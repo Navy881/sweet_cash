@@ -1,57 +1,48 @@
-from flask import Flask
-from flask_jwt_extended import JWTManager
+from fastapi import FastAPI
+from fastapi_sqlalchemy import DBSessionMiddleware, db
+import uvicorn
 import logging
 import redis
 
-from db import db
+from db import engine
+from settings import Settings
 from config import Config
 from api.services.notification_processing.notification_processor import NotificationProcessor
 from message_queue import MessageQueue
+from api.tables import (
+    user_table,
+    token_table,
+    event_table
+)
 
 logging.basicConfig(filename="../logs.log",
                     level=logging.INFO,
                     format='%(levelname)s:%(name)s:%(asctime)s: %(message)s',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-app = Flask(__name__)
-
 messages_queue = MessageQueue()
 
-redis = redis.Redis(Config.REDIS_HOST,
-                    Config.REDIS_PORT,
-                    Config.REDIS_DB,
-                    Config.REDIS_PASSWORD)
+
+# redis = redis.Redis(Config.REDIS_HOST,
+#                     Config.REDIS_PORT,
+#                     Config.REDIS_DB,
+#                     Config.REDIS_PASSWORD)
 
 
-def create_app():
-    # import errors
-    import api.errors as error
+def create_app() -> FastAPI:
+    user_table.user_metadata.create_all(bind=engine)
+    token_table.token_metadata.create_all(bind=engine)
+    event_table.event_metadata.create_all(bind=engine)
 
-    # import routes
-    from api.routes.auth import auth_api
-    from api.routes.transactions import transactions_api
-    from api.routes.external_auth import external_auth_api
-    from api.routes.receipts import receipts_api
-    from api.routes.events import events_api
+    app = FastAPI(title="sweet_cash")
 
-    # db
-    app.config['SQLALCHEMY_DATABASE_URI'] = Config.DATABASE_URI
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
+    # to avoid csrftokenError
+    # app.add_middleware(DBSessionMiddleware, db_url=Settings.POSTGRESQL_DATABASE_URI)
 
-    with app.app_context():
-        db.create_all()
-
-    # jwt
-    app.config["JWT_SECRET_KEY"] = Config.SECRET_KEY
-    jwt = JWTManager(app)
-
-    app.register_blueprint(auth_api)
-    app.register_blueprint(transactions_api)
-    app.register_blueprint(external_auth_api)
-    app.register_blueprint(receipts_api)
-    app.register_blueprint(events_api)
-    app.register_blueprint(error.blueprint)
+    from api.routes.auth_routes import auth_api_router
+    from api.routes.events_routes import events_api_router
+    app.include_router(auth_api_router)
+    app.include_router(events_api_router)
 
     # Run notification processing
     processors_names = Config.EVENT_PROCESSORS
@@ -62,9 +53,10 @@ def create_app():
     return app
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
+        settings = Settings()
         app = create_app()
-        app.run(debug=Config.DEBUG, host='0.0.0.0')
+        uvicorn.run(app, host="0.0.0.0", port=settings.port)
     except Exception as e:
         print(e)
