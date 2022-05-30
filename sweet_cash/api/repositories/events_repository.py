@@ -1,10 +1,10 @@
-
 from datetime import datetime
+from typing import List
 
 from sqlalchemy import Table
 
 from api.repositories.base_repositories import BaseRepository
-from api.tables.event_table import event_table
+from api.repositories.tables.event_table import event_table
 from api.types.events_types import EventModel, CreateEventModel
 
 
@@ -52,13 +52,38 @@ class EventsRepository(BaseRepository):
     #     rows = await r_.fetchall()
     #     return [BindingModel(**row) for row in rows]
 
-    async def create_event(self, item: CreateEventModel) -> EventModel:
-        insert_body = item.dict()
+    async def create_event(self, event: CreateEventModel) -> EventModel:
+        insert_body = event.dict()
         insert_body["created_at"] = datetime.utcnow()
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r_ = await self.conn.execute(create_query)
         # r_ = await self._execute(create_query)
         row = await r_.fetchone()
+        return EventModel(**row)
+
+    async def get_events(self, event_ids: List[int]) -> List[EventModel]:
+        query = (
+            self.table.select()
+                .where(self.table.c.id.in_(event_ids))
+                .order_by(self.table.c.id)
+        )
+        r_ = await self.conn.execute(query)
+        rows = await r_.fetchall()
+        return [EventModel(**row) for row in rows]
+
+    async def update_event(self, event_id: int, event: CreateEventModel) -> EventModel:
+        update_value = {
+            "updated_at": datetime.utcnow(),
+            "name": event.name,
+            "start": event.start,
+            "end": event.end,
+            "description": event.description
+        }
+        update_query = (
+            self.table.update().where(self.table.c.id == event_id).values(**update_value).returning(*self.table.c)
+        )
+        r = await self.conn.execute(update_query)
+        row = await r.fetchone()
         return EventModel(**row)
 
     # async def delete(self, wave_id: int, binding_id: int) -> BindingModel:

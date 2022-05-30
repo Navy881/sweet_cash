@@ -1,27 +1,28 @@
 import logging
 
-from api.api import check_phone_format
-from api.services.users.get_user import GetUser
+from api.services.base_service import BaseService
+from api.repositories.users_repository import UsersRepository
 from api.integrations.nalog_ru import NalogRuApi
-import api.errors as error
+from api.types.users_types import UserModel
+from api.errors import APIError
 
 logger = logging.getLogger(name="nalog_ru")
 
 
-class SendOtpForNalogRu(object):
-    nalog_ru_api = NalogRuApi()
-    get_user = GetUser()
+class SendOtp(BaseService):
+    def __init__(self,
+                 user_id: int,
+                 user_repository: UsersRepository,
+                 nalog_ru_api: NalogRuApi) -> None:
+        self.user_id = user_id
+        self.user_repository = user_repository
+        self.nalog_ru_api = nalog_ru_api
 
-    def __call__(self, user_id: int):
-        user = self.get_user(user_id=user_id)
+    async def __call__(self) -> None:
+        async with self.user_repository.transaction():
+            user: UserModel = await self.user_repository.get_by_id(self.user_id)
 
-        phone = user.phone
+        if user.phone is None:
+            raise APIError(f'User {self.user_id} does not have a phone number')
 
-        if not check_phone_format(phone):
-            raise error.APIParamError('Invalid phone format')
-
-        self.nalog_ru_api.send_otp_sms(phone=phone)
-
-        logger.info(f'User {user_id} is trying to send otp SMS')
-
-        return "Ok"
+        await self.nalog_ru_api.send_otp_sms(user.phone)

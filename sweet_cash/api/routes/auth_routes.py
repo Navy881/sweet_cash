@@ -1,16 +1,21 @@
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import HTMLResponse
 
 from api.dependencies.users_dependecies import (
     register_user_dependency,
     login_user_dependency,
-    get_token_dependency
+    get_token_dependency,
+    confirm_registration_dependency,
+    send_confirmation_code_dependency
 )
 from api.services.users.register_user import RegisterUser
 from api.services.users.login_user import LoginUser
 from api.services.users.get_access_token import GerAccessToken
+from api.services.users.confirm_registration import ConfirmRegistration
+from api.services.users.send_confirmation_code import SendConfirmationCode
 from api.types.users_types import (
-    UserModel,
+    CreateUserModel,
     RegisterUserModel,
     RefreshTokenModel,
     LoginModel,
@@ -21,30 +26,47 @@ from api.types.users_types import (
 import logging
 
 
-logger = logging.getLogger(name="events")
+logger = logging.getLogger(name="users")
 
 auth_api_router = APIRouter()
 
 
-@auth_api_router.post("/api/v1/auth/register", response_model=UserModel)
+@auth_api_router.post("/api/v1/auth/register", response_model=CreateUserModel, tags=["Auth"])
 async def register_user(
     body: RegisterUserModel, register_user_: RegisterUser = Depends(dependency=register_user_dependency)
-) -> UserModel:
+) -> CreateUserModel:
     return await register_user_(body)
 
 
-@auth_api_router.post("/api/v1/auth/login", response_model=RefreshTokenModel)
+@auth_api_router.post("/api/v1/auth/login", response_model=RefreshTokenModel, tags=["Auth"])
 async def login_user(
     body: LoginModel, login_user_: LoginUser = Depends(dependency=login_user_dependency)
 ) -> RefreshTokenModel:
     return await login_user_(body)
 
 
-@auth_api_router.post("/api/v1/auth/token", response_model=TokenModel)
-async def login_user(
+@auth_api_router.post("/api/v1/auth/token", response_model=TokenModel, tags=["Auth"])
+async def get_token(
     body: GetAccessTokenModel, get_token_: GerAccessToken = Depends(dependency=get_token_dependency)
 ) -> TokenModel:
     return await get_token_(body)
+
+
+@auth_api_router.get("/api/v1/auth/confirm", response_class=HTMLResponse, tags=["Auth"])
+async def confirm_registration(
+        email: str,
+        code: str,
+        confirm_registration_: ConfirmRegistration = Depends(dependency=confirm_registration_dependency)
+) -> HTMLResponse:
+    return await confirm_registration_(email=email, confirmation_code=code)
+
+
+@auth_api_router.get("/api/v1/auth/code", tags=["Auth"])
+async def send_confirmation_code(
+        email: str,
+        send_confirmation_code_: SendConfirmationCode = Depends(dependency=send_confirmation_code_dependency)
+) -> str:
+    return await send_confirmation_code_(email)
 
 
 # from flask import Blueprint

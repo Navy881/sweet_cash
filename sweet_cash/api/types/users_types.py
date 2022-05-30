@@ -17,6 +17,15 @@ class UserModel(BaseModel):
     created_at: datetime
     name: str
     email: str
+    password: str
+    phone: str
+
+
+class CreateUserModel(BaseModel):
+    id: int
+    created_at: datetime
+    name: str
+    email: str
     phone: str
 
 

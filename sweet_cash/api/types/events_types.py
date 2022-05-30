@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 
 from pydantic import BaseModel, validator
+
+from api.types.events_participants_types import EventsParticipantsModel
 
 
 class EventModel(BaseModel):
@@ -14,6 +16,7 @@ class EventModel(BaseModel):
     start: Optional[datetime]
     end: Optional[datetime]
     description: Optional[str]
+    participants: Optional[List[EventsParticipantsModel]]
 
 
 class CreateEventModel(BaseModel):

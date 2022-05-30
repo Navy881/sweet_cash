@@ -1,34 +1,42 @@
 import logging
 
-from api.api import check_phone_format
-from api.services.users.get_user import GetUser
-from api.services.nalog_ru.create_or_update_nalog_ru_session import CreateOrUpdateNalogRuSession
+from api.services.base_service import BaseService
+from api.repositories.users_repository import UsersRepository
+from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
 from api.integrations.nalog_ru import NalogRuApi
-import api.errors as error
+from api.types.users_types import UserModel
+from api.types.nalog_ru_types import NalogRuSessionModel, OtpModel
+from api.errors import APIError
 
 logger = logging.getLogger(name="nalog_ru")
 
 
-class VerifyOtpForNalogRu(object):
-    get_user = GetUser()
-    nalog_ru_api = NalogRuApi()
-    create_or_update_nalog_ru_session = CreateOrUpdateNalogRuSession()
+class VerifyOtp(BaseService):
+    def __init__(self,
+                 user_id: int,
+                 user_repository: UsersRepository,
+                 nalog_ru_sessions_repository: NalogRuSessionsRepository,
+                 nalog_ru_api: NalogRuApi) -> None:
+        self.user_id = user_id
+        self.nalog_ru_sessions_repository = nalog_ru_sessions_repository
+        self.user_repository = user_repository
+        self.nalog_ru_api = nalog_ru_api
 
-    def __call__(self, user_id: int, otp: str):
+    async def __call__(self, otp: OtpModel) -> None:
+        async with self.user_repository.transaction():
+            user: UserModel = await self.user_repository.get_by_id(self.user_id)
 
-        user = self.get_user(user_id=user_id)
+        if user.phone is None:
+            raise APIError(f'User {self.user_id} does not have a phone number')
 
-        phone = user.phone
+        nalog_ru_session: NalogRuSessionModel = await self.nalog_ru_api.verify_otp(phone=user.phone, otp=otp.otp)
 
-        if not check_phone_format(phone):
-            raise error.APIError('Invalid phone format')
+        async with self.nalog_ru_sessions_repository.transaction():
+            if await self.nalog_ru_sessions_repository.check_exist_by_user_id(self.user_id):
+                await self.nalog_ru_sessions_repository.update_nalog_ru_session(user_id=self.user_id,
+                                                                                nalog_ru_session=nalog_ru_session)
+            else:
+                await self.nalog_ru_sessions_repository.create_nalog_ru_session(user_id=self.user_id,
+                                                                                nalog_ru_session=nalog_ru_session)
 
-        session_id, refresh_token = self.nalog_ru_api.verify_otp(phone=phone, otp=otp)
-
-        self.create_or_update_nalog_ru_session(user_id=user_id,
-                                               session_id=session_id,
-                                               refresh_token=refresh_token)
-
-        logger.info(f'User {user_id} verified otp for phone {phone}')
-
-        return "Ok"
+        return None

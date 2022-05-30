@@ -7,9 +7,9 @@ import jwt
 from sqlalchemy import Table, desc
 
 from api.repositories.base_repositories import BaseRepository
-from api.tables.token_table import token_table
+from api.repositories.tables.token_table import token_table
 from api.types.users_types import TokenModel, RefreshTokenModel
-from api.errors import APIValueNotFound, APIConflict
+from api.errors import APIValueNotFound
 from settings import Settings
 
 
@@ -27,29 +27,43 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound
+            raise APIValueNotFound()
         return TokenModel(**row)
 
     async def get_token_by_user(self, user_id: int) -> TokenModel:
         query = (
             self.table.select()
                 .where(
-                (self.table.c.user_id == user_id)
-            )
+                    (self.table.c.user_id == user_id)
+                )
                 .order_by(desc(self.table.c.created_at))
         )
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound
+            raise APIValueNotFound(f'User {user_id} is not authorized')
+        return TokenModel(**row)
+
+    async def get_user_by_token(self, token: str) -> TokenModel:
+        query = (
+            self.table.select()
+                .where(
+                    (self.table.c.token == token)
+                )
+                .order_by(desc(self.table.c.created_at))
+        )
+        r_ = await self.conn.execute(query)
+        row = await r_.fetchone()
+        if row is None:
+            raise APIValueNotFound('User not found')
         return TokenModel(**row)
 
     async def check_exist_token_by_user(self, user_id: int) -> bool:
         query = (
             self.table.select()
                 .where(
-                (self.table.c.user_id == user_id)
-            )
+                    (self.table.c.user_id == user_id)
+                )
                 .order_by(desc(self.table.c.created_at))
         )
         r_ = await self.conn.execute(query)

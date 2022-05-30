@@ -1,12 +1,12 @@
 
-from datetime import datetime
 from sqlalchemy import Column, Integer, MetaData, Table, Text, types, Boolean
 
-token_metadata = MetaData()
+
+metadata = MetaData()
 
 token_table = Table(
     "tokens",
-    token_metadata,
+    metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", types.DateTime(timezone=False), nullable=False),
     Column("updated_at", types.DateTime(timezone=False), nullable=True),

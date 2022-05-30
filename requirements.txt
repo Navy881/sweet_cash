@@ -11,3 +11,5 @@ uvicorn
 aiopg
 databases
 fastapi_sqlalchemy
+python-dotenv==0.19.2
+aiohttp

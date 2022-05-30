@@ -1,11 +1,12 @@
 
 from sqlalchemy import Column, Integer, MetaData, Table, Text, types, Boolean
 
-user_metadata = MetaData()
+
+metadata = MetaData()
 
 user_table = Table(
     "users",
-    user_metadata,
+    metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", types.DateTime(timezone=False), nullable=False),
     Column("name", Text, nullable=False),

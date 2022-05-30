@@ -3,20 +3,21 @@ import logging
 
 from api.services.base_service import BaseService
 from api.repositories.tokens_repository import TokenRepository
-from api.repositories.users_repository import UserRepository
+from api.repositories.users_repository import UsersRepository
 from api.types.users_types import RefreshTokenModel, LoginModel
 
 logger = logging.getLogger(name="login")
 
 
 class LoginUser(BaseService):
-    def __init__(self, tokens_repository: TokenRepository, users_repository: UserRepository) -> None:
+    def __init__(self, tokens_repository: TokenRepository, users_repository: UsersRepository) -> None:
         self.tokens_repository = tokens_repository
         self.users_repository = users_repository
 
     async def __call__(self, credits: LoginModel) -> RefreshTokenModel:
         async with self.users_repository.transaction():
             user = await self.users_repository.get_by_email(email=credits.email)
+            self.users_repository.check_password(password=user.password, given_password=credits.password)
         async with self.tokens_repository.transaction():
             data = {"user_id": user.id, "login_method": "email"}
             if await self.tokens_repository.check_exist_token_by_user(user_id=user.id):

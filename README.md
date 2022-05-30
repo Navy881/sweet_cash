@@ -1,3 +1,4 @@
 # sweet_cash
 
-1
+run
+python3 ./sweet_cash/app.py

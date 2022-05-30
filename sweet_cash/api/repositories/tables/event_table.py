@@ -2,11 +2,12 @@
 from sqlalchemy import Column, Integer, MetaData, Table, Text, types
 #from db import metadata
 
-event_metadata = MetaData()
+
+metadata = MetaData()
 
 event_table = Table(
     "events",
-    event_metadata,
+    metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", types.DateTime(timezone=False), nullable=False),
     Column("updated_at", types.DateTime(timezone=False), nullable=True),

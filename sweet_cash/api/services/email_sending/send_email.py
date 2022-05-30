@@ -1,13 +1,15 @@
-
 import logging
 import smtplib
 import ssl
+import jwt
+
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from flask_jwt_extended import create_access_token
 from datetime import timedelta
 
-from config import Config
+from settings import Settings
 
 logger = logging.getLogger(name="email sending")
 
@@ -16,18 +18,18 @@ class SendEmail(object):
 
     def __call__(self, email: str):
         try:
-            server = smtplib.SMTP_SSL(host=Config.SMTP_HOST)
+            server = smtplib.SMTP_SSL(host=Settings.SMTP_HOST)
             # server.starttls(context=ssl.create_default_context())
-            server.login(Config.EMAIL_ADDRESS, Config.EMAIL_PASSWORD)
+            server.login(Settings.EMAIL_ADDRESS, Settings.EMAIL_PASSWORD)
 
             msg = MIMEMultipart()
 
-            msg['From'] = Config.EMAIL_ADDRESS
+            msg['From'] = Settings.EMAIL_ADDRESS
             msg['To'] = email
             msg['Subject'] = 'Подтверждение регистрации Sweet Cash'
 
-            expire_delta = timedelta(24)
-            confirmation_code = create_access_token(identity=email, expires_delta=expire_delta)
+            expires_delta = timedelta(24)
+            confirmation_code = self._create_access_token(data={"sub": email}, expires_delta=expires_delta)
 
             content = f"""\
                     <html>
@@ -44,11 +46,22 @@ class SendEmail(object):
 
             server.send_message(msg)
 
+            del msg
+
         except Exception as e:
             print(e)
 
         logger.info(f'Email sent to address {email}')
 
-        del msg
-
         return "Ok"
+
+    @staticmethod
+    def _create_access_token(data: dict, expires_delta: timedelta = None):
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=15)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, Settings.SECRET_KEY, algorithm=Settings.ALGORITHM)
+        return encoded_jwt
