@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.logger import logger
 import uvicorn
 import logging
+import redis
 
 from db import engine
 from settings import Settings
@@ -29,10 +30,10 @@ logging.basicConfig(filename="../logs.log",
 messages_queue = MessageQueue()
 
 
-# redis = redis.Redis(Config.REDIS_HOST,
-#                     Config.REDIS_PORT,
-#                     Config.REDIS_DB,
-#                     Config.REDIS_PASSWORD)
+redis = redis.Redis(Settings.REDIS_HOST,
+                    Settings.REDIS_PORT,
+                    Settings.REDIS_DB,
+                    Settings.REDIS_PASSWORD)
 
 
 async def on_start_up() -> None:
@@ -64,12 +65,12 @@ def create_app() -> FastAPI:
     from api.routes.transaction_categories import transaction_category_api_router
     from api.routes.receipts import receipts_api_router
     from api.routes.nalog_ru_routes import nalog_ru_api_router
-    app.include_router(auth_api_router)
-    app.include_router(events_api_router)
-    app.include_router(transactions_api_router)
-    app.include_router(transaction_category_api_router)
-    app.include_router(receipts_api_router)
-    app.include_router(nalog_ru_api_router)
+    app.include_router(auth_api_router, prefix="/api/v1")
+    app.include_router(events_api_router, prefix="/api/v1")
+    app.include_router(transactions_api_router, prefix="/api/v1")
+    app.include_router(transaction_category_api_router, prefix="/api/v1")
+    app.include_router(receipts_api_router, prefix="/api/v1")
+    app.include_router(nalog_ru_api_router, prefix="/api/v1")
 
     # Run notification processing
     processors_names = Settings.EVENT_PROCESSORS

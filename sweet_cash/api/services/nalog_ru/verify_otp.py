@@ -3,7 +3,7 @@ import logging
 from api.services.base_service import BaseService
 from api.repositories.users_repository import UsersRepository
 from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
-from api.integrations.nalog_ru import NalogRuApi
+from api.integrations.nalog_ru_api import NalogRuApi
 from api.types.users_types import UserModel
 from api.types.nalog_ru_types import NalogRuSessionModel, OtpModel
 from api.errors import APIError

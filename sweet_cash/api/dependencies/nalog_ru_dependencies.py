@@ -4,7 +4,7 @@ from pydantic import AnyHttpUrl, PositiveInt
 
 from api.repositories.users_repository import UsersRepository
 from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
-from api.integrations.nalog_ru import NalogRuApi
+from api.integrations.nalog_ru_api import NalogRuApi
 from api.services.nalog_ru.send_otp import SendOtp
 from api.services.nalog_ru.verify_otp import VerifyOtp
 from settings import Settings

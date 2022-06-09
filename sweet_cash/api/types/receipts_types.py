@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Any, Dict
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Json
 
 
 class ReceiptModel(BaseModel):
@@ -11,7 +11,8 @@ class ReceiptModel(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime]
     user_id: int
-    external_id: int
+    external_id: str
+    data: Optional[Dict[str, Any]]
 
 
 class CreateReceiptModel(BaseModel):

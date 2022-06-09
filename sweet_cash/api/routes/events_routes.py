@@ -36,7 +36,7 @@ logger = logging.getLogger(name="events")
 events_api_router = APIRouter()
 
 
-@events_api_router.post("/api/v1/events",
+@events_api_router.post("/events",
                         response_model=EventModel,
                         dependencies=[Depends(JWTBearer())],
                         tags=["Events"])
@@ -46,7 +46,7 @@ async def create_event(
     return await create_event_(body)
 
 
-@events_api_router.get("/api/v1/events",
+@events_api_router.get("/events",
                        response_model=List[EventModel],
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -57,7 +57,7 @@ async def get_events(
     return await get_events_(ids)
 
 
-@events_api_router.get("/api/v1/events/by_role",
+@events_api_router.get("/events/by_role",
                        response_model=List[EventModel],
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -68,7 +68,7 @@ async def get_events_by_role(
     return await get_events_(roles)
 
 
-@events_api_router.get("/api/v1/events/invitations",
+@events_api_router.get("/events/invitations",
                        response_model=List[EventModel],
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -78,7 +78,7 @@ async def get_events_invitations(
     return await get_events_()
 
 
-@events_api_router.put("/api/v1/events/{event_id}",
+@events_api_router.put("/events/{event_id}",
                        response_model=EventModel,
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -90,7 +90,7 @@ async def update_event(
     return await update_event_(event_id, body)
 
 
-@events_api_router.post("/api/v1/events/{event_id}/participant",
+@events_api_router.post("/events/{event_id}/participant",
                         response_model=EventsParticipantsModel,
                         dependencies=[Depends(JWTBearer())],
                         tags=["Events"])
@@ -102,7 +102,7 @@ async def create_events_participant(
     return await create_event_participant_(event_id, body)
 
 
-@events_api_router.put("/api/v1/events/participant/{participant_id}",
+@events_api_router.put("/events/participant/{participant_id}",
                        response_model=EventsParticipantsModel,
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -114,7 +114,7 @@ async def update_events_participant(
     return await update_event_participant_(participant_id, body)
 
 
-@events_api_router.put("/api/v1/events/{event_id}/participant/confirm",
+@events_api_router.put("/events/{event_id}/participant/confirm",
                        response_model=List[EventsParticipantsModel],
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -125,7 +125,7 @@ async def confirm_events_participant(
     return await confirm_event_participant_(event_id)
 
 
-@events_api_router.put("/api/v1/events/{event_id}/participant/reject",
+@events_api_router.put("/events/{event_id}/participant/reject",
                        response_model=List[EventsParticipantsModel],
                        dependencies=[Depends(JWTBearer())],
                        tags=["Events"])
@@ -153,7 +153,7 @@ async def reject_events_participant(
 # events_api = Blueprint('events', __name__)
 #
 #
-# @events_api.route('/api/v1/events', methods=['POST'])
+# @events_api.route('/events', methods=['POST'])
 # @auth()
 # @jsonbody(name=features(type=str, required=True),
 #           start=features(type=str),
@@ -172,7 +172,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events', methods=['GET'])
+# @events_api.route('/events', methods=['GET'])
 # @auth()
 # @query_params(ids=features(type=str))
 # def get_events(ids=None,
@@ -183,7 +183,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/by_filter', methods=['GET'])
+# @events_api.route('/events/by_filter', methods=['GET'])
 # @auth()
 # @query_params(role=features(type=str),
 #               accepted=features(type=str))
@@ -197,7 +197,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/<int:event_id>', methods=['PUT'])
+# @events_api.route('/events/<int:event_id>', methods=['PUT'])
 # @auth()
 # @jsonbody(name=features(type=str, required=True),
 #           start=features(type=str),
@@ -218,7 +218,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/<int:event_id>/participant', methods=['POST'])
+# @events_api.route('/events/<int:event_id>/participant', methods=['POST'])
 # @auth()
 # @jsonbody(user_id=features(type=int, required=True),
 #           role=features(type=str, required=True))
@@ -233,7 +233,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/<int:event_id>/participant/<int:participant_id>', methods=['PUT'])
+# @events_api.route('/events/<int:event_id>/participant/<int:participant_id>', methods=['PUT'])
 # @auth()
 # @jsonbody(role=features(type=str, required=True))
 # def update_participant(event_id: int,
@@ -247,7 +247,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/<int:event_id>/participant/confirm', methods=['PUT'])
+# @events_api.route('/events/<int:event_id>/participant/confirm', methods=['PUT'])
 # @auth()
 # def confirm_event(event_id: int,
 #                   confirm_event_participant=ConfirmEventParticipant()):
@@ -256,7 +256,7 @@ async def reject_events_participant(
 #     return SuccessResponse(result)
 #
 #
-# @events_api.route('/api/v1/events/<int:event_id>/participant/reject', methods=['PUT'])
+# @events_api.route('/events/<int:event_id>/participant/reject', methods=['PUT'])
 # @auth()
 # def reject_event(event_id: int,
 #                  reject_event_participant=RejectEventParticipant()):

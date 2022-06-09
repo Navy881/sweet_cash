@@ -6,6 +6,7 @@ from sqlalchemy import Table, desc
 from api.repositories.base_repositories import BaseRepository
 from api.repositories.tables.nalog_ru_sessions_table import nalog_ru_sessions_table
 from api.types.nalog_ru_types import NalogRuSessionModel
+from api.errors import APIValueNotFound
 
 
 class NalogRuSessionsRepository(BaseRepository):
@@ -45,4 +46,18 @@ class NalogRuSessionsRepository(BaseRepository):
         )
         r = await self.conn.execute(update_query)
         row = await r.fetchone()
+        return NalogRuSessionModel(**row)
+
+    async def get_session_by_user(self, user_id: int) -> NalogRuSessionModel:
+        query = (
+            self.table.select()
+                .where(
+                    (self.table.c.user_id == user_id)
+                )
+                .order_by(desc(self.table.c.created_at))
+        )
+        r_ = await self.conn.execute(query)
+        row = await r_.fetchone()
+        if row is None:
+            raise APIValueNotFound(f'User {user_id} is not registered in NalogRU')
         return NalogRuSessionModel(**row)

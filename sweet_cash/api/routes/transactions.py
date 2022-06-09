@@ -23,7 +23,7 @@ logger = logging.getLogger(name="transactions")
 transactions_api_router = APIRouter()
 
 
-@transactions_api_router.post("/api/v1/transactions",
+@transactions_api_router.post("/transactions",
                               response_model=TransactionModel,
                               dependencies=[Depends(JWTBearer())],
                               tags=["Transactions"])
@@ -34,7 +34,7 @@ async def create_transaction(
     return await create_transaction_(body)
 
 
-@transactions_api_router.get("/api/v1/transactions/all",
+@transactions_api_router.get("/transactions/all",
                              response_model=List[TransactionModel],
                              dependencies=[Depends(JWTBearer())],
                              tags=["Transactions"])
@@ -49,7 +49,7 @@ async def get_all_transactions(
     return await get_all_transactions_(event_id, start, end, limit, offset)
 
 
-@transactions_api_router.get("/api/v1/transactions",
+@transactions_api_router.get("/transactions",
                              response_model=List[TransactionModel],
                              dependencies=[Depends(JWTBearer())],
                              tags=["Transactions"])
@@ -60,7 +60,7 @@ async def get_transactions(
     return await get_transactions_(transaction_ids)
 
 
-@transactions_api_router.put("/api/v1/transactions/{transaction_id}",
+@transactions_api_router.put("/transactions/{transaction_id}",
                              response_model=TransactionModel,
                              dependencies=[Depends(JWTBearer())],
                              tags=["Transactions"])
@@ -72,7 +72,7 @@ async def update_transaction(
     return await update_transaction_(transaction_id, body)
 
 
-@transactions_api_router.delete("/api/v1/transactions/{transaction_id}",
+@transactions_api_router.delete("/transactions/{transaction_id}",
                                 response_model=TransactionModel,
                                 dependencies=[Depends(JWTBearer())],
                                 tags=["Transactions"])
@@ -98,7 +98,7 @@ async def delete_transaction(
 # transactions_api = Blueprint('transactions', __name__)
 #
 #
-# @transactions_api.route('/api/v1/transactions', methods=['POST'])
+# @transactions_api.route('/transactions', methods=['POST'])
 # @auth()
 # @jsonbody(event_id=features(type=int, required=True),
 #           transaction_date=features(type=str, required=True),
@@ -147,7 +147,7 @@ async def delete_transaction(
 #     return SuccessResponse(result)
 #
 #
-# @transactions_api.route('/api/v1/transactions/all', methods=['GET'])
+# @transactions_api.route('/transactions/all', methods=['GET'])
 # @auth()
 # @query_params(event_id=features(type=str, required=True),
 #               start=features(type=str, required=True),
@@ -170,7 +170,7 @@ async def delete_transaction(
 #     return SuccessResponse(result)
 #
 #
-# @transactions_api.route('/api/v1/transactions', methods=['GET'])
+# @transactions_api.route('/transactions', methods=['GET'])
 # @auth()
 # @query_params(ids=features(type=str))
 # def get_transactions_by_id(ids=None, get_transactions=GetTransactions()):
@@ -180,7 +180,7 @@ async def delete_transaction(
 #     return SuccessResponse(result)
 #
 #
-# @transactions_api.route('/api/v1/transactions/<int:transaction_id>', methods=['PUT'])
+# @transactions_api.route('/transactions/<int:transaction_id>', methods=['PUT'])
 # @auth()
 # @jsonbody(transaction_date=features(type=str, required=True),
 #           type=features(type=str, required=True),
@@ -207,7 +207,7 @@ async def delete_transaction(
 #     return SuccessResponse(result)
 #
 #
-# @transactions_api.route('/api/v1/transactions/<int:transaction_id>', methods=['DELETE'])
+# @transactions_api.route('/transactions/<int:transaction_id>', methods=['DELETE'])
 # @auth()
 # def delete_transaction(transaction_id: int, delete_transaction=DeleteTransaction()):
 #     result = delete_transaction(user_id=getattr(request, "user_id"),
@@ -215,7 +215,7 @@ async def delete_transaction(
 #     return SuccessResponse(f'{result} transactions deleted')
 #
 #
-# @transactions_api.route('/api/v1/transactions/categories', methods=['GET'])
+# @transactions_api.route('/transactions/categories', methods=['GET'])
 # @auth()
 # def get_categories(get_categories=GetCategories()):
 #     categories = get_categories(user_id=getattr(request, "user_id"))

@@ -19,7 +19,7 @@ logger = logging.getLogger(name="nalog_ru_auth")
 nalog_ru_api_router = APIRouter()
 
 
-@nalog_ru_api_router.post("/api/v1/nalog/otp/send",
+@nalog_ru_api_router.post("/nalog/otp/send",
                           dependencies=[Depends(JWTBearer())],
                           status_code=204,
                           response_class=Response,
@@ -30,7 +30,7 @@ async def send_otp(
     return await send_otp_()
 
 
-@nalog_ru_api_router.post("/api/v1/nalog/otp/verify",
+@nalog_ru_api_router.post("/nalog/otp/verify",
                           dependencies=[Depends(JWTBearer())],
                           response_class=Response,
                           tags=["Nalog RU"])

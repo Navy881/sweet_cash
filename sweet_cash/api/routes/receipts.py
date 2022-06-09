@@ -17,7 +17,7 @@ logger = logging.getLogger(name="receipts")
 receipts_api_router = APIRouter()
 
 
-@receipts_api_router.post("/api/v1/receipts/qr",
+@receipts_api_router.post("/receipts/qr",
                           response_model=ReceiptModel,
                           dependencies=[Depends(JWTBearer())],
                           tags=["Receipts"])
@@ -28,7 +28,7 @@ async def create_receipt_by_qr(
     return await create_receipt_by_qr_(body)
 
 
-@receipts_api_router.get("/api/v1/receipts",
+@receipts_api_router.get("/receipts",
                          response_model=List[ReceiptModel],
                          dependencies=[Depends(JWTBearer())],
                          tags=["Receipts"])
@@ -50,7 +50,7 @@ async def get_receipts(
 # receipts_api = Blueprint('receipts', __name__)
 #
 #
-# @receipts_api.route('/api/v1/receipts/qr', methods=['POST'])
+# @receipts_api.route('/receipts/qr', methods=['POST'])
 # @auth()
 # @jsonbody(event_id=features(type=int, required=True),
 #           qr=features(type=str, required=True))

@@ -23,6 +23,7 @@ class Settings(object):
     REDIS_PORT: int = os.getenv("REDIS_PORT")
     REDIS_DB: int = os.getenv("REDIS_DB")
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD")
+    TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND = 10
 
     NALOG_RU_HOST: str = os.getenv("NALOG_RU_HOST")
     NALOG_RU_CLIENT_SECRET: str = os.getenv("NALOG_RU_CLIENT_SECRET")

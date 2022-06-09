@@ -13,12 +13,13 @@ from api.errors import APIValueNotFound
 class TransactionsRepository(BaseRepository):
     table: Table = transaction_table
 
-    async def create_transaction(self, transaction: CreateTransactionModel) -> TransactionModel:
+    async def create_transaction(self, user_id: int, transaction: CreateTransactionModel) -> TransactionModel:
         insert_body = transaction.dict()
         insert_body["created_at"] = datetime.utcnow()
+        insert_body["user_id"] = user_id
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
-        r_ = await self.conn.execute(create_query)
-        row = await r_.fetchone()
+        r = await self.conn.execute(create_query)
+        row = await r.fetchone()
         return TransactionModel(**row)
 
     async def get_transaction_by_id(self, transaction_id: int) -> TransactionModel:
@@ -27,8 +28,8 @@ class TransactionsRepository(BaseRepository):
                 .where(self.table.c.id == transaction_id)
                 .order_by(self.table.c.id)
         )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
+        r = await self.conn.execute(query)
+        row = await r.fetchone()
         if row is None:
             raise APIValueNotFound(f'Transaction {transaction_id} not found')
         return TransactionModel(**row)
@@ -55,8 +56,8 @@ class TransactionsRepository(BaseRepository):
                 .where(self.table.c.id.in_(transaction_ids))
                 .order_by(self.table.c.id)
         )
-        r_ = await self.conn.execute(query)
-        rows = await r_.fetchall()
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
         return [TransactionModel(**row) for row in rows]
 
     async def get_transactions_page(self, event_id: int,
@@ -65,8 +66,6 @@ class TransactionsRepository(BaseRepository):
                                     user_id: int = None,
                                     limit: int = 100,
                                     offset: int = 0) -> List[TransactionModel]:
-        if user_id is None:
-            user_id = Any
 
         query = (
             self.table.select()
@@ -74,14 +73,18 @@ class TransactionsRepository(BaseRepository):
                 (self.table.c.event_id == event_id)
                 & (self.table.c.transaction_date >= start)
                 & (self.table.c.transaction_date <= end)
-                & (self.table.c.user_id == user_id)
-                )
-                .order_by(self.table.c.start_date)
-                .limit(limit)
-                .offset(offset)
+            )
         )
-        r_ = await self.conn.execute(query)
-        rows = await r_.fetchall()
+
+        if user_id is not None:
+            query = query.where(self.table.c.user_id == user_id)
+
+        query = query.order_by(self.table.c.transaction_date)
+        query = query.limit(limit)
+        query = query.offset(offset)
+
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
         return [TransactionModel(**row) for row in rows]
 
     async def delete_transaction(self, transaction_id: int) -> TransactionModel:

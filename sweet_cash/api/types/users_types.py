@@ -5,7 +5,7 @@ from typing import Any
 
 from pydantic import BaseModel, validator
 
-from api.api import (
+from api.utils import (
     check_email_format,
     check_phone_format,
     check_password_format

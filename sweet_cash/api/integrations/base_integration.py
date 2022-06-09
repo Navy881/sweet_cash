@@ -35,8 +35,6 @@ from settings import Settings
 class BaseIntegration(object):
     sem: Optional[asyncio.Semaphore] = None
     aiohttp_client: Optional[aiohttp.ClientSession] = None
-    success_code_with_content = 200
-    success_code_without_content = 204
 
     def __init__(self, timeout: PositiveInt, url: AnyHttpUrl):
         # self.aiohttp_client = self.get_aiohttp_client()
@@ -58,22 +56,29 @@ class BaseIntegration(object):
             await cls.aiohttp_client.close()
             cls.aiohttp_client = None
 
-    def _check_error(self, resp: Any, status_code: int) -> None:
-        if status_code != self.success_code_with_content and status_code != self.success_code_without_content:
-            raise APIError(message=str(resp), status_code=status_code)
+    def _check_error(self, resp_json_body: Dict[str, Any], status_code: int) -> None:
+        if status_code < 400:
+            return
+        raise APIError(message=str(resp_json_body), status_code=status_code)
 
-    async def _request(self, method: str, url: str, **kwargs: Any) -> Union[Dict[str, Any], List[Any]]:
+    async def request(self, method: str, url: str, **kwargs: Any) -> Union[Dict[str, Any], List[Any]]:
         client = self.get_aiohttp_client()
 
         try:
             async with client.request(
                 method=method, url=urljoin(self.url, url), timeout=self.timeout, ssl=False, **kwargs
             ) as resp:
-                self._check_error(resp=resp, status_code=resp.status)
-                if resp.status == self.success_code_without_content:
-                    return cast(Dict[str, Any], 'Ok')
-                resp_json_body = await resp.json()
+                # resp_json_body = await resp.json(content_type=None)
+                # return resp.status, resp_json_body
+                # if resp.status == self.unauthorized_code:
+                #     return
+                #
+                # if resp.status == self.success_code_without_content:
+                #     return cast(Dict[str, Any], 'Ok')
+                resp_json_body = await resp.json(content_type=None)
+                self._check_error(resp_json_body=resp_json_body, status_code=resp.status)
                 return cast(Dict[str, Any], resp_json_body)
 
         except (asyncio.TimeoutError, aiohttp.ClientError, ValidationError) as exc:
+            await self.close_aiohttp_client()
             raise APIError(exc)

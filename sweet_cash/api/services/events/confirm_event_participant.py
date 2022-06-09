@@ -16,36 +16,14 @@ class ConfirmEventParticipant(BaseService):
         self.events_participants_repository = events_participants_repository
 
     async def __call__(self, event_id: int) -> List[EventsParticipantsModel]:
-        # Get not accepted events participants
-        event_participants: List[EventsParticipantsModel] = await self.events_participants_repository.\
-            get_events_participants_by_user_id(user_id=self.user_id, event_id=event_id, accepted=False)
+        async with self.events_participants_repository.transaction():
+            # Get not accepted events participants
+            event_participants: List[EventsParticipantsModel] = await self.events_participants_repository.\
+                get_events_participants_by_user_id(user_id=self.user_id, event_id=event_id, accepted=False)
 
-        result: List = []
+            result: List = []
 
-        for event_participant in event_participants:
-            result.append(await self.events_participants_repository.accept_events_participant(event_participant.id))
+            for event_participant in event_participants:
+                result.append(await self.events_participants_repository.accept_events_participant(event_participant.id))
 
-        return result
-
-# import logging
-#
-# from api.services.events.get_event_participant import GetEventParticipant
-# from api.models.event_participants import EventParticipantsModel
-#
-# logger = logging.getLogger(name="events")
-#
-#
-# class ConfirmEventParticipant(object):
-#     get_event_participant = GetEventParticipant()
-#
-#     def __call__(self, **kwargs) -> EventParticipantsModel:
-#         user_id = kwargs.get("user_id")
-#         event_id = kwargs.get("event_id")
-#
-#         participant = self.get_event_participant(event_id=event_id, user_id=user_id, accepted=False)
-#
-#         participant.accept()
-#
-#         logger.info(f'User {user_id} confirm event {event_id} with role {participant.role}')
-#
-#         return participant
+            return result

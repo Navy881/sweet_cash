@@ -16,7 +16,7 @@ class TransactionCategoriesRepository(BaseRepository):
             self.table.select()
                 .where(
                 (self.table.c.id == transaction_category_id)
-                & (self.table.c.deleted_at is None)
+                & (self.table.c.deleted.is_(None))
                 )
                 .order_by(self.table.c.id)
         )
@@ -53,7 +53,7 @@ class TransactionCategoriesRepository(BaseRepository):
 
     async def delete_transaction_category(self, transaction_category_id: int) -> TransactionCategoryModel:
         update_value = {
-            "deleted_at": datetime.utcnow()
+            "deleted": datetime.utcnow()
         }
         update_query = (
             self.table.update().where(self.table.c.id == transaction_category_id).values(**update_value).returning(*self.table.c)
@@ -65,7 +65,7 @@ class TransactionCategoriesRepository(BaseRepository):
     async def get_transaction_categories(self) -> List[TransactionCategoryModel]:
         query = (
             self.table.select()
-                .where(self.table.c.deleted_at is None)
+                .where(self.table.c.deleted.is_(None))
                 .order_by(self.table.c.id.desc())
         )
         r_ = await self.conn.execute(query)

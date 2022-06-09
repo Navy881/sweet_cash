@@ -21,7 +21,7 @@ logger = logging.getLogger(name="transactions_categories")
 transaction_category_api_router = APIRouter()
 
 
-@transaction_category_api_router.post("/api/v1/transaction/categories",
+@transaction_category_api_router.post("/transactions/categories",
                                       response_model=TransactionCategoryModel,
                                       dependencies=[Depends(JWTBearer())],
                                       tags=["Transactions categories"])
@@ -33,7 +33,7 @@ async def create_transaction_category(
     return await create_transaction_category_(body)
 
 
-@transaction_category_api_router.get("/api/v1/transaction/categories",
+@transaction_category_api_router.get("/transactions/categories",
                                      response_model=List[TransactionCategoryModel],
                                      dependencies=[Depends(JWTBearer())],
                                      tags=["Transactions categories"])
@@ -44,7 +44,7 @@ async def get_transaction_categories(
     return await get_transaction_categories_()
 
 
-@transaction_category_api_router.put("/api/v1/transaction/categories/{transaction_category_id}",
+@transaction_category_api_router.put("/transactions/categories/{transaction_category_id}",
                                      response_model=TransactionCategoryModel,
                                      dependencies=[Depends(JWTBearer())],
                                      tags=["Transactions categories"])
@@ -57,7 +57,7 @@ async def update_transaction_category(
     return await update_transaction_category_(transaction_category_id, body)
 
 
-@transaction_category_api_router.delete("/api/v1/transaction/categories/{transaction_category_id}",
+@transaction_category_api_router.delete("/transactions/categories/{transaction_category_id}",
                                         response_model=TransactionCategoryModel,
                                         dependencies=[Depends(JWTBearer())],
                                         tags=["Transactions categories"])
