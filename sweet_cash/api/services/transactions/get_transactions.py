@@ -1,11 +1,12 @@
 import logging
 from typing import List
 
-from api.services.base_service import BaseService
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.repositories.transactions_repository import TransactionsRepository
-from api.types.transactions_types import TransactionModel
-from api.types.events_participants_types import EventsParticipantsModel, EventParticipantRole
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.api.types.transactions_types import TransactionModel
+from sweet_cash.api.types.events_participants_types import EventsParticipantsModel, EventParticipantRole
+
 
 logger = logging.getLogger(name="transactions")
 

@@ -1,11 +1,12 @@
 
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.tokens_repository import TokenRepository
-from api.types.users_types import TokenModel, GetAccessTokenModel
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.tokens_repository import TokenRepository
+from sweet_cash.api.types.users_types import TokenModel, GetAccessTokenModel
 
-logger = logging.getLogger(name="login")
+
+logger = logging.getLogger(name="auth")
 
 
 class GerAccessToken(BaseService):

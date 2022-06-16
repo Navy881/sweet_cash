@@ -1,7 +1,7 @@
 
 from sqlalchemy import Column, Integer, MetaData, Table, types, Boolean, Enum
 
-from api.types.events_participants_types import EventParticipantRole
+from sweet_cash.api.types.events_participants_types import EventParticipantRole
 
 
 metadata = MetaData()

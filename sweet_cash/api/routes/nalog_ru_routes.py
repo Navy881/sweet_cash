@@ -1,17 +1,15 @@
 
+import logging
 from fastapi import APIRouter, Depends, Response
-from api.auth.auth_bearer import JWTBearer
 
-from api.dependencies.nalog_ru_dependencies import (
+from sweet_cash.api.auth.auth_bearer import JWTBearer
+from sweet_cash.api.dependencies.nalog_ru_dependencies import (
     send_otp_dependency,
     verify_otp_dependency
 )
-from api.services.nalog_ru.send_otp import SendOtp
-from api.services.nalog_ru.verify_otp import VerifyOtp
-from api.types.nalog_ru_types import OtpModel
-
-
-import logging
+from sweet_cash.api.services.nalog_ru.send_otp import SendOtp
+from sweet_cash.api.services.nalog_ru.verify_otp import VerifyOtp
+from sweet_cash.api.types.nalog_ru_types import OtpModel
 
 
 logger = logging.getLogger(name="nalog_ru_auth")

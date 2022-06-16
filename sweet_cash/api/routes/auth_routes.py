@@ -1,20 +1,21 @@
 
+import logging
 from fastapi import APIRouter, Depends
 from fastapi.responses import HTMLResponse
 
-from api.dependencies.users_dependecies import (
+from sweet_cash.api.dependencies.users_dependecies import (
     register_user_dependency,
     login_user_dependency,
     get_token_dependency,
     confirm_registration_dependency,
     send_confirmation_code_dependency
 )
-from api.services.users.register_user import RegisterUser
-from api.services.users.login_user import LoginUser
-from api.services.users.get_access_token import GerAccessToken
-from api.services.users.confirm_registration import ConfirmRegistration
-from api.services.users.send_confirmation_code import SendConfirmationCode
-from api.types.users_types import (
+from sweet_cash.api.services.users.register_user import RegisterUser
+from sweet_cash.api.services.users.login_user import LoginUser
+from sweet_cash.api.services.users.get_access_token import GerAccessToken
+from sweet_cash.api.services.users.confirm_registration import ConfirmRegistration
+from sweet_cash.api.services.users.send_confirmation_code import SendConfirmationCode
+from sweet_cash.api.types.users_types import (
     CreateUserModel,
     RegisterUserModel,
     RefreshTokenModel,
@@ -22,9 +23,6 @@ from api.types.users_types import (
     TokenModel,
     GetAccessTokenModel
 )
-
-import logging
-
 
 logger = logging.getLogger(name="users")
 

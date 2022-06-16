@@ -1,9 +1,10 @@
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.tokens_repository import TokenRepository
-from api.repositories.users_repository import UsersRepository
-from api.types.users_types import TokenModel
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.tokens_repository import TokenRepository
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.types.users_types import TokenModel
+
 
 logger = logging.getLogger(name="auth")
 

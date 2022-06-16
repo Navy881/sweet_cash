@@ -1,9 +1,8 @@
-
 from aiohttp import hdrs
 
-from api.integrations.base_integration import BaseIntegration
-from settings import Settings
-from api.types.nalog_ru_types import NalogRuSessionModel, NalogRuReceiptIdModel, NalogRuReceiptModel
+from sweet_cash.api.integrations.base_integration import BaseIntegration
+from sweet_cash.api.types.nalog_ru_types import NalogRuSessionModel, NalogRuReceiptIdModel, NalogRuReceiptModel
+from sweet_cash.settings import Settings
 
 
 class NalogRuApi(BaseIntegration):
@@ -15,6 +14,7 @@ class NalogRuApi(BaseIntegration):
     """
     Send SMS with otp
     """
+
     async def send_otp_sms(self, phone: str) -> None:
         payload = {
             'phone': phone,
@@ -22,11 +22,12 @@ class NalogRuApi(BaseIntegration):
             'os': self.os
         }
 
-        await self.request(method=hdrs.METH_POST, url="/v2/auth/phone/request", json=payload)
+        await self._request(method=hdrs.METH_POST, url="/v2/auth/phone/request", json=payload)
 
     """
     Verify otp from SMS
     """
+
     async def verify_otp(self, phone: str, otp: str) -> NalogRuSessionModel:
         payload = {
             'phone': phone,
@@ -35,34 +36,36 @@ class NalogRuApi(BaseIntegration):
             "os": self.os
         }
 
-        raw_item = await self.request(method=hdrs.METH_POST, url="/v2/auth/phone/verify", json=payload)
+        raw_item = await self._request(method=hdrs.METH_POST, url="/v2/auth/phone/verify", json=payload)
 
         return NalogRuSessionModel(**raw_item)
 
     """
     Update session id
     """
+
     async def get_new_session_id(self, refresh_token: str) -> NalogRuSessionModel:
         payload = {
-         'refresh_token': refresh_token,
-         'client_secret': self.client_secret
+            'refresh_token': refresh_token,
+            'client_secret': self.client_secret
         }
 
         headers = {
-         'Device-OS': self.device_os,
-         'Device-Id': self.device_id
+            'Device-OS': self.device_os,
+            'Device-Id': self.device_id
         }
 
-        raw_item = await self.request(method=hdrs.METH_POST,
-                                      url='/v2/mobile/users/refresh',
-                                      headers=headers,
-                                      json=payload)
+        raw_item = await self._request(method=hdrs.METH_POST,
+                                       url='/v2/mobile/users/refresh',
+                                       headers=headers,
+                                       json=payload)
 
         return NalogRuSessionModel(**raw_item)
 
     """
     Get receipt_id from qr
     """
+
     async def _get_ticket_id(self, session_id: str, qr: str) -> NalogRuReceiptIdModel:
         payload = {
             'qr': qr
@@ -72,13 +75,14 @@ class NalogRuApi(BaseIntegration):
             'sessionId': session_id
         }
 
-        raw_item = await self.request(method=hdrs.METH_POST, url='/v2/ticket', headers=headers, json=payload)
+        raw_item = await self._request(method=hdrs.METH_POST, url='/v2/ticket', headers=headers, json=payload)
 
         return NalogRuReceiptIdModel(**raw_item)
 
     """
     Get receipt data
     """
+
     async def get_receipt(self, session_id: str, qr: str) -> NalogRuReceiptModel:
         ticket: NalogRuReceiptIdModel = await self._get_ticket_id(session_id=session_id, qr=qr)
 
@@ -87,7 +91,7 @@ class NalogRuApi(BaseIntegration):
             'Content-Type': 'application/json'
         }
 
-        raw_item = await self.request(method=hdrs.METH_GET, url=f'/v2/tickets/{ticket.id}', headers=headers)
+        raw_item = await self._request(method=hdrs.METH_GET, url=f'/v2/tickets/{ticket.id}', headers=headers)
 
         return NalogRuReceiptModel(data=raw_item)
 
@@ -99,7 +103,6 @@ class NalogRuApi(BaseIntegration):
     #         for raw_item in raw_items
     #         if raw_item["type"] in ValidCompilationItemTypesSet
     #     ]
-
 
 # import requests
 # import logging

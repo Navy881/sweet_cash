@@ -1,6 +1,7 @@
 
-from app import redis
 import pickle
+
+from sweet_cash.app import redis
 
 
 class RedisCache(object):

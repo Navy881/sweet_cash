@@ -3,9 +3,9 @@ from typing import List
 
 from sqlalchemy import Table
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.event_table import event_table
-from api.types.events_types import EventModel, CreateEventModel
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.event_table import event_table
+from sweet_cash.api.types.events_types import EventModel, CreateEventModel
 
 
 class EventsRepository(BaseRepository):

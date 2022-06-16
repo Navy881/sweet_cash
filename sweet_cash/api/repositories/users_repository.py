@@ -4,10 +4,10 @@ import bcrypt
 
 from sqlalchemy import Table, desc
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.user_table import user_table
-from api.types.users_types import UserModel, CreateUserModel, RegisterUserModel
-from api.errors import APIValueNotFound, APIAuthError
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.user_table import user_table
+from sweet_cash.api.types.users_types import UserModel, CreateUserModel, RegisterUserModel
+from sweet_cash.api.errors import APIValueNotFound, APIAuthError
 
 
 class UsersRepository(BaseRepository):

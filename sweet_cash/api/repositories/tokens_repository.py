@@ -6,11 +6,11 @@ from typing import Optional
 import jwt
 from sqlalchemy import Table, desc
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.token_table import token_table
-from api.types.users_types import TokenModel, RefreshTokenModel
-from api.errors import APIValueNotFound
-from settings import Settings
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.token_table import token_table
+from sweet_cash.api.types.users_types import TokenModel, RefreshTokenModel
+from sweet_cash.api.errors import APIValueNotFound
+from sweet_cash.settings import Settings
 
 
 class TokenRepository(BaseRepository):
@@ -27,7 +27,7 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound()
+            raise APIValueNotFound('Token not found')
         return TokenModel(**row)
 
     async def get_token_by_user(self, user_id: int) -> TokenModel:

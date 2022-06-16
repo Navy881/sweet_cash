@@ -3,10 +3,10 @@ from datetime import datetime
 
 from sqlalchemy import Table, desc
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.nalog_ru_sessions_table import nalog_ru_sessions_table
-from api.types.nalog_ru_types import NalogRuSessionModel
-from api.errors import APIValueNotFound
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.nalog_ru_sessions_table import nalog_ru_sessions_table
+from sweet_cash.api.types.nalog_ru_types import NalogRuSessionModel
+from sweet_cash.api.errors import APIValueNotFound
 
 
 class NalogRuSessionsRepository(BaseRepository):

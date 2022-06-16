@@ -4,10 +4,10 @@ from typing import List, Any
 
 from sqlalchemy import Table
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.transaction_table import transaction_table
-from api.types.transactions_types import CreateTransactionModel, TransactionModel
-from api.errors import APIValueNotFound
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.transaction_table import transaction_table
+from sweet_cash.api.types.transactions_types import CreateTransactionModel, TransactionModel
+from sweet_cash.api.errors import APIValueNotFound
 
 
 class TransactionsRepository(BaseRepository):

@@ -1,30 +1,29 @@
 
 from fastapi import Request
 
-from api.repositories.transactions_repository import TransactionsRepository
-from api.repositories.transaction_categories_repository import TransactionCategoriesRepository
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.services.transactions.create_transaction import CreateTransaction
-from api.services.transactions.get_transactions import GetAllTransactions
-from api.services.transactions.get_transaction import GetTransactions
-from api.services.transactions.update_transaction import UpdateTransaction
-from api.services.transactions.delete_transaction import DeleteTransaction
-from db import engine
+from sweet_cash.api.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.api.repositories.transaction_categories_repository import TransactionCategoriesRepository
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.services.transactions.create_transaction import CreateTransaction
+from sweet_cash.api.services.transactions.get_transactions import GetAllTransactions
+from sweet_cash.api.services.transactions.get_transaction import GetTransactions
+from sweet_cash.api.services.transactions.update_transaction import UpdateTransaction
+from sweet_cash.api.services.transactions.delete_transaction import DeleteTransaction
 
 
 def transactions_repository_dependency(request: Request) -> TransactionsRepository:
-    pg_engine = request
-    return TransactionsRepository()
+    engine = request.app.state.db
+    return TransactionsRepository(engine)
 
 
 def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
-    pg_engine = request
-    return TransactionCategoriesRepository()
+    engine = request.app.state.db
+    return TransactionCategoriesRepository(engine)
 
 
 def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
-    pg_engine = request
-    return EventsParticipantsRepository()
+    engine = request.app.state.db
+    return EventsParticipantsRepository(engine)
 
 
 def create_transaction_dependency(request: Request) -> CreateTransaction:

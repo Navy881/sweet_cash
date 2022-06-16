@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from pydantic.types import PositiveInt
 
 
 load_dotenv(os.path.join('local.env'))
@@ -13,7 +14,9 @@ class Settings(object):
     POSTGRESQL_SERVER: str = os.getenv("POSTGRESQL_SERVER")
     POSTGRESQL_PORT: str = os.getenv("POSTGRESQL_PORT")
     POSTGRESQL_DATABASE: str = os.getenv("POSTGRESQL_DATABASE")
-    POSTGRESQL_DATABASE_URI = f'postgresql://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_SERVER}:{POSTGRESQL_PORT}/{POSTGRESQL_DATABASE}'
+    POSTGRESQL_DATABASE_URI: str = f'postgresql://{POSTGRESQL_USER}:{POSTGRESQL_PASSWORD}@{POSTGRESQL_SERVER}:{POSTGRESQL_PORT}/{POSTGRESQL_DATABASE}'
+    POSTGRESQL_POOL_SIZE: PositiveInt = 10
+    POSTGRESQL_CONNECTION_TIMEOUT: PositiveInt = 60
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = 'HS256'
@@ -30,6 +33,7 @@ class Settings(object):
     NALOG_RU_OS: str = os.getenv("NALOG_RU_OS")
     NALOG_RU_DEVICE_OS: str = os.getenv("NALOG_RU_DEVICE_OS")
     NALOG_RU_DEVICE_ID: str = os.getenv("NALOG_RU_DEVICE_ID")
+    NALOG_RU_TIMEOUT: float = 600
 
     EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
     PHONE_REGEX = r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$'

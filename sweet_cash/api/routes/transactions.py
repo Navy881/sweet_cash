@@ -1,22 +1,23 @@
+
+import logging
 from fastapi import APIRouter, Depends
 from typing import List
 
-from api.dependencies.transactions_dependencies import (
+from sweet_cash.api.dependencies.transactions_dependencies import (
     create_transaction_dependency,
     get_all_transactions_dependency,
     get_transactions_dependency,
     update_transaction_dependency,
     delete_transaction_dependency
 )
-from api.services.transactions.create_transaction import CreateTransaction
-from api.services.transactions.get_transactions import GetAllTransactions
-from api.services.transactions.get_transaction import GetTransactions
-from api.services.transactions.update_transaction import UpdateTransaction
-from api.services.transactions.delete_transaction import DeleteTransaction
-from api.types.transactions_types import TransactionModel, CreateTransactionModel
-from api.auth.auth_bearer import JWTBearer
+from sweet_cash.api.services.transactions.create_transaction import CreateTransaction
+from sweet_cash.api.services.transactions.get_transactions import GetAllTransactions
+from sweet_cash.api.services.transactions.get_transaction import GetTransactions
+from sweet_cash.api.services.transactions.update_transaction import UpdateTransaction
+from sweet_cash.api.services.transactions.delete_transaction import DeleteTransaction
+from sweet_cash.api.types.transactions_types import TransactionModel, CreateTransactionModel
+from sweet_cash.api.auth.auth_bearer import JWTBearer
 
-import logging
 
 logger = logging.getLogger(name="transactions")
 

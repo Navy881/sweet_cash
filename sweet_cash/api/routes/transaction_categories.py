@@ -1,20 +1,21 @@
+
+import logging
 from fastapi import APIRouter, Depends
 from typing import List
 
-from api.dependencies.transaction_categories_dependencies import (
+from sweet_cash.api.dependencies.transaction_categories_dependencies import (
     create_transaction_categories_dependency,
     get_transaction_categories_dependency,
     update_transaction_categories_dependency,
     delete_transaction_categories_dependency
 )
-from api.services.transaction_categories.create_transaction_category import CreateTransactionCategory
-from api.services.transaction_categories.get_transaction_categories import GetTransactionCategories
-from api.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
-from api.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
-from api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
-from api.auth.auth_bearer import JWTBearer
+from sweet_cash.api.services.transaction_categories.create_transaction_category import CreateTransactionCategory
+from sweet_cash.api.services.transaction_categories.get_transaction_categories import GetTransactionCategories
+from sweet_cash.api.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
+from sweet_cash.api.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
+from sweet_cash.api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
+from sweet_cash.api.auth.auth_bearer import JWTBearer
 
-import logging
 
 logger = logging.getLogger(name="transactions_categories")
 

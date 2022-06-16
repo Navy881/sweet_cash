@@ -1,10 +1,11 @@
 import logging
 from typing import List
 
-from api.services.base_service import BaseService
-from api.repositories.receipts_repository import ReceiptsRepository
-from api.types.receipts_types import ReceiptModel
-from api.utils import ids2list
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.receipts_repository import ReceiptsRepository
+from sweet_cash.api.types.receipts_types import ReceiptModel
+from sweet_cash.api.utils import ids2list
+
 
 logger = logging.getLogger(name="receipts")
 

@@ -1,12 +1,13 @@
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.users_repository import UsersRepository
-from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
-from api.integrations.nalog_ru_api import NalogRuApi
-from api.types.users_types import UserModel
-from api.types.nalog_ru_types import NalogRuSessionModel, OtpModel
-from api.errors import APIError
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
+from sweet_cash.api.integrations.nalog_ru_api import NalogRuApi
+from sweet_cash.api.types.users_types import UserModel
+from sweet_cash.api.types.nalog_ru_types import NalogRuSessionModel, OtpModel
+from sweet_cash.api.errors import APIError
+
 
 logger = logging.getLogger(name="nalog_ru")
 

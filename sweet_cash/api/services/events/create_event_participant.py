@@ -1,14 +1,15 @@
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.users_repository import UsersRepository
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.types.events_participants_types import (
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.types.events_participants_types import (
     EventsParticipantsModel,
     CreateEventsParticipantsModel,
     EventParticipantRole
 )
-from api.errors import APIValueNotFound, APIParamError
+from sweet_cash.api.errors import APIValueNotFound, APIParamError
+
 
 logger = logging.getLogger(name="events")
 

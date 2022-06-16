@@ -1,13 +1,14 @@
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.types.events_participants_types import (
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.types.events_participants_types import (
     EventsParticipantsModel,
     UpdateEventsParticipantsModel,
     EventParticipantRole
 )
-from api.errors import APIConflict, APIValueNotFound
+from sweet_cash.api.errors import APIConflict, APIValueNotFound
+
 
 logger = logging.getLogger(name="events")
 

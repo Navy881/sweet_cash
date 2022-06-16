@@ -1,7 +1,7 @@
 
 from sqlalchemy import Column, Integer, MetaData, Table, Text, types, Sequence, Enum, Float
 
-from api.types.transactions_types import TransactionType
+from sweet_cash.api.types.transactions_types import TransactionType
 
 metadata = MetaData()
 

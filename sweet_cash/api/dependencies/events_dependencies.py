@@ -1,34 +1,33 @@
 
 from fastapi import Request
 
-from api.repositories.events_repository import EventsRepository
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.repositories.users_repository import UsersRepository
-from api.services.events.create_event import CreateEvent
-from api.services.events.get_events import GetEvents
-from api.services.events.get_events_by_role import GetEventsByRole
-from api.services.events.get_events_invitations import GetEventsInvitations
-from api.services.events.update_event import UpdateEvent
-from api.services.events.create_event_participant import CreateEventParticipant
-from api.services.events.update_event_participant import UpdateEventParticipant
-from api.services.events.confirm_event_participant import ConfirmEventParticipant
-from api.services.events.reject_event_participant import RejectEventParticipant
-from db import engine
+from sweet_cash.api.repositories.events_repository import EventsRepository
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.services.events.create_event import CreateEvent
+from sweet_cash.api.services.events.get_events import GetEvents
+from sweet_cash.api.services.events.get_events_by_role import GetEventsByRole
+from sweet_cash.api.services.events.get_events_invitations import GetEventsInvitations
+from sweet_cash.api.services.events.update_event import UpdateEvent
+from sweet_cash.api.services.events.create_event_participant import CreateEventParticipant
+from sweet_cash.api.services.events.update_event_participant import UpdateEventParticipant
+from sweet_cash.api.services.events.confirm_event_participant import ConfirmEventParticipant
+from sweet_cash.api.services.events.reject_event_participant import RejectEventParticipant
 
 
 def events_repository_dependency(request: Request) -> EventsRepository:
-    pg_engine = request
-    return EventsRepository()
+    engine = request.app.state.db
+    return EventsRepository(engine)
 
 
 def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
-    pg_engine = request
-    return EventsParticipantsRepository()
+    engine = request.app.state.db
+    return EventsParticipantsRepository(engine)
 
 
 def users_repository_dependency(request: Request) -> UsersRepository:
-    pg_engine = request
-    return UsersRepository()
+    engine = request.app.state.db
+    return UsersRepository(engine)
 
 
 def create_event_dependency(request: Request) -> CreateEvent:

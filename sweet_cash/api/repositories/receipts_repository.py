@@ -5,10 +5,10 @@ from typing import List
 
 from sqlalchemy import Table
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.receipt_table import receipt_table
-from api.types.receipts_types import ReceiptModel
-from api.types.nalog_ru_types import NalogRuReceiptModel
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.receipt_table import receipt_table
+from sweet_cash.api.types.receipts_types import ReceiptModel
+from sweet_cash.api.types.nalog_ru_types import NalogRuReceiptModel
 
 
 class ReceiptsRepository(BaseRepository):

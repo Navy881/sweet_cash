@@ -5,7 +5,7 @@ from typing import Any, Optional, Dict, List
 
 from pydantic import BaseModel, validator
 
-from api.types.events_participants_types import EventsParticipantsModel
+from sweet_cash.api.types.events_participants_types import EventsParticipantsModel
 
 
 class EventModel(BaseModel):

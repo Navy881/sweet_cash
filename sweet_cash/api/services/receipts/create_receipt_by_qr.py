@@ -2,17 +2,18 @@ import logging
 from datetime import datetime
 from typing import List
 
-from api.services.base_service import BaseService
-from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.repositories.receipts_repository import ReceiptsRepository
-from api.repositories.transactions_repository import TransactionsRepository
-from api.types.receipts_types import ReceiptModel, CreateReceiptModel
-from api.types.events_participants_types import EventsParticipantsModel
-from api.types.nalog_ru_types import NalogRuSessionModel, NalogRuReceiptModel
-from api.types.transactions_types import CreateTransactionModel, TransactionType
-from api.integrations.nalog_ru_api import NalogRuApi
-from api.errors import APIValueNotFound
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.repositories.receipts_repository import ReceiptsRepository
+from sweet_cash.api.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.api.types.receipts_types import ReceiptModel, CreateReceiptModel
+from sweet_cash.api.types.events_participants_types import EventsParticipantsModel
+from sweet_cash.api.types.nalog_ru_types import NalogRuSessionModel, NalogRuReceiptModel
+from sweet_cash.api.types.transactions_types import CreateTransactionModel, TransactionType
+from sweet_cash.api.integrations.nalog_ru_api import NalogRuApi
+from sweet_cash.api.errors import APIValueNotFound
+
 
 logger = logging.getLogger(name="receipts")
 

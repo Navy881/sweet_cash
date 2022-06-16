@@ -2,15 +2,15 @@ import logging
 import datetime
 from typing import List
 
-from api.services.base_service import BaseService
-from api.repositories.transaction_categories_repository import TransactionCategoriesRepository
-from api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
-from settings import Settings
-from cache_management import RedisCache
-from api.services.transaction_categories.create_category_tree import create_category_tree
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.transaction_categories_repository import TransactionCategoriesRepository
+from sweet_cash.api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
+from sweet_cash.settings import Settings
+from sweet_cash.cache_management import RedisCache
+from sweet_cash.api.services.transaction_categories.create_category_tree import create_category_tree
 
 
-logger = logging.getLogger(name="transactions")
+logger = logging.getLogger(name="transaction_categories")
 
 
 class CreateTransactionCategory(BaseService):

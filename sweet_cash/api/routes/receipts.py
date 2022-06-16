@@ -1,16 +1,17 @@
+
+import logging
 from fastapi import APIRouter, Depends
 from typing import List
 
-from api.dependencies.receipts_dependencies import (
+from sweet_cash.api.dependencies.receipts_dependencies import (
     create_receipt_dependency,
     get_receipts_dependency
 )
-from api.services.receipts.create_receipt_by_qr import CreateReceiptByQr
-from api.services.receipts.get_receipt import GetReceipts
-from api.types.receipts_types import ReceiptModel, CreateReceiptModel
-from api.auth.auth_bearer import JWTBearer
+from sweet_cash.api.services.receipts.create_receipt_by_qr import CreateReceiptByQr
+from sweet_cash.api.services.receipts.get_receipt import GetReceipts
+from sweet_cash.api.types.receipts_types import ReceiptModel, CreateReceiptModel
+from sweet_cash.api.auth.auth_bearer import JWTBearer
 
-import logging
 
 logger = logging.getLogger(name="receipts")
 

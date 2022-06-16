@@ -1,17 +1,16 @@
 
 from fastapi import Request
 
-from api.repositories.transaction_categories_repository import TransactionCategoriesRepository
-from api.services.transaction_categories.create_transaction_category import CreateTransactionCategory
-from api.services.transaction_categories.get_transaction_categories import GetTransactionCategories
-from api.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
-from api.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
-from db import engine
+from sweet_cash.api.repositories.transaction_categories_repository import TransactionCategoriesRepository
+from sweet_cash.api.services.transaction_categories.create_transaction_category import CreateTransactionCategory
+from sweet_cash.api.services.transaction_categories.get_transaction_categories import GetTransactionCategories
+from sweet_cash.api.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
+from sweet_cash.api.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
 
 
 def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
-    pg_engine = request
-    return TransactionCategoriesRepository()
+    engine = request.app.state.db
+    return TransactionCategoriesRepository(engine)
 
 
 def create_transaction_categories_dependency(request: Request) -> CreateTransactionCategory:

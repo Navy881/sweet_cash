@@ -3,15 +3,15 @@ from typing import List
 
 from sqlalchemy import Table
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.event_participants_table import event_participants_table
-from api.types.events_participants_types import (
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.event_participants_table import event_participants_table
+from sweet_cash.api.types.events_participants_types import (
     EventsParticipantsModel,
     EventParticipantRole,
     CreateEventsParticipantsModel,
     UpdateEventsParticipantsModel
 )
-from api.errors import APIValueNotFound
+from sweet_cash.api.errors import APIValueNotFound
 
 
 class EventsParticipantsRepository(BaseRepository):

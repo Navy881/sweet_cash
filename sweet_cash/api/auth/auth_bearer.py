@@ -4,11 +4,11 @@ import jwt
 from fastapi import Request, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
-from api.dependencies.users_dependecies import get_current_user_dependency
-from api.services.users.get_current_user import GetCurrentUser
-from api.types.users_types import TokenModel
+from sweet_cash.api.dependencies.users_dependecies import get_current_user_dependency
+from sweet_cash.api.services.users.get_current_user import GetCurrentUser
+from sweet_cash.api.types.users_types import TokenModel
 
-from settings import Settings
+from sweet_cash.settings import Settings
 
 
 def decode_jwt(token: str) -> dict:

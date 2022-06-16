@@ -1,25 +1,23 @@
-
 from fastapi import Request
-from fastapi.responses import HTMLResponse
 
-from api.repositories.users_repository import UsersRepository
-from api.services.users.register_user import RegisterUser
-from api.services.users.get_access_token import GerAccessToken
-from api.repositories.tokens_repository import TokenRepository
-from api.services.users.login_user import LoginUser
-from api.services.users.get_current_user import GetCurrentUser
-from api.services.users.confirm_registration import ConfirmRegistration
-from api.services.users.send_confirmation_code import SendConfirmationCode
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.services.users.register_user import RegisterUser
+from sweet_cash.api.services.users.get_access_token import GerAccessToken
+from sweet_cash.api.repositories.tokens_repository import TokenRepository
+from sweet_cash.api.services.users.login_user import LoginUser
+from sweet_cash.api.services.users.get_current_user import GetCurrentUser
+from sweet_cash.api.services.users.confirm_registration import ConfirmRegistration
+from sweet_cash.api.services.users.send_confirmation_code import SendConfirmationCode
 
 
 def users_repository_dependency(request: Request) -> UsersRepository:
-    pg_engine = request
-    return UsersRepository()
+    engine = request.app.state.db
+    return UsersRepository(engine)
 
 
 def token_repository_dependency(request: Request) -> TokenRepository:
-    pg_engine = request
-    return TokenRepository()
+    engine = request.app.state.db
+    return TokenRepository(engine)
 
 
 def register_user_dependency(request: Request) -> RegisterUser:

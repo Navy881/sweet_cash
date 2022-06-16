@@ -1,14 +1,14 @@
 
 import logging
 
-from api.services.base_service import BaseService
-from api.repositories.users_repository import UsersRepository
-from api.types.users_types import CreateUserModel, RegisterUserModel
-from api.errors import APIConflict
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.types.users_types import CreateUserModel, RegisterUserModel
+from sweet_cash.api.errors import APIConflict
+from sweet_cash.api.services.email_sending.send_email import SendEmail
 
-from api.services.email_sending.send_email import SendEmail
 
-logger = logging.getLogger(name="users")
+logger = logging.getLogger(name="auth")
 
 
 class RegisterUser(BaseService):

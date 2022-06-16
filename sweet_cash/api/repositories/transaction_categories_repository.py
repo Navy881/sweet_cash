@@ -2,10 +2,10 @@ from sqlalchemy import Table
 from datetime import datetime
 from typing import List
 
-from api.repositories.base_repositories import BaseRepository
-from api.repositories.tables.transaction_category_table import transaction_category_table
-from api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
-from api.errors import APIValueNotFound
+from sweet_cash.api.repositories.base_repositories import BaseRepository
+from sweet_cash.api.repositories.tables.transaction_category_table import transaction_category_table
+from sweet_cash.api.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
+from sweet_cash.api.errors import APIValueNotFound
 
 
 class TransactionCategoriesRepository(BaseRepository):

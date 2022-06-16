@@ -1,42 +1,41 @@
 
 from fastapi import Request
-from pydantic import AnyHttpUrl, PositiveInt
 
-from api.repositories.receipts_repository import ReceiptsRepository
-from api.repositories.transactions_repository import TransactionsRepository
-from api.repositories.events_participants_repository import EventsParticipantsRepository
-from api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
-from api.services.receipts.create_receipt_by_qr import CreateReceiptByQr
-from api.services.receipts.get_receipt import GetReceipts
-from api.integrations.nalog_ru_api import NalogRuApi
-from settings import Settings
-from db import engine
+from sweet_cash.api.repositories.receipts_repository import ReceiptsRepository
+from sweet_cash.api.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.api.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.api.repositories.nalog_ru_sessions_repository import NalogRuSessionsRepository
+from sweet_cash.api.services.receipts.create_receipt_by_qr import CreateReceiptByQr
+from sweet_cash.api.services.receipts.get_receipt import GetReceipts
+from sweet_cash.api.integrations.nalog_ru_api import NalogRuApi
 
 
 def nalog_ru_sessions_repository_dependency(request: Request) -> NalogRuSessionsRepository:
-    pg_engine = request
-    return NalogRuSessionsRepository()
+    engine = request.app.state.db
+    return NalogRuSessionsRepository(engine)
 
 
 def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
-    pg_engine = request
-    return EventsParticipantsRepository()
+    engine = request.app.state.db
+    return EventsParticipantsRepository(engine)
 
 
 def receipts_repository_dependency(request: Request) -> ReceiptsRepository:
-    pg_engine = request
-    return ReceiptsRepository()
+    engine = request.app.state.db
+    return ReceiptsRepository(engine)
 
 
 def transactions_repository_dependency(request: Request) -> TransactionsRepository:
-    pg_engine = request
-    return TransactionsRepository()
+    engine = request.app.state.db
+    return TransactionsRepository(engine)
 
 
-def nalog_ru_api_dependency() -> NalogRuApi:
-    nalog_ru_timeout: PositiveInt = 600
-    nalog_ru_url: AnyHttpUrl = Settings.NALOG_RU_HOST
-    return NalogRuApi(timeout=nalog_ru_timeout, url=nalog_ru_url)
+def nalog_ru_api_dependency(request: Request) -> NalogRuApi:
+    session = request.app.state.session
+    settings = request.app.state.settings
+    return NalogRuApi(session=session,
+                      timeout=settings.NALOG_RU_TIMEOUT,
+                      url=settings.NALOG_RU_HOST)
 
 
 def create_receipt_dependency(request: Request) -> CreateReceiptByQr:
@@ -46,7 +45,7 @@ def create_receipt_dependency(request: Request) -> CreateReceiptByQr:
         events_participants_repository=events_participants_repository_dependency(request),
         receipts_repository=receipts_repository_dependency(request),
         transactions_repository=transactions_repository_dependency(request),
-        nalog_ru_api=nalog_ru_api_dependency()
+        nalog_ru_api=nalog_ru_api_dependency(request)
     )
 
 

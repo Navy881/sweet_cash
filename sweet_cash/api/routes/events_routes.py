@@ -1,7 +1,9 @@
+
+import logging
 from fastapi import APIRouter, Depends
 from typing import List
 
-from api.dependencies.events_dependencies import (
+from sweet_cash.api.dependencies.events_dependencies import (
     create_event_dependency,
     get_events_dependency,
     get_events_by_role_dependency,
@@ -12,24 +14,22 @@ from api.dependencies.events_dependencies import (
     confirm_event_participant_dependency,
     reject_event_participant_dependency
     )
-from api.services.events.create_event import CreateEvent
-from api.services.events.get_events import GetEvents
-from api.services.events.get_events_by_role import GetEventsByRole
-from api.services.events.get_events_invitations import GetEventsInvitations
-from api.services.events.update_event import UpdateEvent
-from api.services.events.create_event_participant import CreateEventParticipant
-from api.services.events.update_event_participant import UpdateEventParticipant
-from api.services.events.confirm_event_participant import ConfirmEventParticipant
-from api.services.events.reject_event_participant import RejectEventParticipant
-from api.types.events_types import EventModel, CreateEventModel
-from api.types.events_participants_types import (
+from sweet_cash.api.services.events.create_event import CreateEvent
+from sweet_cash.api.services.events.get_events import GetEvents
+from sweet_cash.api.services.events.get_events_by_role import GetEventsByRole
+from sweet_cash.api.services.events.get_events_invitations import GetEventsInvitations
+from sweet_cash.api.services.events.update_event import UpdateEvent
+from sweet_cash.api.services.events.create_event_participant import CreateEventParticipant
+from sweet_cash.api.services.events.update_event_participant import UpdateEventParticipant
+from sweet_cash.api.services.events.confirm_event_participant import ConfirmEventParticipant
+from sweet_cash.api.services.events.reject_event_participant import RejectEventParticipant
+from sweet_cash.api.types.events_types import EventModel, CreateEventModel
+from sweet_cash.api.types.events_participants_types import (
     EventsParticipantsModel,
     CreateEventsParticipantsModel,
     UpdateEventsParticipantsModel
 )
-from api.auth.auth_bearer import JWTBearer
-
-import logging
+from sweet_cash.api.auth.auth_bearer import JWTBearer
 
 logger = logging.getLogger(name="events")
 

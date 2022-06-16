@@ -13,3 +13,7 @@ databases
 fastapi_sqlalchemy
 python-dotenv==0.19.2
 aiohttp
+async-asgi-testclient==1.4.6
+pytest
+pytest-asyncio
+pytest-freezegun

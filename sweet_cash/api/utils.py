@@ -1,7 +1,7 @@
 
 import re
 
-from settings import Settings
+from sweet_cash.settings import Settings
 
 
 def check_email_format(email: str):

@@ -3,12 +3,13 @@ import jwt
 import time
 from fastapi.responses import HTMLResponse
 
-from api.services.base_service import BaseService
-from api.repositories.users_repository import UsersRepository
-from api.types.users_types import UserModel
-from settings import Settings
+from sweet_cash.api.services.base_service import BaseService
+from sweet_cash.api.repositories.users_repository import UsersRepository
+from sweet_cash.api.types.users_types import UserModel
+from sweet_cash.settings import Settings
 
-logger = logging.getLogger(name="users")
+
+logger = logging.getLogger(name="auth")
 
 
 class ConfirmRegistration(BaseService):
