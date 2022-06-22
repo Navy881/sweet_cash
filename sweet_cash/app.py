@@ -1,14 +1,14 @@
+import asyncio
 from fastapi import FastAPI
 from fastapi.logger import logger
 import uvicorn
 import logging
-import redis
 
 from sweet_cash.db import engine
 from sweet_cash.settings import Settings
-from sweet_cash.api.services.notification_processing.notification_processor import NotificationProcessor
+from sweet_cash.services.notification_processing.notification_processor import NotificationProcessor
 from sweet_cash.message_queue import MessageQueue
-from sweet_cash.api.repositories.tables import (
+from sweet_cash.repositories.tables import (
     user_table,
     token_table,
     event_table,
@@ -18,7 +18,13 @@ from sweet_cash.api.repositories.tables import (
     receipt_table,
     nalog_ru_sessions_table
 )
-from sweet_cash.api.components import FastAPIStateManager, AIOPostgresComponent, AIOHTTPSessionComponent
+# from sweet_cash.api.components import (
+#     FastAPIStateManager,
+#     AIOPostgresComponent,
+#     AIOHTTPSessionComponent
+# )
+
+from sweet_cash.components import postgres, http_session, redis
 
 
 fastAPI_logger = logger
@@ -29,12 +35,6 @@ logging.basicConfig(filename="../logs.log",
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 messages_queue = MessageQueue()
-
-
-redis = redis.Redis(Settings.REDIS_HOST,
-                    Settings.REDIS_PORT,
-                    Settings.REDIS_DB,
-                    Settings.REDIS_PASSWORD)
 
 
 def create_all_tables(engine):
@@ -48,35 +48,59 @@ def create_all_tables(engine):
     nalog_ru_sessions_table.metadata.create_all(bind=engine)
 
 
-async def on_start_up() -> None:
-    fastAPI_logger.info("on_start_up")
-
-
-async def on_shutdown() -> None:
-    fastAPI_logger.info("on_shutdown")
-
-
 def create_app(settings: Settings) -> FastAPI:
-    app_state_manager = FastAPIStateManager(settings=settings,
-                                            components=[
-                                                AIOPostgresComponent(),
-                                                AIOHTTPSessionComponent()
-                                            ])
+    dependencies = [postgres, http_session, redis]
+
+    async def on_start_up() -> None:
+        app.state.settings = settings
+
+        try:
+            for dependency in dependencies:
+                coroutine = dependency.on_startup(app)
+                if asyncio.iscoroutine(coroutine):
+                    await coroutine
+        except Exception as e:
+            try:
+                await on_shutdown()
+            finally:
+                raise e
+
+        fastAPI_logger.info("on_start_up")
+
+    async def on_shutdown() -> None:
+        for dependency in reversed(dependencies):
+            try:
+                coroutine = dependency.on_shutdown(app)
+                if asyncio.iscoroutine(coroutine):
+                    await coroutine
+            except Exception as e:
+                raise e
+
+        fastAPI_logger.info("on_shutdown")
+
+    # app_state_manager = FastAPIStateManager(settings=settings,
+    #                                         components=[
+    #                                             AIOPostgresComponent(),
+    #                                             AIOHTTPSessionComponent()
+    #                                         ])
 
     app = FastAPI(title="sweet_cash", on_startup=[on_start_up], on_shutdown=[on_shutdown])
 
-    app_state_manager.set_fastapi_startup_hook(app)
-    app_state_manager.set_fastapi_shutdown_hook(app)
+    '''
+    Заменено на запуск компонентов при срабатывании event'ов on_startup, on_shutdown
+    '''
+    # app_state_manager.set_fastapi_startup_hook(app)
+    # app_state_manager.set_fastapi_shutdown_hook(app)
 
     # to avoid tokenError
     # app.add_middleware(DBSessionMiddleware, db_url=Settings.POSTGRESQL_DATABASE_URI)
 
-    from sweet_cash.api.routes.auth_routes import auth_api_router
-    from sweet_cash.api.routes.events_routes import events_api_router
-    from sweet_cash.api.routes.transactions import transactions_api_router
-    from sweet_cash.api.routes.transaction_categories import transaction_category_api_router
-    from sweet_cash.api.routes.receipts import receipts_api_router
-    from sweet_cash.api.routes.nalog_ru_routes import nalog_ru_api_router
+    from sweet_cash.routes.auth_routes import auth_api_router
+    from sweet_cash.routes.events_routes import events_api_router
+    from sweet_cash.routes.transactions import transactions_api_router
+    from sweet_cash.routes.transaction_categories import transaction_category_api_router
+    from sweet_cash.routes.receipts import receipts_api_router
+    from sweet_cash.routes.nalog_ru_routes import nalog_ru_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
     app.include_router(events_api_router, prefix="/api/v1")
     app.include_router(transactions_api_router, prefix="/api/v1")

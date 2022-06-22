@@ -23,10 +23,11 @@ class Settings(object):
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
     REDIS_HOST: str = os.getenv("REDIS_HOST")
-    REDIS_PORT: int = os.getenv("REDIS_PORT")
-    REDIS_DB: int = os.getenv("REDIS_DB")
+    REDIS_PORT: str = os.getenv("REDIS_PORT")
+    REDIS_DB: str = os.getenv("REDIS_DB")
     REDIS_PASSWORD: str = os.getenv("REDIS_PASSWORD")
-    TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND = 10
+    REDIS_DSN: str = f'redis://:{REDIS_PASSWORD}@{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}'
+    TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND = 600
 
     NALOG_RU_HOST: str = os.getenv("NALOG_RU_HOST")
     NALOG_RU_CLIENT_SECRET: str = os.getenv("NALOG_RU_CLIENT_SECRET")

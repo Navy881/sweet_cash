@@ -20,7 +20,7 @@
 
 
 # первый этап
-FROM python:3.7 AS builder
+FROM python:3.9 AS builder
 
 # копирование файла зависимостей в рабочую директорию
 COPY requirements.txt .
@@ -29,7 +29,7 @@ COPY requirements.txt .
 RUN pip install --user -r requirements.txt
 
 # второй этап (без названия)
-FROM python:3.7
+FROM python:3.9
 
 # установка рабочей директории в контейнере
 WORKDIR /code

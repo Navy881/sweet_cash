@@ -32,14 +32,14 @@ services:
         environment:
             - POSTGRES_DB=postgres
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=911911
+            - POSTGRES_PASSWORD=911911  # TODO Убрать в env
         volumes:
             - postgres_data:/var/lib/postgresql/data/
 
     app_redis:
         image: redis
         container_name: sweet_cash-redis
-        command: redis-server --requirepass 911911
+        command: redis-server --requirepass 911911  # TODO Убрать в env
         ports:
             - 6379:6379
 

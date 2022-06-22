@@ -12,7 +12,7 @@ from sweet_cash.app import create_app
 from sweet_cash.settings import Settings
 from sweet_cash.db import engine
 
-from sweet_cash.api.repositories.tables import (
+from sweet_cash.repositories.tables import (
     user_table,
     token_table,
     event_table,
