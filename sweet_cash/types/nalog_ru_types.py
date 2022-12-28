@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class NalogRuSessionModel(BaseModel):
-    sessionId: str
+    session_id: str
     refresh_token: str
 
 

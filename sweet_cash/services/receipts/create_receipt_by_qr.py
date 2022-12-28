@@ -56,7 +56,7 @@ class CreateReceiptByQr(BaseService):
 
             # Get receipt data by qr
             receipt_data: NalogRuReceiptModel = await self.nalog_ru_api. \
-                get_receipt(session_id=new_nalog_ru_session.sessionId, qr=receipt_qr.qr)
+                get_receipt(session_id=new_nalog_ru_session.session_id, qr=receipt_qr.qr)
 
         async with self.receipts_repository.transaction():
             # Save receipt
