@@ -57,5 +57,7 @@ class Settings(object):
 
     SIZE_POOL_AIOHTTP = 100
 
+    HOST = os.getenv("HOST")
+
     class Config:
         env_file = "local.env"
