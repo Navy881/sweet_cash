@@ -38,10 +38,10 @@ WORKDIR /code
 COPY --from=builder /root/.local /root/.local
 
 # копирование содержимого локальной директории в рабочую директорию
-COPY ./sweet_cash .
+COPY . .
 
 # обновление переменной среды PATH
 ENV PATH=/root/.local:$PATH
 
 # команда, выполняемая при запуске контейнера
-CMD [ "python", "./app.py" ]
+CMD ["python", "-m", "sweet_cash.app"]

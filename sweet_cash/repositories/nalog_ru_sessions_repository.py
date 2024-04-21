@@ -38,7 +38,7 @@ class NalogRuSessionsRepository(BaseRepository):
     async def update_nalog_ru_session(self, user_id: int, nalog_ru_session: NalogRuSessionModel) -> NalogRuSessionModel:
         update_value = {
             "updated_at": datetime.utcnow(),
-            "sessionId": nalog_ru_session.sessionId,
+            "session_id": nalog_ru_session.session_id,
             "refresh_token": nalog_ru_session.refresh_token
         }
         update_query = (

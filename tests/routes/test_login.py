@@ -1,7 +1,55 @@
 
 import pytest
+from unittest.mock import ANY
+from datetime import timedelta
 from async_asgi_testclient import TestClient
 
+from sweet_cash.services.email_sending.send_email import SendEmail
+
+
+EMAIL = "test@test.com"
+PHONE = '+79876543210'
+PASSWORD = "1@yAndexru"
+REFRESH_TOKEN = ''
+
+
+@pytest.fixture
+async def create_user(client: TestClient) -> None:
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": EMAIL,
+            "email": EMAIL,
+            "phone": PHONE,
+            "password": PASSWORD
+        }
+    )
+
+
+@pytest.fixture
+async def confirm_user(client: TestClient) -> None:
+    expires_delta = timedelta(24)
+    confirmation_code = SendEmail._create_access_token(data={"sub": EMAIL}, expires_delta=expires_delta)
+    await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code={confirmation_code}")
+
+
+@pytest.fixture
+async def login_user(client: TestClient) -> None:
+    global REFRESH_TOKEN
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": EMAIL,
+            "password": PASSWORD
+        }
+    )
+
+    REFRESH_TOKEN = response.json()["refresh_token"]
+
+
+'''
+TEST REGISTER
+'''
 
 @pytest.mark.asyncio
 @pytest.mark.freeze_time("2020-01-01")
@@ -9,468 +57,523 @@ async def test_register_success(client: TestClient):
     response = await client.post(
         "/api/v1/auth/register",
         json={
-            "name": "test@test.com",
-            "email": "test@test.com",
-            "phone": "+79876543210",
-            "password": "1@yAndexru"
+            "name": EMAIL,
+            "email": EMAIL,
+            "phone": PHONE,
+            "password": PASSWORD
         }
     )
 
     assert response.json() == {
         "id": 1,
         "created_at": "2020-01-01T00:00:00",
-        "name": "test@test.com",
-        "email": "test@test.com",
-        "phone": "+79876543210"
+        "name": EMAIL,
+        "email": EMAIL,
+        "phone": PHONE
     }
     assert response.status_code == 200
 
 
 
-#
-# import pytest
-# import requests
-#
-# HOST = 'http://127.0.0.1:5000'
-# EMAIL = "test1@test.com"
-# PHONE = '+79001234567'
-# PASSWORD = "1@yAndexru"
-# REFRESH_TOKEN = ''
-# TOKEN = ''
-#
-#
-# '''
-# TEST REGISTER
-# '''
-#
-#
-# def test_register_success():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": EMAIL,
-#             "email": "test0@test.com",
-#             "phone": PHONE,
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#
-#
-# def test_register_without_body():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register"
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Json required",
-#         "status": 400
-#     }
-#
-#
-# def test_register_without_required_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={},
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Params ('name', 'email', 'phone', 'password') required",
-#         "status": 400
-#     }
-#
-#
-# def test_register_with_wrong_types_for_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": 1,
-#             "email": 1,
-#             "phone": 1,
-#             "password": 1
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Invalid type for params ('name', 'email', 'phone', 'password')",
-#         "status": 400
-#     }
-#
-#
-# def test_register_with_invalid_email_format():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": EMAIL,
-#             "email": '1212@121',
-#             "phone": PHONE,
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Request parameters error",
-#         "message": "Invalid email format"
-#     }
-#
-#
-# def test_register_with_invalid_phone_format():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": EMAIL,
-#             "email": EMAIL,
-#             "phone": '12345',
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Request parameters error",
-#         "message": "Invalid phone format"
-#     }
-#
-#
-# def test_register_with_invalid_password_format():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": EMAIL,
-#             "email": EMAIL,
-#             "phone": PHONE,
-#             "password": '1231sssss'
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Request parameters error",
-#         "message": "Invalid password format"
-#     }
-#
-#
-# def test_register_with_registered_email():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/register",
-#         json={
-#             "name": EMAIL,
-#             "email": EMAIL,
-#             "phone": PHONE,
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 409
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Conflict",
-#         "message": "Email already registered"
-#     }
-#
-#
-# '''
-# TEST LOGIN
-# '''
-#
-#
-# def test_login_success():
-#     global REFRESH_TOKEN
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={
-#             "email": EMAIL,
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert "refresh_token" in response.json()
-#     assert "user_id" in response.json()
-#     assert "auth_in_nalog_ru" in response.json()
-#     REFRESH_TOKEN = response.json()["refresh_token"]
-#
-#
-# def test_login_without_body():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login"
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Json required",
-#         "status": 400
-#     }
-#
-#
-# def test_login_without_required_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={},
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Params ('email', 'password') required",
-#         "status": 400
-#     }
-#
-#
-# def test_login_with_wrong_types_for_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={
-#             "email": 1,
-#             "password": 1
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Invalid type for params ('email', 'password')",
-#         "status": 400
-#     }
-#
-#
-# def test_login_with_new_refresh_token():
-#     global REFRESH_TOKEN
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={
-#             "email": EMAIL,
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert "refresh_token" in response.json()
-#     assert "user_id" in response.json()
-#     assert "auth_in_nalog_ru" in response.json()
-#     assert response.json()["refresh_token"] != REFRESH_TOKEN
-#     REFRESH_TOKEN = response.json()["refresh_token"]
-#
-#
-# def test_login_with_wrong_password():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={
-#             "email": EMAIL,
-#             "password": "1@yAndexru23"
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 403
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Authentication Error",
-#         "message": "Wrong password"
-#     }
-#
-#
-# def test_login_with_invalid_email_format():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/login",
-#         json={
-#             "email": "test",
-#             "password": PASSWORD
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Request parameters error",
-#         "message": "Invalid email format"
-#     }
-#
-# '''
-# TEST GETTING TOKEN
-# '''
-#
-#
-# def test_getting_token_success():
-#     global REFRESH_TOKEN, TOKEN
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={
-#             "refresh_token": REFRESH_TOKEN
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert "refresh_token" in response.json()
-#     assert "token" in response.json()
-#     assert response.json()["refresh_token"] != REFRESH_TOKEN
-#     REFRESH_TOKEN = response.json()["refresh_token"]
-#     TOKEN = response.json()["token"]
-#
-#
-# def test_getting_token_without_body():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token"
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Json required",
-#         "status": 400
-#     }
-#
-#
-# def test_getting_token_without_required_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={},
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Params ('refresh_token',) required",
-#         "status": 400
-#     }
-#
-#
-# def test_getting_token_with_wrong_types_for_params():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={
-#             "refresh_token": 1
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Invalid type for params ('refresh_token',)",
-#         "status": 400
-#     }
-#
-#
-# def test_getting_new_token():
-#     global REFRESH_TOKEN, TOKEN
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={
-#             "refresh_token": REFRESH_TOKEN
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert "refresh_token" in response.json()
-#     assert "token" in response.json()
-#     assert response.json()["refresh_token"] != REFRESH_TOKEN
-#     assert response.json()["token"] != TOKEN
-#     TOKEN = response.json()["token"]
-#
-#
-# def test_getting_token_with_old_refresh_token():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={
-#             "refresh_token": REFRESH_TOKEN
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 404
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Not found",
-#         "message": "Token not found"
-#     }
-#
-#
-# def test_getting_token_with_wrong_refresh_token():
-#     response = requests.post(
-#         HOST + "/api/v1/auth/token",
-#         json={
-#             "refresh_token": "1"
-#         },
-#         headers={"Content-Type": "application/json"}
-#     )
-#     assert response.status_code == 404
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error": "Not found",
-#         "message": "Token not found"
-#     }
-#
-#
-# '''
-# TEST CONFIRMATION USER
-# '''
-#
-#
-# def test_confirm_registration_success():
-#     global REFRESH_TOKEN, TOKEN
-#     response = requests.get(
-#         HOST + "/api/v1/auth/confirm?email=" + EMAIL + "&code=1234"
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "text/html; charset=utf-8"
-#
-#
-# def test_confirm_registration_without_required_params():
-#     response = requests.get(
-#         HOST + "/api/v1/auth/confirm"
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Params ('email', 'code') required",
-#         "status": 400
-#     }
-#
-#
-# '''
-# TEST SENDING CONFIRM CODE
-# '''
-#
-#
-# def test_send_code_success():
-#     global REFRESH_TOKEN, TOKEN
-#     response = requests.get(
-#         HOST + "/api/v1/auth/code?email=" + EMAIL
-#     )
-#     assert response.status_code == 200
-#     assert response.headers["Content-Type"] == "application/json"
-#
-#
-# def test_send_code_without_required_params():
-#     response = requests.get(
-#         HOST + "/api/v1/auth/code"
-#     )
-#     assert response.status_code == 400
-#     assert response.headers["Content-Type"] == "application/json"
-#     assert response.json() == {
-#         "error_code": "bad-params",
-#         "message": "Params ('email',) required",
-#         "status": 400
-#     }
+@pytest.mark.asyncio
+async def test_register_without_body(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/register"
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_register_without_required_params(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={}
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "name"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            },
+            {
+                "loc": [
+                    "body",
+                    "email"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            },
+            {
+                "loc": [
+                    "body",
+                    "phone"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            },
+            {
+                "loc": [
+                    "body",
+                    "password"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_register_with_wrong_param_type_and_format(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": {},
+            "email": 1,
+            "phone": 1,
+            "password": 1
+        }
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "name"
+                ],
+                "msg": "str type expected",
+                "type": "type_error.str"
+            },
+            {
+                "loc": [
+                    "body",
+                    "email"
+                ],
+                "msg": "Invalid email format",
+                "type": "value_error"
+            },
+            {
+                "loc": [
+                    "body",
+                    "phone"
+                ],
+                "msg": "Invalid phone format",
+                "type": "value_error"
+            },
+            {
+                "loc": [
+                    "body",
+                    "password"
+                ],
+                "msg": "Invalid password format",
+                "type": "value_error"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_register_with_registered_email(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": EMAIL,
+            "email": EMAIL,
+            "phone": PHONE,
+            "password": PASSWORD
+        }
+    )
+
+    response = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "name": EMAIL,
+            "email": EMAIL,
+            "phone": PHONE,
+            "password": PASSWORD
+        }
+    )
+
+    assert response.json() == {
+        "detail": "User with email \"test@test.com\" already exist"
+    }
+    assert response.status_code == 409
+
+
+
+'''
+TEST LOGIN
+'''
+
+@pytest.mark.usefixtures("create_user", "confirm_user")
+@pytest.mark.asyncio
+async def test_login_success(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": EMAIL,
+            "password": PASSWORD
+        }
+    )
+
+    assert response.json() == {
+        "refresh_token": ANY,
+        "user_id": ANY
+    }
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_login_without_body(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/login"
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_login_without_required_params(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={}
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "email"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            },
+            {
+                "loc": [
+                    "body",
+                    "password"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_login_with_wrong_param_types_and_format(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": 1,
+            "password": 1
+        }
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "email"
+                ],
+                "msg": "Invalid email format",
+                "type": "value_error"
+            },
+            {
+                "loc": [
+                    "body",
+                    "password"
+                ],
+                "msg": "Invalid password format",
+                "type": "value_error"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.usefixtures("create_user", "confirm_user")
+@pytest.mark.asyncio
+async def test_login_with_wrong_password(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": EMAIL,
+            "password": "1@yAndexru23"
+        }
+    )
+
+    assert response.json() == {
+        "detail": "Wrong password"
+    }
+    assert response.status_code == 403
+
+
+
+'''
+TEST GETTING TOKEN
+'''
+
+@pytest.mark.usefixtures("create_user", "confirm_user", "login_user")
+@pytest.mark.asyncio
+@pytest.mark.freeze_time("2020-01-01")
+async def test_getting_token_success(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        }
+    )
+
+    assert response.json() == {
+        "refresh_token": ANY,
+        "user_id": ANY,
+        "token": ANY,
+        "expire_at": "2020-01-01T00:30:00"
+    }
+    assert response.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_getting_token_without_body(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token"
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_getting_token_without_required_params(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={},
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "refresh_token"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.asyncio
+async def test_getting_token_with_wrong_param_types(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": {}
+        },
+    )
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "body",
+                    "refresh_token"
+                ],
+                "msg": "str type expected",
+                "type": "type_error.str"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+@pytest.mark.usefixtures("create_user", "confirm_user", "login_user")
+@pytest.mark.asyncio
+async def test_getting_new_token(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        }
+    )
+
+    assert REFRESH_TOKEN != response.json()["refresh_token"]
+
+
+@pytest.mark.usefixtures("create_user", "confirm_user", "login_user")
+@pytest.mark.asyncio
+async def test_getting_token_with_old_refresh_token(client: TestClient):
+    await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        }
+    )
+
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": REFRESH_TOKEN
+        }
+    )
+
+    assert response.json() == {
+        "detail": "Token not found"
+    }
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_getting_token_with_wrong_refresh_token(client: TestClient):
+    response = await client.post(
+        "/api/v1/auth/token",
+        json={
+            "refresh_token": "1"
+        }
+    )
+
+    assert response.json() == {
+        "detail": "Token not found"
+    }
+    assert response.status_code == 404
+
+
+
+'''
+TEST CONFIRMATION USER
+'''
+
+@pytest.mark.usefixtures("create_user")
+@pytest.mark.asyncio
+async def test_confirm_registration_success(client: TestClient):
+    response = await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code=1234")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
+
+
+@pytest.mark.asyncio
+async def test_confirm_with_invalid_email(client: TestClient):
+    response = await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code=1234")
+
+    assert response.json() == {
+        "detail": "User with login \"test@test.com\" not found"
+    }
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_confirm_registration_without_required_params(client: TestClient):
+    response = await client.get(f"/api/v1/auth/confirm")
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "query",
+                    "email"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            },
+            {
+                "loc": [
+                    "query",
+                    "code"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
+
+
+
+'''
+TEST SENDING CONFIRM CODE
+'''
+
+@pytest.mark.usefixtures("create_user")
+@pytest.mark.asyncio
+async def test_send_code_success(client: TestClient):
+    response = await client.get(f"/api/v1/auth/code?email={EMAIL}")
+
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "application/json"
+
+
+@pytest.mark.asyncio
+async def test_send_code_with_invalid_email(client: TestClient):
+    response = await client.get(f"/api/v1/auth/code?email={EMAIL}")
+
+    assert response.json() == {
+        "detail": "User with login \"test@test.com\" not found"
+    }
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_send_code_without_required_params(client: TestClient):
+    response = await client.get(f"/api/v1/auth/code")
+
+    assert response.json() == {
+        "detail": [
+            {
+                "loc": [
+                    "query",
+                    "email"
+                ],
+                "msg": "field required",
+                "type": "value_error.missing"
+            }
+        ]
+    }
+    assert response.status_code == 422
