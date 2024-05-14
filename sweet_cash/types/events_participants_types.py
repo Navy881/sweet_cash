@@ -24,7 +24,7 @@ class EventsParticipantsModel(BaseModel):
     user_id: int
     event_id: int
     role: EventParticipantRole
-    accepted: str
+    accepted: bool
 
 
 class CreateEventsParticipantsModel(BaseModel):

@@ -8,20 +8,24 @@ from sweet_cash.dependencies.users_dependecies import (
     login_user_dependency,
     get_token_dependency,
     confirm_registration_dependency,
-    send_confirmation_code_dependency
+    send_confirmation_code_dependency,
+    verify_token_dependency
 )
 from sweet_cash.services.users.register_user import RegisterUser
 from sweet_cash.services.users.login_user import LoginUser
 from sweet_cash.services.users.get_access_token import GerAccessToken
 from sweet_cash.services.users.confirm_registration import ConfirmRegistration
 from sweet_cash.services.users.send_confirmation_code import SendConfirmationCode
+from sweet_cash.services.users.verify_token import VerifyToken
 from sweet_cash.types.users_types import (
     CreateUserModel,
     RegisterUserModel,
     RefreshTokenModel,
     LoginModel,
     TokenModel,
-    GetAccessTokenModel
+    GetAccessTokenModel,
+    VerifyTokenModel,
+    TokenInfoModel
 )
 
 logger = logging.getLogger(name="users")
@@ -65,3 +69,10 @@ async def send_confirmation_code(
         send_confirmation_code_: SendConfirmationCode = Depends(dependency=send_confirmation_code_dependency)
 ) -> str:
     return await send_confirmation_code_(email)
+
+
+@auth_api_router.post("/auth/token/verify", response_model=TokenInfoModel, tags=["Auth"])
+async def verify_token(
+    body: VerifyTokenModel, verify_token_: VerifyToken = Depends(dependency=verify_token_dependency)
+) -> TokenInfoModel:
+    return await verify_token_(body)

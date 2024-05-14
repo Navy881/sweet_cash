@@ -85,3 +85,13 @@ class LoginModel(BaseModel):
 
 class GetAccessTokenModel(BaseModel):
     refresh_token: str
+
+
+class VerifyTokenModel(BaseModel):
+    token: str
+
+
+class TokenInfoModel(BaseModel):
+    token: str
+    user_id: int
+    expire_at: datetime

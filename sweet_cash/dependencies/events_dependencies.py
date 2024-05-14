@@ -19,67 +19,67 @@ from sweet_cash.dependencies.notifications_events_dependencies import (
 )
 
 
-def events_repository_dependency(request: Request) -> EventsRepository:
+async def events_repository_dependency(request: Request) -> EventsRepository:
     engine = request.app.state.db
     return EventsRepository(engine)
 
 
-def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
+async def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
     engine = request.app.state.db
     return EventsParticipantsRepository(engine)
 
 
-def users_repository_dependency(request: Request) -> UsersRepository:
+async def users_repository_dependency(request: Request) -> UsersRepository:
     engine = request.app.state.db
     return UsersRepository(engine)
 
 
-def create_event_dependency(request: Request) -> CreateEvent:
+async def create_event_dependency(request: Request) -> CreateEvent:
     return CreateEvent(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_repository = await events_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def get_events_dependency(request: Request) -> GetEvents:
+async def get_events_dependency(request: Request) -> GetEvents:
     return GetEvents(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_repository = await events_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def get_events_by_role_dependency(request: Request) -> GetEventsByRole:
+async def get_events_by_role_dependency(request: Request) -> GetEventsByRole:
     return GetEventsByRole(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_repository = await events_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def get_events_invitations_dependency(request: Request) -> GetEventsInvitations:
+async def get_events_invitations_dependency(request: Request) -> GetEventsInvitations:
     return GetEventsInvitations(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_repository = await events_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def update_event_dependency(request: Request) -> UpdateEvent:
+async def update_event_dependency(request: Request) -> UpdateEvent:
     return UpdateEvent(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_repository = await events_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def create_event_participant_dependency(request: Request) -> CreateEventParticipant:
+async def create_event_participant_dependency(request: Request) -> CreateEventParticipant:
     return CreateEventParticipant(
         user_id=getattr(request, "user_id"),
-        users_repository=users_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request),
-        events_sender=send_partisipant_added_event_dependency(
+        users_repository = await users_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request),
+        events_sender = await send_partisipant_added_event_dependency(
             request,
             events_repository_dependency(request),
             events_participants_repository_dependency(request)
@@ -87,11 +87,11 @@ def create_event_participant_dependency(request: Request) -> CreateEventParticip
     )
 
 
-def update_event_participant_dependency(request: Request) -> UpdateEventParticipant:
+async def update_event_participant_dependency(request: Request) -> UpdateEventParticipant:
     return UpdateEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request),
-        events_sender=send_partisipant_got_role_event_dependency(
+        events_participants_repository = await events_participants_repository_dependency(request),
+        events_sender = await send_partisipant_got_role_event_dependency(
             request,
             events_repository_dependency(request),
             events_participants_repository_dependency(request)
@@ -99,15 +99,15 @@ def update_event_participant_dependency(request: Request) -> UpdateEventParticip
     )
 
 
-def confirm_event_participant_dependency(request: Request) -> ConfirmEventParticipant:
+async def confirm_event_participant_dependency(request: Request) -> ConfirmEventParticipant:
     return ConfirmEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request)
     )
 
 
-def reject_event_participant_dependency(request: Request) -> RejectEventParticipant:
+async def reject_event_participant_dependency(request: Request) -> RejectEventParticipant:
     return RejectEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request)
     )

@@ -10,27 +10,27 @@ from sweet_cash.services.receipts.get_receipt import GetReceipts
 from sweet_cash.integrations.nalog_ru_api import NalogRuApi
 
 
-def nalog_ru_sessions_repository_dependency(request: Request) -> NalogRuSessionsRepository:
+async def nalog_ru_sessions_repository_dependency(request: Request) -> NalogRuSessionsRepository:
     engine = request.app.state.db
     return NalogRuSessionsRepository(engine)
 
 
-def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
+async def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
     engine = request.app.state.db
     return EventsParticipantsRepository(engine)
 
 
-def receipts_repository_dependency(request: Request) -> ReceiptsRepository:
+async def receipts_repository_dependency(request: Request) -> ReceiptsRepository:
     engine = request.app.state.db
     return ReceiptsRepository(engine)
 
 
-def transactions_repository_dependency(request: Request) -> TransactionsRepository:
+async def transactions_repository_dependency(request: Request) -> TransactionsRepository:
     engine = request.app.state.db
     return TransactionsRepository(engine)
 
 
-def nalog_ru_api_dependency(request: Request) -> NalogRuApi:
+async def nalog_ru_api_dependency(request: Request) -> NalogRuApi:
     session = request.app.state.session
     settings = request.app.state.settings
     return NalogRuApi(session=session,
@@ -38,19 +38,19 @@ def nalog_ru_api_dependency(request: Request) -> NalogRuApi:
                       url=settings.NALOG_RU_HOST)
 
 
-def create_receipt_dependency(request: Request) -> CreateReceiptByQr:
+async def create_receipt_dependency(request: Request) -> CreateReceiptByQr:
     return CreateReceiptByQr(
         user_id=getattr(request, "user_id"),
-        nalog_ru_sessions_repository=nalog_ru_sessions_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request),
-        receipts_repository=receipts_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request),
-        nalog_ru_api=nalog_ru_api_dependency(request)
+        nalog_ru_sessions_repository = await nalog_ru_sessions_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request),
+        receipts_repository = await receipts_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request),
+        nalog_ru_api = await nalog_ru_api_dependency(request)
     )
 
 
-def get_receipts_dependency(request: Request) -> GetReceipts:
+async def get_receipts_dependency(request: Request) -> GetReceipts:
     return GetReceipts(
         user_id=getattr(request, "user_id"),
-        receipts_repository=receipts_repository_dependency(request)
+        receipts_repository = await receipts_repository_dependency(request)
     )

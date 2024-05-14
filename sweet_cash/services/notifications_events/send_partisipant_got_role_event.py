@@ -40,7 +40,11 @@ class SendPartisipantGotRoleEvent(object):
         async with self.events_participants_repository.transaction():
             events_participants = await self.events_participants_repository.get_events_participants_by_event_id([event_id])
 
-            user_ids = set(p.user_id for p in events_participants)
+            # Only accepted participants
+            user_ids = set()
+            for participant in events_participants:
+                if participant.accepted:
+                    user_ids.add(participant.user_id)
 
             for user_id in user_ids:
                 

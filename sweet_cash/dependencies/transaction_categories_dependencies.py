@@ -9,43 +9,43 @@ from sweet_cash.services.transaction_categories.update_transaction_category impo
 from sweet_cash.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
 
 
-def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
+async def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
     engine = request.app.state.db
     return TransactionCategoriesRepository(engine)
 
 
-def transaction_categories_cache_repository_dependency(request: Request) -> TransactionCategoriesCacheRepository:
+async def transaction_categories_cache_repository_dependency(request: Request) -> TransactionCategoriesCacheRepository:
     redis = request.app.state.redis
     return TransactionCategoriesCacheRepository(redis)
 
 
-def create_transaction_categories_dependency(request: Request) -> CreateTransactionCategory:
+async def create_transaction_categories_dependency(request: Request) -> CreateTransactionCategory:
     return CreateTransactionCategory(
         user_id=getattr(request, "user_id"),
-        transaction_categories_cache_repository=transaction_categories_cache_repository_dependency(request),
-        transaction_categories_repository=transaction_categories_repository_dependency(request)
+        transaction_categories_cache_repository = await transaction_categories_cache_repository_dependency(request),
+        transaction_categories_repository = await transaction_categories_repository_dependency(request)
     )
 
 
-def get_transaction_categories_dependency(request: Request) -> GetTransactionCategories:
+async def get_transaction_categories_dependency(request: Request) -> GetTransactionCategories:
     return GetTransactionCategories(
         user_id=getattr(request, "user_id"),
-        transaction_categories_cache_repository=transaction_categories_cache_repository_dependency(request),
-        transaction_categories_repository=transaction_categories_repository_dependency(request)
+        transaction_categories_cache_repository = await transaction_categories_cache_repository_dependency(request),
+        transaction_categories_repository = await transaction_categories_repository_dependency(request)
     )
 
 
-def update_transaction_categories_dependency(request: Request) -> UpdateTransactionCategory:
+async def update_transaction_categories_dependency(request: Request) -> UpdateTransactionCategory:
     return UpdateTransactionCategory(
         user_id=getattr(request, "user_id"),
-        transaction_categories_cache_repository=transaction_categories_cache_repository_dependency(request),
-        transaction_categories_repository=transaction_categories_repository_dependency(request)
+        transaction_categories_cache_repository = await transaction_categories_cache_repository_dependency(request),
+        transaction_categories_repository = await transaction_categories_repository_dependency(request)
     )
 
 
-def delete_transaction_categories_dependency(request: Request) -> DeleteTransactionCategory:
+async def delete_transaction_categories_dependency(request: Request) -> DeleteTransactionCategory:
     return DeleteTransactionCategory(
         user_id=getattr(request, "user_id"),
-        transaction_categories_cache_repository=transaction_categories_cache_repository_dependency(request),
-        transaction_categories_repository=transaction_categories_repository_dependency(request)
+        transaction_categories_cache_repository = await transaction_categories_cache_repository_dependency(request),
+        transaction_categories_repository = await transaction_categories_repository_dependency(request)
     )

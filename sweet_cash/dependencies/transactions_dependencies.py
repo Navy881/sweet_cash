@@ -11,58 +11,58 @@ from sweet_cash.services.transactions.update_transaction import UpdateTransactio
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
 
 
-def transactions_repository_dependency(request: Request) -> TransactionsRepository:
+async def transactions_repository_dependency(request: Request) -> TransactionsRepository:
     engine = request.app.state.db
     return TransactionsRepository(engine)
 
 
-def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
+async def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
     engine = request.app.state.db
     return TransactionCategoriesRepository(engine)
 
 
-def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
+async def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
     engine = request.app.state.db
     return EventsParticipantsRepository(engine)
 
 
-def create_transaction_dependency(request: Request) -> CreateTransaction:
+async def create_transaction_dependency(request: Request) -> CreateTransaction:
     return CreateTransaction(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository=transaction_categories_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request)
+        transaction_categories_repository = await transaction_categories_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
-def get_all_transactions_dependency(request: Request) -> GetAllTransactions:
+async def get_all_transactions_dependency(request: Request) -> GetAllTransactions:
     return GetAllTransactions(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
-def get_transactions_dependency(request: Request) -> GetTransactions:
+async def get_transactions_dependency(request: Request) -> GetTransactions:
     return GetTransactions(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
-def update_transaction_dependency(request: Request) -> UpdateTransaction:
+async def update_transaction_dependency(request: Request) -> UpdateTransaction:
     return UpdateTransaction(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository=transaction_categories_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request)
+        transaction_categories_repository = await transaction_categories_repository_dependency(request),
+        events_participants_repository = await events_participants_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
-def delete_transaction_dependency(request: Request) -> DeleteTransaction:
+async def delete_transaction_dependency(request: Request) -> DeleteTransaction:
     return DeleteTransaction(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request),
-        transactions_repository=transactions_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )

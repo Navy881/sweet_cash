@@ -8,32 +8,32 @@ from sweet_cash.repositories.events_repository import EventsRepository
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
 
 
-def notifications_events_repository_dependency(request: Request) -> NotificationsEventsRepository:
+async def notifications_events_repository_dependency(request: Request) -> NotificationsEventsRepository:
     producer = request.app.state.kafka
     return NotificationsEventsRepository(producer)
 
 
-def send_partisipant_added_event_dependency(
+async def send_partisipant_added_event_dependency(
         request: Request, 
         events_repository: EventsRepository, 
         events_participants_repository: EventsParticipantsRepository
         ) -> SendPartisipantAddedEvent:
     return SendPartisipantAddedEvent(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository,
-        events_participants_repository=events_participants_repository,
-        notifications_events_repository=notifications_events_repository_dependency(request)
+        events_repository = await events_repository,
+        events_participants_repository = await events_participants_repository,
+        notifications_events_repository = await notifications_events_repository_dependency(request)
     )
 
 
-def send_partisipant_got_role_event_dependency(
+async def send_partisipant_got_role_event_dependency(
         request: Request, 
         events_repository: EventsRepository, 
         events_participants_repository: EventsParticipantsRepository
         ) -> SendPartisipantGotRoleEvent:
     return SendPartisipantGotRoleEvent(
         user_id=getattr(request, "user_id"),
-        events_repository=events_repository,
-        events_participants_repository=events_participants_repository,
-        notifications_events_repository=notifications_events_repository_dependency(request)
+        events_repository = await events_repository,
+        events_participants_repository = await events_participants_repository,
+        notifications_events_repository = await notifications_events_repository_dependency(request)
     )
