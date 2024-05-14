@@ -3,7 +3,7 @@ from datetime import datetime
 
 from sqlalchemy import Table, desc
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.nalog_ru_sessions_table import nalog_ru_sessions_table
 from sweet_cash.types.nalog_ru_types import NalogRuSessionModel
 from sweet_cash.errors import APIValueNotFound

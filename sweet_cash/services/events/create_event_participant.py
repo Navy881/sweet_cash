@@ -8,6 +8,7 @@ from sweet_cash.types.events_participants_types import (
     CreateEventsParticipantsModel,
     EventParticipantRole
 )
+from sweet_cash.services.notifications_events.send_partisipant_added_event import SendPartisipantAddedEvent
 from sweet_cash.errors import APIValueNotFound, APIParamError
 
 
@@ -17,10 +18,12 @@ logger = logging.getLogger(name="events")
 class CreateEventParticipant(BaseService):
     def __init__(self, user_id: int,
                  users_repository: UsersRepository,
-                 events_participants_repository: EventsParticipantsRepository) -> None:
+                 events_participants_repository: EventsParticipantsRepository,
+                 events_sender: SendPartisipantAddedEvent) -> None:
         self.user_id = user_id
         self.users_repository = users_repository
         self.events_participants_repository = events_participants_repository
+        self.events_sender = events_sender
 
     async def __call__(self, event_id: int,
                        event_participants: CreateEventsParticipantsModel) -> EventsParticipantsModel:
@@ -46,5 +49,11 @@ class CreateEventParticipant(BaseService):
                                                            role=EventParticipantRole(role)):
                 raise APIParamError(f'Participant for {user_id} already exist in event {event_id}')
 
-            return await self.events_participants_repository. \
+            
+            event_participant: EventsParticipantsModel = await self.events_participants_repository. \
                 create_events_participant(event_id=event_id, event_participant=event_participants)
+
+            # Send notification event to kafka
+            await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
+
+            return event_participant

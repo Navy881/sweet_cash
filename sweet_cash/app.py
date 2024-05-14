@@ -24,7 +24,7 @@ from sweet_cash.repositories.tables import (
 #     AIOHTTPSessionComponent
 # )
 
-from sweet_cash.components import postgres, http_session, redis
+from sweet_cash.components import postgres, http_session, redis, kafka
 
 
 fastAPI_logger = logger
@@ -49,7 +49,7 @@ def create_all_tables(engine):
 
 
 def create_app(settings: Settings) -> FastAPI:
-    dependencies = [postgres, http_session, redis]
+    dependencies = [postgres, http_session, redis, kafka]
 
     async def on_start_up() -> None:
         app.state.settings = settings

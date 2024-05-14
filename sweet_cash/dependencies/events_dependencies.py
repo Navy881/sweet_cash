@@ -13,6 +13,10 @@ from sweet_cash.services.events.create_event_participant import CreateEventParti
 from sweet_cash.services.events.update_event_participant import UpdateEventParticipant
 from sweet_cash.services.events.confirm_event_participant import ConfirmEventParticipant
 from sweet_cash.services.events.reject_event_participant import RejectEventParticipant
+from sweet_cash.dependencies.notifications_events_dependencies import (
+    send_partisipant_added_event_dependency, 
+    send_partisipant_got_role_event_dependency,
+)
 
 
 def events_repository_dependency(request: Request) -> EventsRepository:
@@ -74,14 +78,24 @@ def create_event_participant_dependency(request: Request) -> CreateEventParticip
     return CreateEventParticipant(
         user_id=getattr(request, "user_id"),
         users_repository=users_repository_dependency(request),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_participants_repository=events_participants_repository_dependency(request),
+        events_sender=send_partisipant_added_event_dependency(
+            request,
+            events_repository_dependency(request),
+            events_participants_repository_dependency(request)
+        )
     )
 
 
 def update_event_participant_dependency(request: Request) -> UpdateEventParticipant:
     return UpdateEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository=events_participants_repository_dependency(request)
+        events_participants_repository=events_participants_repository_dependency(request),
+        events_sender=send_partisipant_got_role_event_dependency(
+            request,
+            events_repository_dependency(request),
+            events_participants_repository_dependency(request)
+        )
     )
 
 

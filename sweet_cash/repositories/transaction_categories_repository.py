@@ -2,7 +2,7 @@ from sqlalchemy import Table
 from datetime import datetime
 from typing import List
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.transaction_category_table import transaction_category_table
 from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
 from sweet_cash.errors import APIValueNotFound

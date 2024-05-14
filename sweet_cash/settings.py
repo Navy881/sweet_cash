@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from pydantic.types import PositiveInt
+from typing import List
 
 
 load_dotenv(os.path.join('local.env'))
@@ -58,6 +59,12 @@ class Settings(object):
     SIZE_POOL_AIOHTTP = 100
 
     HOST = os.getenv("HOST")
+
+    KAFKA_BOOTSTRAP_SERVERS: str = os.getenv("KAFKA_BOOTSTRAP_SERVERS")
+    KAFKA_SECURITY_PROTOCOL: str = os.getenv("KAFKA_SECURITY_PROTOCOL")
+    KAFKA_SASL_MECHANISM: str = os.getenv("KAFKA_SASL_MECHANISM")
+    KAFKA_SASL_PLAIN_USERNAME: str = os.getenv("KAFKA_SASL_PLAIN_USERNAME")
+    KAFKA_SASL_PLAIN_PASSWORD: str = os.getenv("KAFKA_SASL_PLAIN_PASSWORD")
 
     class Config:
         env_file = "local.env"

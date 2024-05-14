@@ -5,7 +5,7 @@ from typing import List
 
 from sqlalchemy import Table
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.receipt_table import receipt_table
 from sweet_cash.types.receipts_types import ReceiptModel
 from sweet_cash.types.nalog_ru_types import NalogRuReceiptModel

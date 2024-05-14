@@ -4,7 +4,7 @@ from typing import List, Any
 
 from sqlalchemy import Table
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.transaction_table import transaction_table
 from sweet_cash.types.transactions_types import CreateTransactionModel, TransactionModel
 from sweet_cash.errors import APIValueNotFound

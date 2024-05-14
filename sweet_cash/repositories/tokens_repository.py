@@ -6,7 +6,7 @@ from typing import Optional
 import jwt
 from sqlalchemy import Table, desc
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.token_table import token_table
 from sweet_cash.types.users_types import TokenModel, RefreshTokenModel
 from sweet_cash.errors import APIValueNotFound

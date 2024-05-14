@@ -7,6 +7,7 @@ from sweet_cash.types.events_participants_types import (
     UpdateEventsParticipantsModel,
     EventParticipantRole
 )
+from sweet_cash.services.notifications_events.send_partisipant_got_role_event import SendPartisipantGotRoleEvent
 from sweet_cash.errors import APIConflict, APIValueNotFound
 
 
@@ -15,9 +16,11 @@ logger = logging.getLogger(name="events")
 
 class UpdateEventParticipant(BaseService):
     def __init__(self, user_id: int,
-                 events_participants_repository: EventsParticipantsRepository) -> None:
+                 events_participants_repository: EventsParticipantsRepository,
+                 events_sender: SendPartisipantGotRoleEvent) -> None:
         self.user_id = user_id
         self.events_participants_repository = events_participants_repository
+        self.events_sender = events_sender
 
     async def __call__(self, event_participant_id: int,
                        event_participants: UpdateEventsParticipantsModel) -> EventsParticipantsModel:
@@ -39,6 +42,11 @@ class UpdateEventParticipant(BaseService):
                                                            role=EventParticipantRole('Manager')):
                 raise APIValueNotFound(f'User {self.user_id} not associated with the event {event_id}')
 
-            return await self.events_participants_repository. \
+            event_participant: EventsParticipantsModel = await self.events_participants_repository. \
                 update_events_participant(event_participant_id=event_participant_id,
                                           event_participant=event_participants)
+        
+            # Send notification event to kafka
+            await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
+
+            return event_participant

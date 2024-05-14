@@ -3,7 +3,7 @@ from typing import List
 
 from sqlalchemy import Table
 
-from sweet_cash.repositories.base_repositories import BaseRepository
+from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.event_participants_table import event_participants_table
 from sweet_cash.types.events_participants_types import (
     EventsParticipantsModel,
