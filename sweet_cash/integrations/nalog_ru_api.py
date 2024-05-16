@@ -32,10 +32,9 @@ class NalogRuApi(BaseIntegration):
         payload = {
             'phone': phone,
             'client_secret': self.client_secret,
-            'code': otp,
-            "os": self.os
+            'code': otp
+            #"os": self.os
         }
-
         raw_item = await self._request(method=hdrs.METH_POST, url="/v2/auth/phone/verify", json=payload)
 
         return NalogRuSessionModel(**raw_item)

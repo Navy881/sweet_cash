@@ -25,8 +25,10 @@ class BaseIntegration(object):
             async with self.session.request(
                 method=method, url=urljoin(self.url, url), timeout=self.timeout, ssl=False, **kwargs
             ) as resp:
+                if resp.status >= 400:
+                    raise APIError(message=str(resp.content), status_code=resp.status)
                 resp_json_body = await resp.json(content_type=None)
-                self._check_error(resp_json_body=resp_json_body, status_code=resp.status)
+                # self._check_error(resp_json_body=resp_json_body, status_code=resp.status)
                 return cast(Dict[str, Any], resp_json_body)
 
         except (asyncio.TimeoutError, aiohttp.ClientError, ValidationError) as exc:

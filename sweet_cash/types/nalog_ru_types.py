@@ -7,6 +7,11 @@ class NalogRuSessionModel(BaseModel):
     session_id: str
     refresh_token: str
 
+    def __init__(self, **kwargs):
+        if "sessionId" in kwargs:
+            kwargs["session_id"] = kwargs["sessionId"]
+        super().__init__(**kwargs)
+
 
 class OtpModel(BaseModel):
     otp: str

@@ -11,6 +11,6 @@ nalog_ru_sessions_table = Table(
     Column("created_at", types.DateTime(timezone=False), nullable=False),
     Column("updated_at", types.DateTime(timezone=False), nullable=True),
     Column("user_id", Integer, index=True, nullable=False),
-    Column("sessio_id", Text, nullable=False),
+    Column("session_id", Text, nullable=False),
     Column("refresh_token", Text, nullable=True)
 )
