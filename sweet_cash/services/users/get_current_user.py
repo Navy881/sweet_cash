@@ -20,6 +20,6 @@ class GetCurrentUser(BaseService):
             token_info: TokenModel = await self.tokens_repository.get_user_by_token(token=token)
         
             if token_info is None:
-                APIAuthError
+                raise APIAuthError()
 
             return token_info
