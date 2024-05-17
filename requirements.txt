@@ -16,6 +16,6 @@ pytest-freezegun==0.4.2
 python-dotenv==0.20.0
 PyJWT==2.4.0
 pydantic==1.9.1
-aiokafka=0.10.0
-kafka-python=2.0.2
-orjson=3.10.3
+aiokafka==0.10.0
+kafka-python==2.0.2
+orjson==3.10.3
