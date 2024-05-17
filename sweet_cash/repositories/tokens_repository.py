@@ -1,7 +1,7 @@
 
 from datetime import datetime, timedelta
 import uuid
-from typing import Optional
+from typing import Optional, Union
 
 import jwt
 from sqlalchemy import Table, desc
@@ -44,7 +44,7 @@ class TokenRepository(BaseRepository):
             raise APIValueNotFound(f'User {user_id} is not authorized')
         return TokenModel(**row)
 
-    async def get_user_by_token(self, token: str) -> TokenModel:
+    async def get_user_by_token(self, token: str) -> Union[TokenModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -55,7 +55,7 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound('User not found')
+            return None
         return TokenModel(**row)
 
     async def check_exist_token_by_user(self, user_id: int) -> bool:
