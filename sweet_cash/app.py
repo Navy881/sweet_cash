@@ -49,7 +49,7 @@ def create_all_tables(engine):
 
 
 def create_app(settings: Settings) -> FastAPI:
-    dependencies = [postgres, http_session, redis]
+    dependencies = [postgres, http_session, redis, kafka]
 
     async def on_start_up() -> None:
         app.state.settings = settings
