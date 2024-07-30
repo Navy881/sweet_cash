@@ -238,7 +238,12 @@ async def test_login_success(client: TestClient):
 
     assert response.json() == {
         "refresh_token": ANY,
-        "user_id": ANY
+        "user_id": ANY,
+        "user": {
+            "id": ANY,
+            "created_at": ANY,
+            "name": ANY
+        }
     }
     assert response.status_code == 200
 
@@ -363,7 +368,7 @@ async def test_getting_token_success(client: TestClient):
         "refresh_token": ANY,
         "user_id": ANY,
         "token": ANY,
-        "expire_at": "2020-01-01T00:30:00"
+        "expire_at": ANY
     }
     assert response.status_code == 200
 

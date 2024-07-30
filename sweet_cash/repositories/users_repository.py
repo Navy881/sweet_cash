@@ -6,7 +6,7 @@ from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.user_table import user_table
-from sweet_cash.types.users_types import UserModel, CreateUserModel, RegisterUserModel
+from sweet_cash.types.users_types import UserModel, RegisterUserResponseModel, RegisterUserModel
 from sweet_cash.errors import APIValueNotFound, APIAuthError
 
 
@@ -79,14 +79,14 @@ class UsersRepository(BaseRepository):
     #     rows = await r_.fetchall()
     #     return [BindingModel(**row) for row in rows]
 
-    async def create_user(self, item: RegisterUserModel) -> CreateUserModel:
+    async def create_user(self, item: RegisterUserModel) -> RegisterUserResponseModel:
         insert_body = item.dict()
         insert_body["created_at"] = datetime.utcnow()
         insert_body["password"] = bcrypt.hashpw(item.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r_ = await self.conn.execute(create_query)
         row = await r_.fetchone()
-        return CreateUserModel(**row)
+        return RegisterUserResponseModel(**row)
 
     async def confirm_user(self, user_id: int) -> UserModel:
         update_value = {

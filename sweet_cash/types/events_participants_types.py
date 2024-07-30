@@ -6,6 +6,8 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from sweet_cash.types.users_types import UserResponseModel
+
 
 class EventParticipantRole(enum.Enum):
     MANAGER = "Manager"
@@ -25,6 +27,7 @@ class EventsParticipantsModel(BaseModel):
     event_id: int
     role: EventParticipantRole
     accepted: bool
+    user: Optional[UserResponseModel]
 
 
 class CreateEventsParticipantsModel(BaseModel):

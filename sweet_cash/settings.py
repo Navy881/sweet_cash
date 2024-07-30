@@ -66,5 +66,7 @@ class Settings(object):
     KAFKA_SASL_PLAIN_USERNAME: str = os.getenv("KAFKA_SASL_PLAIN_USERNAME")
     KAFKA_SASL_PLAIN_PASSWORD: str = os.getenv("KAFKA_SASL_PLAIN_PASSWORD")
 
+    MAX_USER_TOKENS: int = 5
+
     class Config:
         env_file = "local.env"

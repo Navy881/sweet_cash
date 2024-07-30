@@ -4,8 +4,10 @@ from typing import List
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.types.transactions_types import TransactionModel
 from sweet_cash.types.events_participants_types import EventsParticipantsModel, EventParticipantRole
+from sweet_cash.types.users_types import UserResponseModel
 
 
 logger = logging.getLogger(name="transactions")
@@ -15,10 +17,12 @@ class GetAllTransactions(BaseService):
     def __init__(self,
                  user_id: int,
                  events_participants_repository: EventsParticipantsRepository,
-                 transactions_repository: TransactionsRepository) -> None:
+                 transactions_repository: TransactionsRepository,
+                 user_repository: UsersRepository) -> None:
         self.user_id = user_id
         self.events_participants_repository = events_participants_repository
         self.transactions_repository = transactions_repository
+        self.user_repository = user_repository
 
     async def __call__(self, event_id: int, start: str, end: str, limit: int, offset: int) -> List[TransactionModel]:
         async with self.events_participants_repository.transaction():
@@ -47,5 +51,10 @@ class GetAllTransactions(BaseService):
                                           end=end,
                                           limit=limit,
                                           offset=offset)
+
+            async with self.user_repository.transaction():
+                for i, transaction in enumerate(transactions):
+                    user = await self.user_repository.get_by_id(transaction.user_id)
+                    transactions[i].user = UserResponseModel(**user.dict())
 
             return transactions

@@ -5,8 +5,10 @@ from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel
 from sweet_cash.types.events_participants_types import EventsParticipantsModel, EventParticipantRole
+from sweet_cash.types.users_types import UserResponseModel
 from sweet_cash.errors import APIValueNotFound, APIConflict
 
 
@@ -18,11 +20,13 @@ class UpdateTransaction(BaseService):
                  user_id: int,
                  transaction_categories_repository: TransactionCategoriesRepository,
                  events_participants_repository: EventsParticipantsRepository,
-                 transactions_repository: TransactionsRepository) -> None:
+                 transactions_repository: TransactionsRepository,
+                 user_repository: UsersRepository) -> None:
         self.user_id = user_id
         self.transaction_categories_repository = transaction_categories_repository
         self.events_participants_repository = events_participants_repository
         self.transactions_repository = transactions_repository
+        self.user_repository = user_repository
 
     async def __call__(self, transaction_id: int, transaction: CreateTransactionModel) -> TransactionModel:
         transaction_category_id: int = transaction.category_id
@@ -49,5 +53,11 @@ class UpdateTransaction(BaseService):
                         [event_participant.role for event_participant in event_participants]:
                     raise APIConflict(f'Updating a transaction {transaction_id} unavailable for user {self.user_id}')
 
-            return await self.transactions_repository.update_transaction(transaction_id=transaction_id,
-                                                                         transaction=transaction)
+            transaction_ = await self.transactions_repository.update_transaction(transaction_id=transaction_id,
+                                                                                 transaction=transaction)
+
+            async with self.user_repository.transaction():
+                user = await self.user_repository.get_by_id(transaction_.user_id)
+                transaction_.user = UserResponseModel(**user.dict())
+
+            return transaction_

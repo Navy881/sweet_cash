@@ -38,7 +38,8 @@ async def create_event_dependency(request: Request) -> CreateEvent:
     return CreateEvent(
         user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -46,7 +47,8 @@ async def get_events_dependency(request: Request) -> GetEvents:
     return GetEvents(
         user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -54,7 +56,8 @@ async def get_events_by_role_dependency(request: Request) -> GetEventsByRole:
     return GetEventsByRole(
         user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_partisipants = await users_repository_dependency(request)
     )
 
 
@@ -62,7 +65,8 @@ async def get_events_invitations_dependency(request: Request) -> GetEventsInvita
     return GetEventsInvitations(
         user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -70,7 +74,8 @@ async def update_event_dependency(request: Request) -> UpdateEvent:
     return UpdateEvent(
         user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -95,19 +100,22 @@ async def update_event_participant_dependency(request: Request) -> UpdateEventPa
             request,
             events_repository_dependency(request),
             events_participants_repository_dependency(request)
-        )
+        ),
+        user_repository = await users_repository_dependency(request)
     )
 
 
 async def confirm_event_participant_dependency(request: Request) -> ConfirmEventParticipant:
     return ConfirmEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository= await users_repository_dependency(request)
     )
 
 
 async def reject_event_participant_dependency(request: Request) -> RejectEventParticipant:
     return RejectEventParticipant(
         user_id=getattr(request, "user_id"),
-        events_participants_repository = await events_participants_repository_dependency(request)
+        events_participants_repository = await events_participants_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )

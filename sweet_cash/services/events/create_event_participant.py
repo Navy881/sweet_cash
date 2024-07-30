@@ -8,6 +8,7 @@ from sweet_cash.types.events_participants_types import (
     CreateEventsParticipantsModel,
     EventParticipantRole
 )
+from sweet_cash.types.users_types import UserResponseModel
 from sweet_cash.services.notifications_events.send_partisipant_added_event import SendPartisipantAddedEvent
 from sweet_cash.errors import APIValueNotFound, APIParamError
 
@@ -32,7 +33,7 @@ class CreateEventParticipant(BaseService):
 
         async with self.users_repository.transaction():
             # Checking user from requests exist
-            await self.users_repository.get_by_id(user_id)
+            user = await self.users_repository.get_by_id(user_id)
 
         async with self.events_participants_repository.transaction():
             # Checking that requests user is the event manager
@@ -49,9 +50,10 @@ class CreateEventParticipant(BaseService):
                                                            role=EventParticipantRole(role)):
                 raise APIParamError(f'Participant for {user_id} already exist in event {event_id}')
 
-            
             event_participant: EventsParticipantsModel = await self.events_participants_repository. \
                 create_events_participant(event_id=event_id, event_participant=event_participants)
+            
+            event_participant.user = UserResponseModel(**user.dict())
 
             # Send notification event to kafka
             # await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)

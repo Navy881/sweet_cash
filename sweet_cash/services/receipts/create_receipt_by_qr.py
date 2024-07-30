@@ -71,10 +71,11 @@ class CreateReceiptByQr(BaseService):
 
             transaction: CreateTransactionModel = \
                 CreateTransactionModel(event_id=receipt_qr.event_id,
-                                       type=TransactionType.INCOME,
+                                       type=TransactionType.EXPENSE,
                                        category_id=1,  # TODO Выбрать какую категорию брать для чеков
                                        amount=amount/100,
-                                       transaction_date=datetime.utcfromtimestamp(transaction_date).isoformat())
+                                       transaction_date=datetime.utcfromtimestamp(transaction_date).isoformat(),
+                                       receipt_id=receipt.id)
 
             await self.transactions_repository.create_transaction(user_id=self.user_id,
                                                                   transaction=transaction)

@@ -5,8 +5,10 @@ from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
+from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel
 from sweet_cash.types.events_participants_types import EventsParticipantsModel
+from sweet_cash.types.users_types import UserResponseModel
 from sweet_cash.errors import APIValueNotFound
 
 
@@ -18,11 +20,13 @@ class CreateTransaction(BaseService):
                  user_id: int,
                  transaction_categories_repository: TransactionCategoriesRepository,
                  events_participants_repository: EventsParticipantsRepository,
-                 transactions_repository: TransactionsRepository) -> None:
+                 transactions_repository: TransactionsRepository,
+                 user_repository: UsersRepository) -> None:
         self.user_id = user_id
         self.transaction_categories_repository = transaction_categories_repository
         self.events_participants_repository = events_participants_repository
         self.transactions_repository = transactions_repository
+        self.user_repository = user_repository
 
     async def __call__(self, transaction: CreateTransactionModel) -> TransactionModel:
         event_id: int = transaction.event_id
@@ -41,5 +45,11 @@ class CreateTransaction(BaseService):
                 raise APIValueNotFound(f'User {self.user_id} not associated with the event {event_id}')
 
         async with self.transactions_repository.transaction():
-            return await self.transactions_repository.create_transaction(user_id=self.user_id,
-                                                                         transaction=transaction)
+            transaction_model =  await self.transactions_repository.create_transaction(user_id=self.user_id,
+                                                                                       transaction=transaction)
+        
+        async with self.user_repository.transaction():
+            user = await self.user_repository.get_by_id(transaction_model.user_id)
+            transaction_model.user = UserResponseModel(**user.dict())
+
+        return transaction_model

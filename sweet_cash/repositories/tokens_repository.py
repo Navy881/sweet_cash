@@ -1,9 +1,8 @@
 
-from datetime import datetime, timedelta
-import uuid
-from typing import Optional, Union
-
 import jwt
+import uuid
+from datetime import datetime, timedelta
+from typing import Optional, Union, List
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
@@ -71,29 +70,16 @@ class TokenRepository(BaseRepository):
         if row is None:
             return False
         return True
-
-    #
-    # async def find_bindings(self, wave_id: int, end_date: datetime, start_date: datetime) -> list[BindingModel]:
-    #     query = self.table.select().where(
-    #         (self.table.c.wave_id == wave_id)
-    #         & (self.table.c.end_date >= start_date)
-    #         & (self.table.c.start_date <= end_date)
-    #     )
-    #     r_ = await self._execute(query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
-    #
-    # async def get(self, wave_id: int, limit: int = 100, offset: int = 0) -> list[BindingModel]:
-    #     query = (
-    #         self.table.select()
-    #             .where(self.table.c.wave_id == wave_id)
-    #             .order_by(self.table.c.start_date)
-    #             .limit(limit)
-    #             .offset(offset)
-    #     )
-    #     r_ = await self._execute(query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
+    
+    async def get_tokens_by_user(self, user_id: int) -> List[TokenModel]:
+        query = (
+            self.table.select()
+                .where(self.table.c.user_id == user_id)
+                .order_by(self.table.c.created_at)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TokenModel(**row) for row in rows]
 
     async def create_access_token(self, item: dict) -> RefreshTokenModel:
         expires_delta = timedelta(minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -125,24 +111,6 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(update_query)
         row = await r_.fetchone()
         return RefreshTokenModel(**row)
-
-    # async def delete(self, wave_id: int, binding_id: int) -> BindingModel:
-    #     delete_query = (
-    #         self.table.delete()
-    #             .where((self.table.c.wave_id == wave_id) & (self.table.c.id == binding_id))
-    #             .returning(*self.table.c)
-    #     )
-    #     r_ = await self._execute(delete_query)
-    #     row = await r_.fetchone()
-    #     if row is None:
-    #         raise NotFoundError
-    #     return BindingModel(**row)
-    #
-    # async def delete_bindings_by_wave_id(self, wave_id: int) -> list[BindingModel]:
-    #     delete_query = self.table.delete().where(self.table.c.wave_id == wave_id).returning(*self.table.c)
-    #     r_ = await self._execute(delete_query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
 
     @staticmethod
     def _create_refresh_token():

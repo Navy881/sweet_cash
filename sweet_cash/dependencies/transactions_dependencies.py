@@ -4,6 +4,7 @@ from fastapi import Request
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.services.transactions.create_transaction import CreateTransaction
 from sweet_cash.services.transactions.get_transactions import GetAllTransactions
 from sweet_cash.services.transactions.get_transaction import GetTransactions
@@ -26,12 +27,18 @@ async def events_participants_repository_dependency(request: Request) -> EventsP
     return EventsParticipantsRepository(engine)
 
 
+async def users_repository_dependency(request: Request) -> UsersRepository:
+    engine = request.app.state.db
+    return UsersRepository(engine)
+
+
 async def create_transaction_dependency(request: Request) -> CreateTransaction:
     return CreateTransaction(
         user_id=getattr(request, "user_id"),
         transaction_categories_repository = await transaction_categories_repository_dependency(request),
         events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request)
+        transactions_repository = await transactions_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -39,7 +46,8 @@ async def get_all_transactions_dependency(request: Request) -> GetAllTransaction
     return GetAllTransactions(
         user_id=getattr(request, "user_id"),
         events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request)
+        transactions_repository = await transactions_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -47,7 +55,8 @@ async def get_transactions_dependency(request: Request) -> GetTransactions:
     return GetTransactions(
         user_id=getattr(request, "user_id"),
         events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request)
+        transactions_repository = await transactions_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -56,7 +65,8 @@ async def update_transaction_dependency(request: Request) -> UpdateTransaction:
         user_id=getattr(request, "user_id"),
         transaction_categories_repository = await transaction_categories_repository_dependency(request),
         events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request)
+        transactions_repository = await transactions_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )
 
 
@@ -64,5 +74,6 @@ async def delete_transaction_dependency(request: Request) -> DeleteTransaction:
     return DeleteTransaction(
         user_id=getattr(request, "user_id"),
         events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request)
+        transactions_repository = await transactions_repository_dependency(request),
+        user_repository = await users_repository_dependency(request)
     )

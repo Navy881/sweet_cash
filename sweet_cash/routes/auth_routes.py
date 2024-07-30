@@ -18,14 +18,15 @@ from sweet_cash.services.users.confirm_registration import ConfirmRegistration
 from sweet_cash.services.users.send_confirmation_code import SendConfirmationCode
 from sweet_cash.services.users.verify_token import VerifyToken
 from sweet_cash.types.users_types import (
-    CreateUserModel,
+    RegisterUserResponseModel,
     RegisterUserModel,
     RefreshTokenModel,
     LoginModel,
     TokenModel,
     GetAccessTokenModel,
     VerifyTokenModel,
-    TokenInfoModel
+    TokenInfoModel,
+    LoginResponseModel
 )
 
 logger = logging.getLogger(name="users")
@@ -33,17 +34,17 @@ logger = logging.getLogger(name="users")
 auth_api_router = APIRouter()
 
 
-@auth_api_router.post("/auth/register", response_model=CreateUserModel, tags=["Auth"])
+@auth_api_router.post("/auth/register", response_model=RegisterUserResponseModel, tags=["Auth"])
 async def register_user(
     body: RegisterUserModel, register_user_: RegisterUser = Depends(dependency=register_user_dependency)
-) -> CreateUserModel:
+) -> RegisterUserResponseModel:
     return await register_user_(body)
 
 
-@auth_api_router.post("/auth/login", response_model=RefreshTokenModel, tags=["Auth"])
+@auth_api_router.post("/auth/login", response_model=LoginResponseModel, tags=["Auth"])
 async def login_user(
     body: LoginModel, login_user_: LoginUser = Depends(dependency=login_user_dependency)
-) -> RefreshTokenModel:
+) -> LoginResponseModel:
     return await login_user_(body)
 
 

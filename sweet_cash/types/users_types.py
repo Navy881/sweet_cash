@@ -21,7 +21,13 @@ class UserModel(BaseModel):
     phone: str
 
 
-class CreateUserModel(BaseModel):
+class UserResponseModel(BaseModel):
+    id: int
+    created_at: datetime
+    name: str
+
+
+class RegisterUserResponseModel(BaseModel):
     id: int
     created_at: datetime
     name: str
@@ -64,6 +70,12 @@ class TokenModel(BaseModel):
 class RefreshTokenModel(BaseModel):
     refresh_token: str
     user_id: int
+
+
+class LoginResponseModel(BaseModel):
+    refresh_token: str
+    user_id: int
+    user: UserResponseModel
 
 
 class LoginModel(BaseModel):
