@@ -24,7 +24,6 @@ class LoginUser(BaseService):
         async with self.tokens_repository.transaction():
             data = {"user_id": user.id, "login_method": "email"}
 
-            #TODO Нужно проверять, что если токенов не больше 5, то создать новый инчаен, обновить первый по дате создания
             tokens = await self.tokens_repository.get_tokens_by_user(user_id=user.id)
 
             if len(tokens) < Settings.MAX_USER_TOKENS:

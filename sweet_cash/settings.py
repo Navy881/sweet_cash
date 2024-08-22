@@ -38,7 +38,7 @@ class Settings(object):
     NALOG_RU_TIMEOUT: float = 600
 
     EMAIL_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
-    PHONE_REGEX = r'^((8|\+7)[\- ]?)?(\(?\d{3}\)?[\- ]?)?[\d\- ]{7,10}$'
+    PHONE_REGEX = r'^((\+7)+([0-9]){10})$'
     PASSWORD_REGEX = r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$'
 
     MIN_TRANSACTION_AMOUNT = 0

@@ -75,7 +75,7 @@ class TokenRepository(BaseRepository):
         query = (
             self.table.select()
                 .where(self.table.c.user_id == user_id)
-                .order_by(self.table.c.created_at)
+                .order_by(self.table.c.expire_at)
         )
         r = await self.conn.execute(query)
         rows = await r.fetchall()
