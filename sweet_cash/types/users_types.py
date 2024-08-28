@@ -1,3 +1,4 @@
+
 from __future__ import annotations
 
 from datetime import datetime
@@ -19,6 +20,7 @@ class UserModel(BaseModel):
     email: str
     password: str
     phone: str
+    confirmed: bool
 
 
 class UserResponseModel(BaseModel):
@@ -107,3 +109,15 @@ class TokenInfoModel(BaseModel):
     token: str
     user_id: int
     expire_at: datetime
+
+
+class ChangePasswordRequestModel(BaseModel):
+    email: str
+    code: str
+    new_password: str
+
+    @validator("new_password")
+    def validate_password(cls, v: str, **kwargs: Any) -> str:
+        if not check_password_format(v):
+            raise ValueError("Invalid password format")
+        return v

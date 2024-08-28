@@ -9,6 +9,7 @@ user_table = Table(
     metadata,
     Column("id", Integer, primary_key=True),
     Column("created_at", types.DateTime(timezone=False), nullable=False),
+    Column("updated_at", types.DateTime(timezone=False), nullable=True),
     Column("name", Text, nullable=False),
     Column("email", Text, nullable=False, unique=True),
     Column("phone", Text, nullable=False),

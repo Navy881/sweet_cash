@@ -1,0 +1,1346 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,400;1,100&display=swap");
+
+* {
+  font-family: "Noto Sans SC";
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* ===== Colors ====== */
+  --body-color: #e4e9f7;
+  --sidebar-color: #5b5b5b;
+  --primary-color: #409eff;
+  --primary-color-light: #f6f5ff;
+  --toggle-color: #ddd;
+  --text-color: #707070;
+  --light: #ffffff;
+  --placeholder: #3a3a3b;
+  --sidebar-text: #ffffff;
+  --sidebar-border: #409eff;
+  --error: red;
+  --success: #0abf30;
+  --warning: #e9bd0c;
+  --info: #3498db;
+
+  /* ===== Transaction ===== */
+
+  --tran-03: all 0.3s ease;
+  --tran-04: all 0.4s ease;
+  --tran-05: all 0.5s ease;
+}
+
+body {
+  color: #424242;
+  font-size: 16px;
+  background: #ffffff;
+}
+
+h1,
+h2 {
+  font-weight: normal;
+  text-align: center;
+}
+
+h1 {
+  font-size: 30px;
+  padding-bottom: 35px;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 200px;
+  padding: 10px 14px;
+  background: var(--sidebar-color);
+  transition: var(--tran-03);
+  border-radius: 3px;
+  z-index: 1000;
+  white-space: nowrap;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+.sidebar.close {
+  width: 60px;
+  padding: 10px 14px;
+}
+
+.sidebar .text {
+  font-weight: 50;
+  color: var(--sidebar-text);
+}
+
+.sidebar.close .text {
+  display: none;
+}
+
+.sidebar .image {
+  min-width: 30px;
+  display: flex;
+  padding-right: 10px;
+  padding-left: 15px;
+}
+
+.sidebar:hover {
+  left: 0px;
+  transition: var(--tran-03);
+}
+
+.sidebar header {
+  background: #4a4848;
+  padding-right: 0px;
+  margin-right: -13px;
+  margin-top: -13px;
+  padding-top: 13px;
+  margin-left: -14px;
+  margin-bottom: -1px;
+  padding-bottom: 13px;
+  overflow: hidden;
+}
+
+.sidebar .image-text img {
+  width: 30px;
+}
+
+.sidebar header .image-text {
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  overflow-x: hidden;
+}
+
+header .image-text .header-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.header-text .name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.sidebar li {
+  height: 30px;
+  margin-top: 15px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+}
+
+.sidebar li .icon {
+  font-size: 25px;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+}
+
+.sidebar li .icon,
+.sidebar li .text {
+  color: var(--sidebar-text);
+  transition: var(--tran-03);
+}
+
+.sidebar li a {
+  text-decoration: none;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  transition: var(--text-color);
+  width: 100%;
+  border-radius: 6px;
+}
+
+.sidebar li a:hover {
+  background: var(--sidebar-border);
+}
+
+.sidebar .menu-bar {
+  height: calc(100% - 70px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.nav-text#transaction {
+  color: var(--primary-color);
+}
+
+.icon#dollar {
+  color: var(--primary-color);
+}
+
+.sidebar li#tr:hover a {
+  background-color: transparent !important;
+}
+
+/* ===== Navbar ===== */
+
+.wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-left: 80px;
+  padding-right: 20px;
+  height: 70px;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.13);
+  user-select: none;
+}
+
+.wrapper > div {
+  margin-right: 20px;
+}
+
+.create-button,
+.get-button {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 93px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.get-button.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+  width: 93px;
+}
+
+.create-button.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+  width: 93px;
+}
+
+.create-button:hover,
+.get-button:hover {
+  background-color: #2f86e4;
+}
+
+.container {
+  position: relative;
+}
+
+.wrapper .dropdown {
+  position: relative;
+  background: #ffffff;
+  width: 350px;
+  height: 40px;
+  border-radius: 5px;
+}
+
+.wrapper .dropdown::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  right: 20px;
+  top: 12px;
+  z-index: 10000;
+  border-top: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  transform: rotate(-45deg);
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.wrapper .dropdown.active::before {
+  transform: rotate(-225deg);
+  top: 20px;
+}
+
+.dropdown input {
+  position: relative;
+  background: #ffffff;
+  width: 350px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+  padding-right: 35px;
+}
+
+.text-box {
+  user-select: none;
+}
+
+.dropdown .input::placeholder {
+  font-size: 29px;
+}
+
+.dropdown .option {
+  background: #ffffff;
+  position: absolute;
+  width: 100%;
+  top: 50px;
+  border: 1px solid #e4e7ed;
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-y: scroll;
+  max-height: 130px;
+  display: none;
+  z-index: 500;
+}
+
+.dropdown.active .option {
+  display: block;
+}
+
+.dropdown .option li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.dropdown .option li:hover {
+  background: #f5f7fa;
+}
+
+#ShowdropdownCat {
+  margin-top: 20px;
+  width: 420px;
+}
+
+#showCatTran {
+  width: 420px;
+}
+
+.item {
+  user-select: none;
+}
+
+input[type="date"] {
+  padding: 12px 20px;
+  height: 40px;
+  width: 150px;
+  border: 1px solid #e4e7ed;
+  color: #5b5b5b;
+  border-radius: 5px;
+  font-family: "Noto Sans SC";
+}
+
+input:focus,
+input[type="date"]:focus,
+input[type="time"]:focus {
+  border: 1px solid #409eff;
+  outline: none;
+}
+
+input[type="date"].error {
+  border: 1px solid var(--error);
+}
+
+.user-id-label,
+#user_id {
+  position: absolute;
+  right: 3cap;
+  display: flex;
+  align-items: center;
+  top: 30px;
+}
+
+.user-id-label {
+  margin-right: 15px;
+}
+
+#transactionsLabel {
+  display: inline-block;
+  margin-left: 80px;
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+#infoTransactionsLabel {
+  margin-top: 20px;
+  font-size: 18px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+#infoTransactionsLabel.disable {
+  display: none;
+}
+
+.custom-table {
+  height: 48px;
+  overflow: auto;
+  border: 1px solid #dddddd;
+}
+
+table {
+  width: 95%;
+  table-layout: fixed;
+  min-width: 900px;
+  border-collapse: collapse;
+  margin-left: 80px;
+  margin-top: 10px;
+  user-select: none;
+}
+
+th,
+td {
+  border-top: 1px solid #dddddd;
+  border-bottom: 1px solid #dddddd;
+  padding: 10px 40px;
+  text-align: left;
+  height: 48px;
+}
+thead th {
+  position: sticky;
+  top: 0;
+  color: #909399;
+  z-index: 100;
+  background-color: #faf8f8;
+}
+
+td img {
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  text-align: center;
+}
+
+td img:hover {
+  filter: brightness(80%);
+}
+
+.smallRow {
+  width: 170px;
+}
+
+.dataBlockMore {
+  display: inline-block;
+  margin-left: 80px;
+  margin-top: 10px;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  color: #06c;
+}
+
+.dataBlockMore.disable {
+  display: none;
+}
+
+/* Стили для модального окна */
+.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 288px;
+  height: 160px;
+  user-select: text;
+  visibility: visible;
+  overflow: auto;
+
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  opacity: 0;
+  visibility: hidden;
+  /* transition: all 0.3s; */
+  border: none;
+  border-radius: 6px;
+  user-select: none;
+}
+
+.modal[open] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal::backdrop {
+  background: #00000000;
+}
+
+.modal-title {
+  padding-top: 15px;
+  color: #303133;
+  text-align: left;
+  padding-left: 20px;
+}
+
+.modal p {
+  padding-left: 70px;
+  padding-top: 2px;
+  color: #606266;
+}
+
+.modal .buttonsMod {
+  padding-top: 20px;
+  padding-left: 140px;
+}
+
+.modal .deleteBtn {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 46px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modal .closeBtn {
+  background-color: #fff;
+  color: #606266;
+  width: 46px;
+  height: 32px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  margin-left: 10px;
+}
+
+/* Стили модального окна транзакций */
+.modalTr {
+  position: fixed;
+  top: 50%; /* Размещаем верхнюю часть модального окна посередине по вертикали */
+  left: 50%; /* Размещаем левую часть модального окна посередине по горизонтали */
+  transform: translate(-50%, -50%);
+  width: 460px;
+  height: 730px;
+  user-select: text;
+  visibility: visible;
+  overflow: auto;
+  background: #fff; /* Добавляем фоновый цвет */
+  display: block;
+  box-shadow: 0 0 0 100vmax #00000038;
+  opacity: 0;
+  visibility: hidden;
+  /* Мерцает заголовок таблицы если раскоментирую */
+  /* transition: all 0.3s; */
+  border: none;
+  border-radius: 6px;
+  user-select: none;
+}
+
+#ShowModalTransaction {
+  height: 765px;
+}
+
+.modalTr[open] {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modalTr::backdrop {
+  background: #00000000;
+}
+
+.modalTr {
+  padding: 20px;
+  color: #303133;
+  text-align: left;
+}
+
+.modalTr label {
+  color: #606266;
+  text-align: left;
+  margin-top: 20px !important;
+}
+
+.inputBox {
+  /* position: relative; */
+  background: #ffffff;
+  width: 420px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  margin-top: 20px;
+}
+
+#InputId {
+  background: #f5f7fa;
+}
+
+.inputBox::placeholder {
+  font-size: 15px;
+}
+
+.modalTr .label {
+  margin-top: 20px;
+}
+
+.dateTime {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+#timeTr {
+  width: 195px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  border-radius: 5px;
+}
+
+#dateTr {
+  width: 195px;
+  height: 40px;
+}
+
+/* ===== Радио кнопка "Тип" */
+
+.radio {
+  display: flex;
+  justify-content: left;
+}
+
+.custom-radio {
+  position: absolute;
+  z-index: -1;
+  opacity: 0;
+}
+
+/* для элемента label связанного с .custom-radio */
+.custom-radio + label {
+  display: inline-flex;
+  align-items: center;
+  user-select: none;
+}
+
+/* создание в label псевдоэлемента  before со следующими стилями */
+.custom-radio + label::before {
+  content: "";
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+  flex-grow: 0;
+  border: 1px solid #adb5bd;
+  border-radius: 50%;
+  margin-right: 0.5em;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 50% 50%;
+}
+
+/* стили при наведении курсора на радио */
+.custom-radio:not(:disabled):not(:checked) + label:hover::before {
+  border-color: #b3d7ff;
+}
+
+/* стили для активной радиокнопки (при нажатии на неё) */
+.custom-radio:not(:disabled):active + label::before {
+  background-color: #b3d7ff;
+  border-color: #b3d7ff;
+}
+
+/* стили для радиокнопки, находящейся в фокусе и не находящейся в состоянии checked */
+.custom-radio:focus:not(:checked) + label::before {
+  border-color: #80bdff;
+}
+
+/* стили для радиокнопки, находящейся в состоянии checked */
+.custom-radio:checked + label::before {
+  border-color: #409eff;
+  background-color: #409eff;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+/* стили для радиокнопки, находящейся в состоянии disabled */
+.custom-radio:disabled + label::before {
+  background-color: #e9ecef;
+}
+
+.radio {
+  margin-bottom: 0.4em;
+}
+
+/* ewrewrwerewrwe*/
+
+.dropdown1 {
+  position: relative;
+  background: #ffffff;
+  width: 420px;
+  height: 40px;
+  border-radius: 5px;
+  margin-top: 20px;
+}
+
+.dropdown1::before {
+  content: "";
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border: 2px solid #333;
+  right: 20px;
+  top: 12px;
+  z-index: 10000;
+  border-top: 2px solid #ffffff;
+  border-right: 2px solid #ffffff;
+  transform: rotate(-45deg);
+  transition: 0.5s;
+  pointer-events: none;
+}
+
+.dropdown1.active::before {
+  transform: rotate(-225deg);
+  top: 20px;
+}
+
+.dropdown1 input {
+  position: relative;
+  background: #ffffff;
+  width: 420px;
+  border-radius: 5px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  cursor: pointer;
+  outline: none;
+}
+
+.text-box {
+  user-select: none;
+}
+
+.dropdown1 .input::placeholder {
+  font-size: 29px;
+}
+
+.dropdown1 .option1 {
+  background: #ffffff;
+  position: absolute;
+  width: 100%;
+  top: 50px;
+  border: 1px solid #e4e7ed;
+  list-style: none;
+  border-radius: 5px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+  padding-top: 4px;
+  padding-bottom: 4px;
+  padding-left: 5px;
+  padding-right: 5px;
+  overflow-y: scroll;
+  max-height: 130px;
+  display: none;
+  z-index: 500;
+}
+
+.dropdown1.active .option1 {
+  display: block;
+}
+
+/* .dropdown1 .option1 li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.dropdown1 .option1 li:hover {
+  background: #f5f7fa;
+}
+
+.dropdown1 .option1 ul {
+  list-style-type: none;
+} */
+
+/* Основной стиль для элементов списка */
+.dropdown1 .option1 li {
+  padding: 8px 13px;
+  cursor: pointer;
+  border-radius: 5px;
+  position: relative;
+  background: transparent;
+}
+
+/* Стиль для элемента <li> при наведении */
+.dropdown1 .option1 li.highlight {
+  background: #f5f7fa; /* Подсветка при наведении */
+}
+
+/* Убираем фон у дочерних элементов */
+.dropdown1 .option1 li ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.dropdown1 .option1 li ul li {
+  background: transparent;
+}
+
+.item {
+  user-select: none;
+}
+
+.description {
+  margin-top: 20px;
+  width: 420px;
+  height: 128px;
+  outline: none;
+  -moz-appearance: none;
+  border: 1px solid #e4e7ed;
+  border-radius: 5px;
+  resize: none;
+  padding: 0 0 0 13px;
+}
+
+.modalTr .buttons {
+  margin-top: 20px;
+  display: flex;
+  justify-content: left;
+}
+
+.modalTr .createButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.modalTr .createButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.closeButton {
+  background: #82848a;
+  color: #fff;
+  width: 97px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  height: 40px;
+  border: none;
+  margin-left: 20px;
+}
+
+.closeButton:hover {
+  background-color: #7b7c81;
+}
+
+.editButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 97px;
+  height: 40px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 3px solid transparent;
+}
+
+.editButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.editButton.Off {
+  display: none;
+}
+
+.modalTr .createButton.Off {
+  display: none;
+}
+
+/* Стили страницы регистрации */
+
+.registrationContainer h2 {
+  font-size: 20px;
+}
+
+.registrationContainer {
+  width: 310px;
+  height: 446px;
+  border: 1px solid #606266;
+  border-radius: 5px;
+  padding: 19px 25px 19px 25px;
+  text-align: center;
+}
+
+.registrationContainer input {
+  width: 253px;
+  padding: 10px;
+  height: 32px;
+  border: 1px solid #606266;
+  border-radius: 4px;
+  margin-top: 31px;
+}
+
+#InputName::placeholder {
+  font-size: 15px;
+}
+
+#InputMobile::placeholder {
+  font-size: 15px;
+}
+
+#InputEmail::placeholder {
+  font-size: 15px;
+}
+
+/* #InputPassword::placeholder {
+  font-size: 15px;
+} */
+
+input.active:focus,
+textarea.active:focus {
+  border: 1px solid #409eff;
+}
+
+#InputEmailReg.emailError,
+#InputMobile.mobileError,
+#InputPassword.passwordError,
+#InputPasswordRepeat.passwordError {
+  border: 1px solid var(--error);
+}
+
+.textPasswordErrorRepeat {
+  color: var(--error);
+  padding-right: 80px;
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textPasswordErrorRepeat.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+/* .textPasswordError1 {
+  color: var(--error);
+  position: absolute;
+  font-size: 10px;
+  text-align: left;
+  margin-top: 1px;
+  width: 253px;
+  margin-left: 3px;
+  display: block;
+} */
+
+.textPasswordError2 {
+  color: var(--error);
+  font-size: 10px;
+  position: absolute;
+  display: none;
+  width: 253px;
+  text-align: left;
+}
+
+.textPasswordError2.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+.textPasswordError {
+  color: var(--error);
+  font-size: 10px;
+  position: absolute;
+  display: none;
+  width: 253px;
+  text-align: left;
+}
+
+.textPasswordError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+  width: 253px;
+}
+
+.textEmailError {
+  color: var(--error);
+  padding-right: 80px;
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textEmailError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+.textMobileError {
+  color: var(--error);
+  padding-right: 80px;
+  font-size: 10px;
+  position: absolute;
+  display: none;
+}
+
+.textMobileError.view {
+  position: absolute;
+  display: block;
+  margin-left: 3px;
+  margin-top: 1px;
+}
+
+/* .auth-container input[type="password"] {
+  margin-top: 36px;
+} */
+
+.registrationButtons {
+  display: flex;
+  justify-content: space-between;
+  height: 32px;
+  margin-top: 36px;
+}
+
+.registrationButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 124px;
+  border-radius: 4px;
+  cursor: pointer;
+  transform: translateX(3px);
+  border: 3px solid transparent;
+}
+
+.registrationButton:hover {
+  background-color: #2f86e4;
+}
+
+.registrationButton.disable {
+  pointer-events: none;
+  background-color: #409eff;
+  opacity: 0.5;
+}
+
+.cancellButton {
+  background: #82848a;
+  color: #fff;
+  width: 94px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  border: 3px solid transparent;
+}
+
+.cancellButton:hover {
+  background-color: #7b7c81;
+}
+
+/* Стили страницы подтверждения регистрации */
+
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  user-select: none;
+}
+
+.confRegContainer {
+  width: 360px;
+  height: 204px;
+  border: 1px solid #606266;
+  border-radius: 5px;
+  padding: 19px 25px 19px 25px;
+  text-align: center;
+}
+
+p {
+  margin-top: 18px;
+  text-align: left;
+}
+
+.regConButtons {
+  display: flex;
+  justify-content: flex-start;
+  height: 32px;
+  margin-top: 36px;
+}
+
+.authButton {
+  background-color: #3a8ee6;
+  color: #fff;
+  width: 124px;
+  border-radius: 4px;
+  cursor: pointer;
+  transform: translateX(3px);
+  border: 3px solid transparent;
+}
+
+.authButton:hover {
+  background-color: #2f86e4;
+}
+
+.cancellButtonReg {
+  background: #82848a;
+  color: #fff;
+  width: 94px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 3px;
+  border: 3px solid transparent;
+  margin-left: 40px;
+}
+
+.cancellButtonReg:hover {
+  background-color: #7b7c81;
+}
+
+/* Стили уведомлений */
+.notifications {
+  position: fixed;
+  top: 30px;
+  right: 20px;
+  user-select: none;
+  z-index: 2000;
+}
+
+.notifications :where(.toast, .column) {
+  display: flex;
+  align-items: center;
+}
+
+.notifications .toast {
+  width: 400px;
+  list-style: none;
+  border-radius: 4px;
+  padding: 16px 17px;
+  margin-bottom: 10px;
+  background: var(--light);
+  border: 1px solid #dddddd;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+  animation: show_toast 0.3s ease forwards;
+  z-index: 2000;
+}
+
+@keyframes show_toast {
+  0% {
+    transform: translateX(100%);
+  }
+  40% {
+    transform: translateX(-5%);
+  }
+  80% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-10px);
+  }
+}
+
+.notifications .toast.hide {
+  animation: hide_toast 0.3s ease forwards;
+}
+
+@keyframes hide_toast {
+  0% {
+    transform: translateX(-10px);
+  }
+  40% {
+    transform: translateX(0%);
+  }
+  80% {
+    transform: translateX(-5%);
+  }
+  100% {
+    transform: translateX(calc(100% + 20px));
+  }
+}
+
+.toast::before {
+  position: absolute;
+  content: "";
+  height: 3px;
+  width: 100%;
+  bottom: 0px;
+  left: 0px;
+  animation: progress 5s linear forwards;
+}
+
+@keyframes progress {
+  100% {
+    width: 0%;
+  }
+}
+
+.toast.success::before {
+  background: var(--success);
+}
+
+.toast.error::before {
+  background: var(--error);
+}
+
+.toast.warning::before {
+  background: var(--warning);
+}
+
+.toast.info::before {
+  background: var(--info);
+}
+
+.toast .column i {
+  font-size: 1.75rem;
+}
+
+.toast.success .column i {
+  color: var(--success);
+}
+
+.toast.error .column i {
+  color: var(--error);
+}
+
+.toast.warning .column i {
+  color: var(--warning);
+}
+
+.toast.info .column i {
+  color: var(--info);
+}
+
+.toast .column span {
+  font-size: 1.07rem;
+  margin-left: 12px;
+}
+
+.toast i:last-child {
+  color: #aeb0d7;
+  cursor: pointer;
+  font-size: 1.4rem;
+}
+
+.toast i:last-child:hover {
+  color: #34495e;
+}
+
+.column span.title {
+  font-size: 14px;
+}
+
+input:focus::-webkit-input-placeholder {
+  opacity: 0;
+} /* Chrome/Opera/Safari */
+input:focus::-moz-placeholder {
+  opacity: 0;
+} /* Firefox 19+ */
+input:focus:-moz-placeholder {
+  opacity: 0;
+} /* Firefox 4-18 */
+input:focus:-ms-input-placeholder {
+  opacity: 0;
+} /* Internet Explorer 10+ */
+
+input::placeholder {
+  transition: opacity 1.3s;
+}
+
+.selected-row {
+  background-color: #f0f0f0; /* Любой цвет фона, который вы хотите использовать */
+}
+
+.modalTr .star {
+  margin-left: -3px;
+  color: #fc0000;
+}
+
+#ShowtimeTr {
+  width: 195px;
+  height: 40px;
+  border: 1px solid #e4e7ed;
+  padding: 0 0 0 13px;
+  border-radius: 5px;
+}
+
+/* .hide::before {
+  content: "+  ";
+}
+
+.show::before {
+  content: "-  ";
+} */
+
+.toggle {
+  cursor: pointer;
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 5px;
+  text-align: center;
+  line-height: 10px;
+  background-color: lightgray;
+}
+
+.toggle.plus::before {
+  content: "+";
+}
+
+.toggle.minus::before {
+  content: "-";
+}
+
+#scanner-form {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  padding: 20px;
+  border: 1px solid #ccc;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 400px;
+  height: 400px;
+}
+
+.password-1 {
+  position: relative;
+}
+
+#eye-1 {
+  top: 37px;
+  right: 10px;
+  font-size: 1.3em;
+  cursor: pointer;
+  position: absolute;
+}
+
+#eye-2 {
+  top: 37px;
+  right: 10px;
+  font-size: 1.3em;
+  cursor: pointer;
+  position: absolute;
+}

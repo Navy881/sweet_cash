@@ -4,9 +4,9 @@ import logging
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.tokens_repository import TokenRepository
 from sweet_cash.repositories.users_repository import UsersRepository
-from sweet_cash.types.users_types import RefreshTokenModel, LoginModel, LoginResponseModel
+from sweet_cash.types.users_types import LoginModel, LoginResponseModel, UserModel
 from sweet_cash.settings import Settings
-
+from sweet_cash.errors import APIConflict
 
 logger = logging.getLogger(name="auth")
 
@@ -18,7 +18,10 @@ class LoginUser(BaseService):
 
     async def __call__(self, credits: LoginModel) -> LoginResponseModel:
         async with self.users_repository.transaction():
-            user = await self.users_repository.get_by_email(email=credits.email)
+            user: UserModel = await self.users_repository.get_by_email(email=credits.email)
+            if not user.confirmed:
+                raise APIConflict(f'Registration for {credits.email} not confirmed')
+                
             self.users_repository.check_password(password=user.password, given_password=credits.password)
 
         async with self.tokens_repository.transaction():

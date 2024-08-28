@@ -1,7 +1,7 @@
+
 import os
 from dotenv import load_dotenv
 from pydantic.types import PositiveInt
-from typing import List
 
 
 load_dotenv(os.path.join('local.env'))

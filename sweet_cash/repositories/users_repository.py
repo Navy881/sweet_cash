@@ -27,19 +27,33 @@ class UsersRepository(BaseRepository):
             return False
         return True
 
-    async def get_by_email(self, email: str, confirmed: bool = True) -> UserModel:
+    # async def get_by_email(self, email: str, confirmed: bool = True) -> UserModel:
+    #     query = (
+    #         self.table.select()
+    #             .where(
+    #                 (self.table.c.email == email)
+    #                 & (self.table.c.confirmed == confirmed)
+    #             )
+    #             .order_by(desc(self.table.c.created_at))
+    #     )
+    #     r = await self.conn.execute(query)
+    #     row = await r.fetchone()
+    #     if row is None:
+    #         raise APIValueNotFound(f'User with login "{email}" not found')
+    #     return UserModel(**row)
+    
+    async def get_by_email(self, email: str) -> UserModel:
         query = (
             self.table.select()
                 .where(
                     (self.table.c.email == email)
-                    & (self.table.c.confirmed == confirmed)
                 )
                 .order_by(desc(self.table.c.created_at))
         )
         r = await self.conn.execute(query)
         row = await r.fetchone()
         if row is None:
-            raise APIValueNotFound(f'User with login "{email}" not found')
+            raise APIValueNotFound(f'User with email "{email}" not found')
         return UserModel(**row)
 
     async def get_by_id(self, user_id: int) -> UserModel:
@@ -94,6 +108,21 @@ class UsersRepository(BaseRepository):
         }
         update_query = (
             self.table.update().where(self.table.c.id == user_id).values(**update_value).returning(*self.table.c)
+        )
+        r = await self.conn.execute(update_query)
+        row = await r.fetchone()
+        return UserModel(**row)
+    
+    async def update_user(self, user: RegisterUserModel) -> UserModel:
+        update_value = {
+            "updated_at": datetime.utcnow(),
+            "name": user.name,
+            "email": user.email,
+            "phone": user.phone,
+            "password": bcrypt.hashpw(user.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        }
+        update_query = (
+            self.table.update().where(self.table.c.email == user.email).values(**update_value).returning(*self.table.c)
         )
         r = await self.conn.execute(update_query)
         row = await r.fetchone()

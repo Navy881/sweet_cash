@@ -4,7 +4,7 @@ from unittest.mock import ANY
 from datetime import timedelta
 from async_asgi_testclient import TestClient
 
-from sweet_cash.services.email_sending.send_email import SendEmail
+from sweet_cash.auth.utils import create_access_token
 
 
 EMAIL = "test@test.com"
@@ -29,8 +29,8 @@ async def create_user(client: TestClient) -> None:
 @pytest.fixture
 async def confirm_user(client: TestClient) -> None:
     expires_delta = timedelta(24)
-    confirmation_code = SendEmail._create_access_token(data={"sub": EMAIL}, expires_delta=expires_delta)
-    await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code={confirmation_code}")
+    confirmation_code = create_access_token(data={"sub": EMAIL}, expires_delta=expires_delta)
+    await client.get(f"/confirm?email={EMAIL}&code={confirmation_code}")
 
 
 @pytest.fixture
@@ -498,7 +498,7 @@ TEST CONFIRMATION USER
 @pytest.mark.usefixtures("create_user")
 @pytest.mark.asyncio
 async def test_confirm_registration_success(client: TestClient):
-    response = await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code=1234")
+    response = await client.get(f"/confirm?email={EMAIL}&code=1234")
 
     assert response.status_code == 200
     assert response.headers["Content-Type"] == "text/html; charset=utf-8"
@@ -506,17 +506,17 @@ async def test_confirm_registration_success(client: TestClient):
 
 @pytest.mark.asyncio
 async def test_confirm_with_invalid_email(client: TestClient):
-    response = await client.get(f"/api/v1/auth/confirm?email={EMAIL}&code=1234")
+    response = await client.get(f"/confirm?email={EMAIL}&code=1234")
 
     assert response.json() == {
-        "detail": "User with login \"test@test.com\" not found"
+        "detail": "User with email \"test@test.com\" not found"
     }
     assert response.status_code == 404
 
 
 @pytest.mark.asyncio
 async def test_confirm_registration_without_required_params(client: TestClient):
-    response = await client.get(f"/api/v1/auth/confirm")
+    response = await client.get(f"/confirm")
 
     assert response.json() == {
         "detail": [
@@ -560,7 +560,7 @@ async def test_send_code_with_invalid_email(client: TestClient):
     response = await client.get(f"/api/v1/auth/code?email={EMAIL}")
 
     assert response.json() == {
-        "detail": "User with login \"test@test.com\" not found"
+        "detail": "User with email \"test@test.com\" not found"
     }
     assert response.status_code == 404
 

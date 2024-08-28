@@ -1,6 +1,4 @@
-import time
 
-import jwt
 from fastapi import Request, Depends, HTTPException
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
@@ -8,16 +6,8 @@ from sweet_cash.dependencies.users_dependecies import get_current_user_dependenc
 from sweet_cash.services.users.get_current_user import GetCurrentUser
 from sweet_cash.types.users_types import TokenModel
 
-from sweet_cash.settings import Settings
-
-
-def decode_jwt(token: str) -> dict:
-    try:
-        decoded_token = jwt.decode(token, Settings.SECRET_KEY, algorithms=[Settings.ALGORITHM])
-        return decoded_token if decoded_token["exp"] >= time.time() else None
-    except:
-        return {}
-
+from sweet_cash.auth.utils import decode_jwt
+    
 
 class JWTBearer(HTTPBearer):
 

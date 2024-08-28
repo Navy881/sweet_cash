@@ -1,12 +1,12 @@
+
 import logging
-import jwt
-import time
+
 from fastapi.responses import HTMLResponse
 
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.types.users_types import UserModel
-from sweet_cash.settings import Settings
+from sweet_cash.auth.utils import decode_jwt
 
 
 logger = logging.getLogger(name="auth")
@@ -18,10 +18,12 @@ class ConfirmRegistration(BaseService):
 
     async def __call__(self, email: str, confirmation_code: str) -> HTMLResponse:
         async with self.users_repository.transaction():
-            user: UserModel = await self.users_repository.get_by_email(email=email, confirmed=False)
+            user: UserModel = await self.users_repository.get_by_email(email=email)
+            if user.confirmed:
+                return HTMLResponse(open('sweet_cash/templates/success_confirmation.html', 'r').read())
 
             try:
-                payload = self.decode_jwt(token=confirmation_code)
+                payload = decode_jwt(token=confirmation_code)
             except:
                 payload = None
 
@@ -31,11 +33,3 @@ class ConfirmRegistration(BaseService):
             await self.users_repository.confirm_user(user.id)
 
             return HTMLResponse(open('sweet_cash/templates/success_confirmation.html', 'r').read())
-
-    @staticmethod
-    def decode_jwt(token: str) -> dict:
-        try:
-            decoded_token = jwt.decode(token, Settings.SECRET_KEY, algorithms=[Settings.ALGORITHM])
-            return decoded_token if decoded_token["exp"] >= time.time() else None
-        except:
-            return {}

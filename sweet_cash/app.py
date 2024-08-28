@@ -1,3 +1,4 @@
+
 import asyncio
 from fastapi import FastAPI
 from fastapi.logger import logger
@@ -24,7 +25,13 @@ from sweet_cash.repositories.tables import (
 #     AIOHTTPSessionComponent
 # )
 
-from sweet_cash.components import postgres, http_session, redis, kafka
+from sweet_cash.components import (
+    postgres, 
+    http_session, 
+    redis, 
+    kafka,
+    smtp_server
+)
 
 
 fastAPI_logger = logger
@@ -49,7 +56,7 @@ def create_all_tables(engine):
 
 
 def create_app(settings: Settings) -> FastAPI:
-    dependencies = [postgres, http_session, redis, kafka]
+    dependencies = [postgres, http_session, redis, kafka, smtp_server]
 
     async def on_start_up() -> None:
         app.state.settings = settings
@@ -95,13 +102,14 @@ def create_app(settings: Settings) -> FastAPI:
     # to avoid tokenError
     # app.add_middleware(DBSessionMiddleware, db_url=Settings.POSTGRESQL_DATABASE_URI)
 
-    from sweet_cash.routes.auth_routes import auth_api_router
+    from sweet_cash.routes.auth_routes import auth_api_router, auth_pages_router
     from sweet_cash.routes.events_routes import events_api_router
     from sweet_cash.routes.transactions import transactions_api_router
     from sweet_cash.routes.transaction_categories import transaction_category_api_router
     from sweet_cash.routes.receipts import receipts_api_router
     from sweet_cash.routes.nalog_ru_routes import nalog_ru_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
+    app.include_router(auth_pages_router)
     app.include_router(events_api_router, prefix="/api/v1")
     app.include_router(transactions_api_router, prefix="/api/v1")
     app.include_router(transaction_category_api_router, prefix="/api/v1")

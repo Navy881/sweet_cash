@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 import psycopg2
 import bcrypt
 from datetime import datetime
