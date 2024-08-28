@@ -18,6 +18,9 @@ class SendConfirmRegistrationEmail(object):
         self.smtp = smtp
     
     async def __call__(self, email: str) -> None:
+        if not self.smtp.is_connected:
+            await self.smtp.connect()
+
         try:
             msg = MIMEMultipart()
 
