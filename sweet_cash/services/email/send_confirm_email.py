@@ -1,4 +1,5 @@
 
+import asyncio
 import logging
 
 from aiosmtplib import SMTP
@@ -8,6 +9,7 @@ from email.mime.text import MIMEText
 
 from sweet_cash.settings import Settings
 from sweet_cash.auth.utils import create_access_token
+from sweet_cash.errors import APIError
 
 logger = logging.getLogger(name="email sending")
 
@@ -18,8 +20,13 @@ class SendConfirmRegistrationEmail(object):
         self.smtp = smtp
     
     async def __call__(self, email: str) -> None:
-        if not self.smtp.is_connected:
-            await self.smtp.connect()
+        
+        # Переподключение smtp, если оно пропало. Таймаут 10 секунд
+        if self.smtp.protocol is None:
+            try:
+                await asyncio.wait_for(self.smtp.connect(), 10)
+            except asyncio.exceptions.TimeoutError:
+                raise APIError("Smtp connection timed out")
 
         try:
             msg = MIMEMultipart()
