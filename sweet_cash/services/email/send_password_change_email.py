@@ -22,8 +22,9 @@ class SendPasswordChangeEmail(object):
     async def __call__(self, email: str) -> None:
         
         # Переподключение smtp, если оно пропало. Таймаут 10 секунд
-        if self.smtp.protocol is None:
+        if not self.smtp.is_connected:
             try:
+                self.smtp.close()
                 await asyncio.wait_for(self.smtp.connect(), 10)
             except asyncio.exceptions.TimeoutError:
                 raise APIError("Smtp connection timed out")
