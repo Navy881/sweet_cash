@@ -5,7 +5,7 @@ from typing import List
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.transaction_categories_cache_repository import TransactionCategoriesCacheRepository
-from sweet_cash.types.transaction_categories_types import TransactionCategoryModel
+from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, TransactionCategoryType
 from sweet_cash.settings import Settings
 from sweet_cash.services.transaction_categories.create_category_tree import create_category_tree
 
@@ -22,17 +22,27 @@ class GetTransactionCategories(BaseService):
         self.transaction_categories_cache_repository = transaction_categories_cache_repository
         self.transaction_categories_repository = transaction_categories_repository
 
-    async def __call__(self) -> List[TransactionCategoryModel]:
-        result: List[TransactionCategoryModel] = await self.transaction_categories_cache_repository.get()
+    async def __call__(self, type=None) -> List[TransactionCategoryModel]:
+        if TransactionCategoryType.has_value(type):
+            type = TransactionCategoryType(type)
+        else:
+            type = None
+
+        result = await self.transaction_categories_cache_repository.get(type)
 
         if result is None:
             async with self.transaction_categories_repository.transaction():
-                transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository.\
-                    get_transaction_categories()
+                if type:
+                    transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository.\
+                        get_transaction_categories_by_type(type)
+                else:
+                    transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository.\
+                        get_transaction_categories()
 
                 result = create_category_tree(transaction_categories)
 
             await self.transaction_categories_cache_repository.set(transaction_categories=result,
-                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND)
+                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
+                                                                   type=type)
 
         return result

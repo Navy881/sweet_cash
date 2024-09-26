@@ -43,6 +43,7 @@ class TransactionCategoriesRepository(BaseRepository):
             "updated_at": datetime.utcnow(),
             "name": transaction_category.name,
             "parent_category_id": transaction_category.parent_category_id,
+            "type": transaction_category.type,
             "description": transaction_category.description
         }
         update_query = (
@@ -67,6 +68,19 @@ class TransactionCategoriesRepository(BaseRepository):
         query = (
             self.table.select()
                 .where(self.table.c.deleted.is_(None))
+                .order_by(self.table.c.id.desc())
+        )
+        r_ = await self.conn.execute(query)
+        rows = await r_.fetchall()
+        return [TransactionCategoryModel(**row) for row in rows]
+    
+    async def get_transaction_categories_by_type(self, type: str) -> List[TransactionCategoryModel]:
+        query = (
+            self.table.select()
+                .where(
+                    (self.table.c.deleted.is_(None))
+                    & (self.table.c.type == type)
+                )
                 .order_by(self.table.c.id.desc())
         )
         r_ = await self.conn.execute(query)

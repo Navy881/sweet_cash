@@ -104,9 +104,9 @@ def create_app(settings: Settings) -> FastAPI:
 
     from sweet_cash.routes.auth_routes import auth_api_router, auth_pages_router
     from sweet_cash.routes.events_routes import events_api_router
-    from sweet_cash.routes.transactions import transactions_api_router
-    from sweet_cash.routes.transaction_categories import transaction_category_api_router
-    from sweet_cash.routes.receipts import receipts_api_router
+    from sweet_cash.routes.transactions_routes import transactions_api_router
+    from sweet_cash.routes.transaction_categories_routes import transaction_category_api_router
+    from sweet_cash.routes.receipts_routes import receipts_api_router
     from sweet_cash.routes.nalog_ru_routes import nalog_ru_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
     app.include_router(auth_pages_router)

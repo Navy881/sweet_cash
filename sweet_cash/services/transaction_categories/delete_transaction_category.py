@@ -25,14 +25,18 @@ class DeleteTransactionCategory(BaseService):
     async def __call__(self, transaction_category_id: int) -> TransactionCategoryModel:
         async with self.transaction_categories_repository.transaction():
             transaction_category: TransactionCategoryModel = await self.transaction_categories_repository.\
-                delete_transaction_category(transaction_category_id)
+                get_transaction_category_by_id(transaction_category_id)
+            
+            transaction_category: TransactionCategoryModel = await self.transaction_categories_repository.\
+                delete_transaction_category(transaction_category.id)
 
             transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
-                get_transaction_categories()
+                get_transaction_categories_by_type(transaction_category.type)
 
             category_tree = create_category_tree(transaction_categories)
 
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
-                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND)
+                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
+                                                                   type=transaction_category.type)
 
             return transaction_category

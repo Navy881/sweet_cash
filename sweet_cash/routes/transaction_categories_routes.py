@@ -1,16 +1,18 @@
 
 import logging
 from fastapi import APIRouter, Depends
-from typing import List
+from typing import List, Optional
 
 from sweet_cash.dependencies.transaction_categories_dependencies import (
     create_transaction_categories_dependency,
     get_transaction_categories_dependency,
+    get_transaction_category_dependency,
     update_transaction_categories_dependency,
     delete_transaction_categories_dependency
 )
 from sweet_cash.services.transaction_categories.create_transaction_category import CreateTransactionCategory
 from sweet_cash.services.transaction_categories.get_transaction_categories import GetTransactionCategories
+from sweet_cash.services.transaction_categories.get_transaction_category import GetTransactionCategory
 from sweet_cash.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
 from sweet_cash.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
 from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
@@ -39,10 +41,23 @@ async def create_transaction_category(
                                      dependencies=[Depends(JWTBearer())],
                                      tags=["Transactions categories"])
 async def get_transaction_categories(
+        type: str = '',
         get_transaction_categories_: GetTransactionCategories = Depends(
             dependency=get_transaction_categories_dependency)
 ) -> List[TransactionCategoryModel]:
-    return await get_transaction_categories_()
+    return await get_transaction_categories_(type)
+
+
+@transaction_category_api_router.get("/transactions/categories/{transaction_category_id}",
+                                     response_model=TransactionCategoryModel,
+                                     dependencies=[Depends(JWTBearer())],
+                                     tags=["Transactions categories"])
+async def get_transaction_category(
+        transaction_category_id: int,
+        get_transaction_category_: GetTransactionCategory = Depends(
+            dependency=get_transaction_category_dependency)
+) -> TransactionCategoryModel:
+    return await get_transaction_category_(transaction_category_id)
 
 
 @transaction_category_api_router.put("/transactions/categories/{transaction_category_id}",

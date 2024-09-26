@@ -5,7 +5,7 @@ from typing import List
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.transaction_categories_cache_repository import TransactionCategoriesCacheRepository
-from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
+from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel, TransactionCategoryType
 from sweet_cash.settings import Settings
 from sweet_cash.services.transaction_categories.create_category_tree import create_category_tree
 
@@ -28,11 +28,12 @@ class CreateTransactionCategory(BaseService):
                 create_transaction_category(category)
 
             transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
-                get_transaction_categories()
+                get_transaction_categories_by_type(transaction_category.type)
 
             category_tree = create_category_tree(transaction_categories)
 
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
-                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND)
+                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
+                                                                   type=transaction_category.type)
 
             return transaction_category

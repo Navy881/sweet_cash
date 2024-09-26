@@ -7,6 +7,7 @@ from sweet_cash.services.transaction_categories.create_transaction_category impo
 from sweet_cash.services.transaction_categories.get_transaction_categories import GetTransactionCategories
 from sweet_cash.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
 from sweet_cash.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
+from sweet_cash.services.transaction_categories.get_transaction_category import GetTransactionCategory
 
 
 async def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
@@ -47,5 +48,12 @@ async def delete_transaction_categories_dependency(request: Request) -> DeleteTr
     return DeleteTransactionCategory(
         user_id=getattr(request, "user_id"),
         transaction_categories_cache_repository = await transaction_categories_cache_repository_dependency(request),
+        transaction_categories_repository = await transaction_categories_repository_dependency(request)
+    )
+
+
+async def get_transaction_category_dependency(request: Request) -> GetTransactionCategory:
+    return GetTransactionCategory(
+        user_id=getattr(request, "user_id"),
         transaction_categories_repository = await transaction_categories_repository_dependency(request)
     )
