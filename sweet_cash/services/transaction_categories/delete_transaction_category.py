@@ -30,6 +30,7 @@ class DeleteTransactionCategory(BaseService):
             transaction_category: TransactionCategoryModel = await self.transaction_categories_repository.\
                 delete_transaction_category(transaction_category.id)
 
+            # Запись в кэш по типу категории
             transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
                 get_transaction_categories_by_type(transaction_category.type)
 
@@ -38,5 +39,15 @@ class DeleteTransactionCategory(BaseService):
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
                                                                    ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
                                                                    type=transaction_category.type)
+            
+            # Запись в кэш по всем категорииям
+            transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
+                get_transaction_categories()
+
+            category_tree = create_category_tree(transaction_categories)
+
+            await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
+                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
+                                                                   type=None)
 
             return transaction_category

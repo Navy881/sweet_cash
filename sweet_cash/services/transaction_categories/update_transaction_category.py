@@ -30,6 +30,7 @@ class UpdateTransactionCategory(BaseService):
                 update_transaction_category(transaction_category_id=transaction_category_id,
                                             transaction_category=transaction_category)
 
+            # Запись в кэш по типу категории
             transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
                 get_transaction_categories_by_type(transaction_category.type)
 
@@ -38,5 +39,15 @@ class UpdateTransactionCategory(BaseService):
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
                                                                    ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
                                                                    type=transaction_category.type)
+            
+            # Запись в кэш по всем категорииям
+            transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
+                get_transaction_categories()
+
+            category_tree = create_category_tree(transaction_categories)
+
+            await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
+                                                                   ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
+                                                                   type=None)
 
             return transaction_category
