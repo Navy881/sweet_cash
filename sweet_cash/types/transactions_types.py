@@ -8,6 +8,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, validator
 
 from sweet_cash.types.users_types import UserResponseModel
+from sweet_cash.types.accounts_types import AccountResponseModel
 
 
 class TransactionType(enum.Enum):
@@ -33,6 +34,27 @@ class TransactionModel(BaseModel):
     description: Optional[str]
     receipt_id: Optional[int]
     user: Optional[UserResponseModel]
+    source_account_id: Optional[int]
+    source_account: Optional[AccountResponseModel]
+    target_account_id: Optional[int]
+    target_account: Optional[AccountResponseModel]
+
+
+class TransactionResponseModel(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+    number: int
+    event_id: int
+    type: TransactionType
+    category_id: int
+    amount: float
+    transaction_date: datetime
+    description: Optional[str]
+    receipt_id: Optional[int]
+    user: Optional[UserResponseModel]
+    source_account: Optional[AccountResponseModel]
+    target_account: Optional[AccountResponseModel]
 
 
 class CreateTransactionModel(BaseModel):
@@ -43,6 +65,8 @@ class CreateTransactionModel(BaseModel):
     transaction_date: datetime
     description: Optional[str]
     receipt_id: Optional[int]
+    source_account_id: Optional[int]
+    target_account_id: Optional[int]
 
     @validator("amount")
     def validate_email(cls, v: float,  **kwargs: Any) -> float:

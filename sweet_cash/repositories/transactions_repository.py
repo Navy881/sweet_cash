@@ -1,5 +1,5 @@
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from sqlalchemy import Table
@@ -15,7 +15,7 @@ class TransactionsRepository(BaseRepository):
 
     async def create_transaction(self, user_id: int, transaction: CreateTransactionModel) -> TransactionModel:
         insert_body = transaction.dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["user_id"] = user_id
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r = await self.conn.execute(create_query)
@@ -36,12 +36,14 @@ class TransactionsRepository(BaseRepository):
 
     async def update_transaction(self, transaction_id: int, transaction: CreateTransactionModel) -> TransactionModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "type": transaction.type,
             "category_id": transaction.category_id,
             "amount": transaction.amount,
             "transaction_date": transaction.transaction_date,
-            "description": transaction.description
+            "description": transaction.description,
+            "source_account_id": transaction.source_account_id,
+            "target_account_id": transaction.target_account_id
         }
         update_query = (
             self.table.update().where(self.table.c.id == transaction_id).values(**update_value).returning(*self.table.c)

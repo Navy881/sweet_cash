@@ -20,5 +20,7 @@ transaction_table = Table(
     Column("transaction_date", types.DateTime(timezone=False), nullable=False),
     Column("description", Text, nullable=True),
     Column("receipt_id", Integer, nullable=True),
-    Column("deleted", types.DateTime(timezone=False), nullable=True)
+    Column("deleted", types.DateTime(timezone=False), nullable=True),
+    Column("source_account_id", Integer, nullable=True),
+    Column("target_account_id", Integer, nullable=True)
 )

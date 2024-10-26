@@ -8,14 +8,16 @@ from sweet_cash.dependencies.transactions_dependencies import (
     get_all_transactions_dependency,
     get_transactions_dependency,
     update_transaction_dependency,
-    delete_transaction_dependency
+    delete_transaction_dependency,
+    create_transaction_dependency_v2,
+    update_transaction_dependency_v2
 )
-from sweet_cash.services.transactions.create_transaction import CreateTransaction
+from sweet_cash.services.transactions.create_transaction import CreateTransaction, CreateTransactionV2
 from sweet_cash.services.transactions.get_transactions import GetAllTransactions
 from sweet_cash.services.transactions.get_transaction import GetTransactions
-from sweet_cash.services.transactions.update_transaction import UpdateTransaction
+from sweet_cash.services.transactions.update_transaction import UpdateTransaction, UpdateTransactionV2
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
-from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel
+from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel, TransactionResponseModel
 from sweet_cash.auth.auth_bearer import JWTBearer
 
 
@@ -82,3 +84,66 @@ async def delete_transaction(
         delete_transaction_: DeleteTransaction = Depends(dependency=delete_transaction_dependency)
 ) -> TransactionModel:
     return await delete_transaction_(transaction_id)
+
+
+transactions_api_router_v2 = APIRouter()
+
+
+@transactions_api_router_v2.post("/transactions",
+                                 response_model=TransactionResponseModel,
+                                 dependencies=[Depends(JWTBearer())],
+                                 tags=["Transactions"])
+async def create_transaction_v2(
+    body: CreateTransactionModel,
+    create_transaction_: CreateTransactionV2 = Depends(dependency=create_transaction_dependency_v2)
+) -> TransactionModel:
+    return await create_transaction_(body)
+
+
+@transactions_api_router_v2.delete("/transactions/{transaction_id}",
+                                    response_model=TransactionResponseModel,
+                                    dependencies=[Depends(JWTBearer())],
+                                    tags=["Transactions"])
+async def delete_transaction_v2(
+    transaction_id: int,
+    delete_transaction_: DeleteTransaction = Depends(dependency=delete_transaction_dependency)
+) -> TransactionModel:
+    return await delete_transaction_(transaction_id)
+
+
+@transactions_api_router_v2.get("/transactions",
+                                response_model=List[TransactionResponseModel],
+                                dependencies=[Depends(JWTBearer())],
+                                tags=["Transactions"])
+async def get_transactions_v2(
+        transaction_ids: str,
+        get_transactions_: GetTransactions = Depends(dependency=get_transactions_dependency)
+) -> List[TransactionModel]:
+    return await get_transactions_(transaction_ids)
+
+
+@transactions_api_router_v2.get("/transactions/all",
+                                response_model=List[TransactionResponseModel],
+                                dependencies=[Depends(JWTBearer())],
+                                tags=["Transactions"])
+async def get_all_transactions_v2(
+        event_id: int,
+        start: str,
+        end: str,
+        limit: int,
+        offset: int,
+        get_all_transactions_: GetAllTransactions = Depends(dependency=get_all_transactions_dependency)
+) -> List[TransactionModel]:
+    return await get_all_transactions_(event_id, start, end, limit, offset)
+
+
+@transactions_api_router_v2.put("/transactions/{transaction_id}",
+                                response_model=TransactionResponseModel,
+                                dependencies=[Depends(JWTBearer())],
+                                tags=["Transactions"])
+async def update_transaction_v2(
+    transaction_id: int,
+    body: CreateTransactionModel,
+    update_transaction_: UpdateTransactionV2 = Depends(dependency=update_transaction_dependency_v2)
+) -> TransactionModel:
+    return await update_transaction_(transaction_id, body)
