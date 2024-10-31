@@ -21,11 +21,11 @@ class AccountModel(BaseModel):
 
 class AccountResponseModel(BaseModel):
     id: int
-    created_at: datetime
+    created_at: Optional[datetime]
     updated_at: Optional[datetime]
-    name: str
+    name: Optional[str]
     description: Optional[str]
-    is_blocked: bool
+    is_blocked: Optional[bool]
     user: Optional[UserResponseModel]
 
 

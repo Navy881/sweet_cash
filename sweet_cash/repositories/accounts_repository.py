@@ -1,12 +1,11 @@
 
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Union
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.account_table import account_table
 from sweet_cash.types.accounts_types import AccountModel, CreateAccountModel, UpdateAccountModel
-from sweet_cash.errors import APIValueNotFound
 
 
 class AccountsRepository(BaseRepository):
@@ -35,7 +34,7 @@ class AccountsRepository(BaseRepository):
         row = await r.fetchone()
         return AccountModel(**row)
     
-    async def get_by_id(self, account_id: int) -> AccountModel:
+    async def get_by_id(self, account_id: int) -> Union[AccountModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -46,10 +45,10 @@ class AccountsRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound(f'Account {account_id} not found')
+            return None
         return AccountModel(**row)
     
-    async def get_user_account_by_id(self, account_id: int, user_id: int) -> AccountModel:
+    async def get_user_account_by_id(self, account_id: int, user_id: int) -> Union[AccountModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -61,7 +60,7 @@ class AccountsRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound(f'Account {account_id} not found')
+            return None
         return AccountModel(**row)
     
     async def get_by_ids(self, account_ids: List[int]) -> List[AccountModel]:

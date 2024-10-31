@@ -73,3 +73,20 @@ class CreateTransactionModel(BaseModel):
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
+
+
+class UpdateTransactionModel(BaseModel):
+    type: TransactionType
+    category_id: int
+    amount: float
+    transaction_date: datetime
+    description: Optional[str]
+    receipt_id: Optional[int]
+    source_account_id: Optional[int]
+    target_account_id: Optional[int]
+
+    @validator("amount")
+    def validate_email(cls, v: float,  **kwargs: Any) -> float:
+        if v < 0:
+            raise ValueError("'amount' must be positive")
+        return v

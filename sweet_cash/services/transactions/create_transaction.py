@@ -87,14 +87,18 @@ class CreateTransactionV2(BaseService):
             raise APIParamError("Field target_account_id should not be empty for income transaction")
         
         # Checking exist accounts
+        # Проверка только по id, т.к. пользователь можно создавать 
+        # транзкации со счётом, к которому у него нет доступа
         async with self.accounts_repository.transaction():
             if transaction.source_account_id is not None:
-                self.source_account: AccountModel = await self.accounts_repository.get_user_account_by_id(account_id=transaction.source_account_id,
-                                                                                                          user_id=self.user_id)
+                self.source_account = await self.accounts_repository.get_by_id(account_id=transaction.source_account_id)
+                if self.source_account is None:
+                    raise APIValueNotFound(f'Account {transaction.source_account_id} not found')
                 
             if transaction.target_account_id is not None:
-                self.target_account: AccountModel = await self.accounts_repository.get_user_account_by_id(account_id=transaction.target_account_id,
-                                                                                                          user_id=self.user_id)
+                self.target_account = await self.accounts_repository.get_by_id(account_id=transaction.target_account_id)
+                if self.target_account is None:
+                    raise APIValueNotFound(f'Account {transaction.target_account_id} not found')
 
         # Checking exist transaction category
         async with self.transaction_categories_repository.transaction():
@@ -118,9 +122,15 @@ class CreateTransactionV2(BaseService):
 
         # Update transactions accounts
         if self.source_account:
-            transaction_model.source_account = AccountResponseModel(**self.source_account.dict())
+            if self.source_account.user_id == self.user_id:
+                transaction_model.source_account = AccountResponseModel(**self.source_account.dict())
+            else:
+                transaction_model.source_account = AccountResponseModel(id=self.source_account.id)
         
         if self.target_account:
-            transaction_model.target_account = AccountResponseModel(**self.target_account.dict())
+            if self.target_account.user_id == self.user_id:
+                transaction_model.target_account = AccountResponseModel(**self.target_account.dict())
+            else:
+                transaction_model.target_account = AccountResponseModel(id=self.target_account.id)
 
         return transaction_model

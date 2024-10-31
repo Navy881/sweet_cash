@@ -56,12 +56,18 @@ class GetTransactions(BaseService):
                         if transaction.source_account_id:
                             account = await self.accounts_repository.get_user_account_by_id(account_id=transaction.source_account_id,
                                                                                             user_id=self.user_id)
-                            transaction.source_account = AccountResponseModel(**account.dict())
+                            if account:
+                                transaction.source_account = AccountResponseModel(**account.dict())
+                            else:
+                                transaction.source_account = AccountResponseModel(id=transaction.source_account_id)
 
                         if transaction.target_account_id:
                             account = await self.accounts_repository.get_user_account_by_id(account_id=transaction.target_account_id,
                                                                                             user_id=self.user_id)
-                            transaction.target_account = AccountResponseModel(**account.dict())
+                            if account:
+                                transaction.target_account = AccountResponseModel(**account.dict())
+                            else:
+                                transaction.target_account = AccountResponseModel(id=transaction.target_account_id)
 
                         result.append(transaction)
         

@@ -94,49 +94,60 @@ class UpdateTransactionV2(BaseService):
             raise APIParamError("Field target_account_id should not be empty for income transaction")
         
         # Checking exist accounts
+        # Проверка только по id, т.к. пользователь можно изменять 
+        # транзкации со счётом, к которому у него нет доступа
         async with self.accounts_repository.transaction():
             if transaction.source_account_id is not None:
-                self.source_account: AccountModel = await self.accounts_repository.get_user_account_by_id(account_id=transaction.source_account_id,
-                                                                                                          user_id=self.user_id)
+                self.source_account = await self.accounts_repository.get_by_id(account_id=transaction.source_account_id)
+                if self.source_account is None:
+                    raise APIValueNotFound(f'Account {transaction.source_account_id} not found')
                 
             if transaction.target_account_id is not None:
-                self.target_account: AccountModel = await self.accounts_repository.get_user_account_by_id(account_id=transaction.target_account_id,
-                                                                                                          user_id=self.user_id)
+                self.target_account = await self.accounts_repository.get_by_id(account_id=transaction.target_account_id)
+                if self.target_account is None:
+                    raise APIValueNotFound(f'Account {transaction.target_account_id} not found')
 
         # Checking exist transaction category
         async with self.transaction_categories_repository.transaction():
             await self.transaction_categories_repository.get_transaction_category_by_id(transaction_category_id)
 
         async with self.transactions_repository.transaction():
+            # Checking access to transaction
             transaction_model: TransactionModel = await self.transactions_repository.get_transaction_by_id(transaction_id)
             event_id: int = transaction_model.event_id
-
+            
             async with self.events_participants_repository.transaction():
-                # Checking that user in event
+                # Checking that user in transaction event
                 event_participants: List[EventsParticipantsModel] = await self.events_participants_repository. \
                     get_events_participants_by_user_id(user_id=self.user_id, event_id=event_id)
 
                 if len(event_participants) == 0:
-                    raise APIValueNotFound(f'User {self.user_id} not associated with the event for transaction '
-                                           f'{transaction_id}')
+                    raise APIValueNotFound(f'User {self.user_id} is not participant in transaction event')
 
-            if self.user_id != transaction_model.user_id:
-                if EventParticipantRole.MANAGER not in \
-                        [event_participant.role for event_participant in event_participants]:
-                    raise APIConflict(f'Updating a transaction {transaction_id} unavailable for user {self.user_id}')
-
+                # Эта проверка только по event_participants текущего event транзакции
+                if self.user_id != transaction_model.user_id:
+                    if EventParticipantRole.MANAGER not in \
+                            [event_participant.role for event_participant in event_participants]:
+                        raise APIConflict(f'Updating a transaction {transaction_id} unavailable for user {self.user_id}')
+                    
             transaction_model = await self.transactions_repository.update_transaction(transaction_id=transaction_id,
-                                                                                 transaction=transaction)
-            # Update transactions user
-            async with self.user_repository.transaction():
-                user = await self.user_repository.get_by_id(transaction_model.user_id)
-                transaction_model.user = UserResponseModel(**user.dict())
+                                                                                      transaction=transaction)
+        # Update transactions user
+        async with self.user_repository.transaction():
+            user = await self.user_repository.get_by_id(transaction_model.user_id)
+            transaction_model.user = UserResponseModel(**user.dict())
 
-            # Update transactions accounts
-            if self.source_account:
+        # Update transactions accounts
+        if self.source_account:
+            if self.source_account.user_id == self.user_id:
                 transaction_model.source_account = AccountResponseModel(**self.source_account.dict())
+            else:
+                transaction_model.source_account = AccountResponseModel(id=self.source_account.id)
         
-            if self.target_account:
+        if self.target_account:
+            if self.target_account.user_id == self.user_id:
                 transaction_model.target_account = AccountResponseModel(**self.target_account.dict())
+            else:
+                transaction_model.target_account = AccountResponseModel(id=self.target_account.id)
 
-            return transaction_model
+        return transaction_model

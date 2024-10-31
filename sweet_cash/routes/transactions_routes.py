@@ -17,7 +17,12 @@ from sweet_cash.services.transactions.get_transactions import GetAllTransactions
 from sweet_cash.services.transactions.get_transaction import GetTransactions
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction, UpdateTransactionV2
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
-from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel, TransactionResponseModel
+from sweet_cash.types.transactions_types import (
+    TransactionModel,
+    CreateTransactionModel,
+    TransactionResponseModel,
+    UpdateTransactionModel
+)
 from sweet_cash.auth.auth_bearer import JWTBearer
 
 
@@ -69,7 +74,7 @@ async def get_transactions(
                              tags=["Transactions"])
 async def update_transaction(
         transaction_id: int,
-        body: CreateTransactionModel,
+        body: UpdateTransactionModel,
         update_transaction_: UpdateTransaction = Depends(dependency=update_transaction_dependency)
 ) -> TransactionModel:
     return await update_transaction_(transaction_id, body)
@@ -143,7 +148,7 @@ async def get_all_transactions_v2(
                                 tags=["Transactions"])
 async def update_transaction_v2(
     transaction_id: int,
-    body: CreateTransactionModel,
+    body: UpdateTransactionModel,
     update_transaction_: UpdateTransactionV2 = Depends(dependency=update_transaction_dependency_v2)
 ) -> TransactionModel:
     return await update_transaction_(transaction_id, body)
