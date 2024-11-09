@@ -1,4 +1,3 @@
-
 import logging
 from fastapi import APIRouter, Depends
 from typing import List
@@ -6,14 +5,27 @@ from typing import List
 from sweet_cash.dependencies.accounts_dependencies import (
     create_account_dependency,
     update_account_dependency,
-    get_accounts_dependency,
-    get_user_accounts_dependency
+    get_available_accounts_by_ids_dependency,
+    get_available_accounts_by_user_dependency,
+    create_accounts_admitted_user_dependency,
+    delete_accounts_admitted_user_dependency
 )
+
 from sweet_cash.services.account.create_account import CreateAccount
 from sweet_cash.services.account.update_account import UpdateAccount
-from sweet_cash.services.account.get_accounts_by_ids import GetAccounts
-from sweet_cash.services.account.get_user_accounts import GetUserAccounts
-from sweet_cash.types.accounts_types import AccountResponseModel, CreateAccountModel, UpdateAccountModel, AccountModel
+from sweet_cash.services.account.get_available_accounts_by_ids import GetAvailableAccountsByIds
+from sweet_cash.services.account.get_available_accounts_by_user import GetAvailableAccountsByUser
+from sweet_cash.services.account.create_accounts_admitted_user import CreateAccountsAdmittedUser
+from sweet_cash.services.account.delete_accounts_admitted_user import DeleteAccountsAdmittedUser
+
+from sweet_cash.types.accounts_types import (
+    AccountResponseModel,
+    CreateAccountModel,
+    UpdateAccountModel,
+    AccountModel
+)
+from sweet_cash.types.accounts_admitted_users_types import AccountsAdmittedUsersModel
+
 from sweet_cash.auth.auth_bearer import JWTBearer
 
 
@@ -51,7 +63,7 @@ async def update_account(
                          tags=["Accounts"])
 async def get_user_accounts(
     with_blocked = False,
-    get_user_accounts_: GetUserAccounts = Depends(dependency=get_user_accounts_dependency)
+    get_user_accounts_: GetAvailableAccountsByUser = Depends(dependency=get_available_accounts_by_user_dependency)
 ) -> List[AccountModel]:
     return await get_user_accounts_(with_blocked)
 
@@ -62,6 +74,32 @@ async def get_user_accounts(
                          tags=["Accounts"])
 async def get_accounts(
     account_ids: str,
-    get_accounts_: GetAccounts = Depends(dependency=get_accounts_dependency)
+    get_accounts_: GetAvailableAccountsByIds = Depends(dependency=get_available_accounts_by_ids_dependency)
 ) -> List[AccountModel]:
-    return await get_accounts_(account_ids)
+    return await get_accounts_(account_ids=account_ids, with_blocked=True)
+
+
+@accounts_api_router.post("/accounts/{account_id}/addUser",
+                         response_model=AccountsAdmittedUsersModel,
+                         dependencies=[Depends(JWTBearer())],
+                         tags=["Accounts"])
+async def create_accounts_admitted_user(
+    account_id: int,
+    user_id: int,
+    create_accounts_admitted_user_: CreateAccountsAdmittedUser = \
+            Depends(dependency=create_accounts_admitted_user_dependency)
+) -> AccountsAdmittedUsersModel:
+    return await create_accounts_admitted_user_(account_id=account_id, user_id=user_id)
+
+
+@accounts_api_router.delete("/accounts/{account_id}/deleteUser/{user_id}",
+                         response_model=AccountsAdmittedUsersModel,
+                         dependencies=[Depends(JWTBearer())],
+                         tags=["Accounts"])
+async def delete_accounts_admitted_user(
+    account_id: int,
+    user_id: int,
+    delete_accounts_admitted_user_: DeleteAccountsAdmittedUser = \
+            Depends(dependency=delete_accounts_admitted_user_dependency)
+) -> AccountsAdmittedUsersModel:
+    return await delete_accounts_admitted_user_(account_id=account_id, user_id=user_id)

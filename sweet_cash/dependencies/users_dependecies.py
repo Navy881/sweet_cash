@@ -1,9 +1,10 @@
 from fastapi import Request
 
 from sweet_cash.repositories.users_repository import UsersRepository
+from sweet_cash.repositories.tokens_repository import TokenRepository
+
 from sweet_cash.services.users.register_user import RegisterUser
 from sweet_cash.services.users.get_access_token import GerAccessToken
-from sweet_cash.repositories.tokens_repository import TokenRepository
 from sweet_cash.services.users.login_user import LoginUser
 from sweet_cash.services.users.get_current_user import GetCurrentUser
 from sweet_cash.services.users.confirm_registration import ConfirmRegistration
@@ -14,6 +15,7 @@ from sweet_cash.services.email.send_password_change_email import SendPasswordCha
 from sweet_cash.services.users.password_recovery import PasswordRecovery
 from sweet_cash.services.users.get_password_change_from import GetPasswordChangeForm
 from sweet_cash.services.users.change_password import ChangePassword
+from sweet_cash.services.users.get_user_by_id import GetUserById
 
 
 async def users_repository_dependency(request: Request) -> UsersRepository:
@@ -94,5 +96,11 @@ async def get_password_change_form_dependency(request: Request) -> GetPasswordCh
 
 async def change_password_dependency(request: Request) -> ChangePassword:
     return ChangePassword(
+        users_repository = await users_repository_dependency(request)
+    )
+
+async def get_user_by_id_dependency(request: Request) -> GetUserById:
+    return GetUserById(
+        user_id=getattr(request, "user_id"),
         users_repository = await users_repository_dependency(request)
     )

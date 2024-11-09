@@ -15,8 +15,8 @@ from sweet_cash.dependencies.events_dependencies import (
     reject_event_participant_dependency
     )
 from sweet_cash.services.events.create_event import CreateEvent
-from sweet_cash.services.events.get_events import GetEvents
-from sweet_cash.services.events.get_events_by_role import GetEventsByRole
+from sweet_cash.services.events.get_events_by_ids import GetEventsByIds
+from sweet_cash.services.events.get_events_by_roles import GetEventsByRoles
 from sweet_cash.services.events.get_events_invitations import GetEventsInvitations
 from sweet_cash.services.events.update_event import UpdateEvent
 from sweet_cash.services.events.create_event_participant import CreateEventParticipant
@@ -52,7 +52,7 @@ async def create_event(
                        tags=["Events"])
 async def get_events(
         ids: str,
-        get_events_: GetEvents = Depends(dependency=get_events_dependency)
+        get_events_: GetEventsByIds = Depends(dependency=get_events_dependency)
 ) -> List[EventModel]:
     return await get_events_(ids)
 
@@ -63,7 +63,7 @@ async def get_events(
                        tags=["Events"])
 async def get_events_by_role(
         roles: str,
-        get_events_: GetEventsByRole = Depends(dependency=get_events_by_role_dependency)
+        get_events_: GetEventsByRoles = Depends(dependency=get_events_by_role_dependency)
 ) -> List[EventModel]:
     return await get_events_(roles)
 

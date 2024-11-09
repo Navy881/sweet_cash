@@ -1,4 +1,3 @@
-
 from datetime import datetime, timezone
 from typing import List, Union
 from sqlalchemy import Table, desc
@@ -63,12 +62,24 @@ class AccountsRepository(BaseRepository):
             return None
         return AccountModel(**row)
     
-    async def get_by_ids(self, account_ids: List[int]) -> List[AccountModel]:
-        query = (
-            self.table.select()
-                .where(self.table.c.id.in_(account_ids))
+    async def get_by_ids(self, account_ids: List[int], with_blocked = False) -> List[AccountModel]:
+        if with_blocked:
+            query = (
+                self.table.select()
+                    .where(
+                        self.table.c.id.in_(account_ids)
+                    )
+                    .order_by(self.table.c.id)
+            )
+        else:
+            query = (
+                self.table.select()
+                .where(
+                    self.table.c.id.in_(account_ids)
+                    & (self.table.c.is_blocked == False)
+                )
                 .order_by(self.table.c.id)
-        )
+            )
         r = await self.conn.execute(query)
         rows = await r.fetchall()
         return [AccountModel(**row) for row in rows]
@@ -104,7 +115,6 @@ class AccountsRepository(BaseRepository):
                 )
                     .order_by(self.table.c.id)
             )
-
         r = await self.conn.execute(query)
         rows = await r.fetchall()
         return [AccountModel(**row) for row in rows]

@@ -1,18 +1,20 @@
-
 from sqlalchemy import Table
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.transaction_category_table import transaction_category_table
+
 from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
-from sweet_cash.errors import APIValueNotFound
 
 
 class TransactionCategoriesRepository(BaseRepository):
     table: Table = transaction_category_table
 
-    async def get_transaction_category_by_id(self, transaction_category_id: int) -> TransactionCategoryModel:
+    async def get_transaction_category_by_id(
+            self, transaction_category_id: int
+    ) -> Union[TransactionCategoryModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -24,7 +26,7 @@ class TransactionCategoriesRepository(BaseRepository):
         r = await self.conn.execute(query)
         row = await r.fetchone()
         if row is None:
-            raise APIValueNotFound(f'Transaction category {transaction_category_id} not found')
+            return None
         return TransactionCategoryModel(**row)
 
     async def create_transaction_category(self, transaction_category: CreateTransactionCategoryModel) -> \

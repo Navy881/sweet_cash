@@ -1,18 +1,18 @@
-
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
 from sqlalchemy import Table
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.event_participants_table import event_participants_table
+
 from sweet_cash.types.events_participants_types import (
     EventsParticipantsModel,
     EventParticipantRole,
     CreateEventsParticipantsModel,
     UpdateEventsParticipantsModel
 )
-from sweet_cash.errors import APIValueNotFound
 
 
 class EventsParticipantsRepository(BaseRepository):
@@ -29,6 +29,19 @@ class EventsParticipantsRepository(BaseRepository):
         row = await r.fetchone()
         return EventsParticipantsModel(**row)
 
+    async def create_events_participant_for_owner(
+            self, event_id: int,
+            event_participant: CreateEventsParticipantsModel
+    ) -> EventsParticipantsModel:
+        insert_body = event_participant.dict()
+        insert_body['event_id'] = event_id
+        insert_body["created_at"] = datetime.utcnow()
+        insert_body["accepted"] = True
+        create_query = self.table.insert().values(insert_body).returning(*self.table.c)
+        r = await self.conn.execute(create_query)
+        row = await r.fetchone()
+        return EventsParticipantsModel(**row)
+
     async def accept_events_participant(self, events_participant_id: int) -> EventsParticipantsModel:
         query = (
             self.table.update()
@@ -39,7 +52,7 @@ class EventsParticipantsRepository(BaseRepository):
         row = await r.fetchone()
         return EventsParticipantsModel(**row)
 
-    async def get_events_participants_by_event_id(self, event_ids: List[int]) -> List[EventsParticipantsModel]:
+    async def get_events_participants_by_event_ids(self, event_ids: List[int]) -> List[EventsParticipantsModel]:
         query = (
             self.table.select()
                 .where(self.table.c.event_id.in_(event_ids))
@@ -69,7 +82,7 @@ class EventsParticipantsRepository(BaseRepository):
             return False
         return True
 
-    async def get_events_participant_by_id(self, event_participant_id: int) -> EventsParticipantsModel:
+    async def get_events_participant_by_id(self, event_participant_id: int) -> Union[EventsParticipantsModel, None]:
         query = (
             self.table.select()
                 .where(self.table.c.id == event_participant_id)
@@ -78,10 +91,12 @@ class EventsParticipantsRepository(BaseRepository):
         r = await self.conn.execute(query)
         row = await r.fetchone()
         if row is None:
-            raise APIValueNotFound(f'Event participant {event_participant_id} not found')
+            return None
         return EventsParticipantsModel(**row)
 
-    async def get_events_participants(self, user_id: int, accepted: bool = True) -> List[EventsParticipantsModel]:
+    async def get_events_participants_by_user(
+            self, user_id: int, accepted: bool = True
+    ) -> List[EventsParticipantsModel]:
         query = (
             self.table.select()
                 .where(
@@ -94,9 +109,24 @@ class EventsParticipantsRepository(BaseRepository):
         rows = await r.fetchall()
         return [EventsParticipantsModel(**row) for row in rows]
 
-    async def get_events_participants_with_role(self, user_id: int,
-                                                roles: List[EventParticipantRole],
-                                                accepted: bool = True) -> List[EventsParticipantsModel]:
+    async def get_events_participants_by_event(
+            self, event_id: int, accepted: bool = True
+    ) -> List[EventsParticipantsModel]:
+        query = (
+            self.table.select()
+                .where(
+                (self.table.c.event_id == event_id)
+                & (self.table.c.accepted == accepted)
+            )
+                .order_by(self.table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [EventsParticipantsModel(**row) for row in rows]
+
+    async def get_events_participants_by_user_and_roles(self, user_id: int,
+                                                        roles: List[EventParticipantRole],
+                                                        accepted: bool = True) -> List[EventsParticipantsModel]:
         query = (
             self.table.select()
                 .where(
@@ -110,9 +140,9 @@ class EventsParticipantsRepository(BaseRepository):
         rows = await r.fetchall()
         return [EventsParticipantsModel(**row) for row in rows]
 
-    async def get_events_participants_by_user_id(self, user_id: int,
-                                                 event_id: int,
-                                                 accepted: bool = True) -> List[EventsParticipantsModel]:
+    async def get_events_participants_by_user_and_event(self, user_id: int,
+                                                        event_id: int,
+                                                        accepted: bool = True) -> List[EventsParticipantsModel]:
         query = (
             self.table.select()
                 .where(

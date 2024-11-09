@@ -13,8 +13,8 @@ from sweet_cash.dependencies.transactions_dependencies import (
     update_transaction_dependency_v2
 )
 from sweet_cash.services.transactions.create_transaction import CreateTransaction, CreateTransactionV2
-from sweet_cash.services.transactions.get_transactions import GetAllTransactions
-from sweet_cash.services.transactions.get_transaction import GetTransactions
+from sweet_cash.services.transactions.get_all_transactions import GetAllTransactions
+from sweet_cash.services.transactions.get_transactions_by_ids import GetTransactionsByIds
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction, UpdateTransactionV2
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
 from sweet_cash.types.transactions_types import (
@@ -63,7 +63,7 @@ async def get_all_transactions(
                              tags=["Transactions"])
 async def get_transactions(
         transaction_ids: str,
-        get_transactions_: GetTransactions = Depends(dependency=get_transactions_dependency)
+        get_transactions_: GetTransactionsByIds = Depends(dependency=get_transactions_dependency)
 ) -> List[TransactionModel]:
     return await get_transactions_(transaction_ids)
 
@@ -122,7 +122,7 @@ async def delete_transaction_v2(
                                 tags=["Transactions"])
 async def get_transactions_v2(
         transaction_ids: str,
-        get_transactions_: GetTransactions = Depends(dependency=get_transactions_dependency)
+        get_transactions_: GetTransactionsByIds = Depends(dependency=get_transactions_dependency)
 ) -> List[TransactionModel]:
     return await get_transactions_(transaction_ids)
 

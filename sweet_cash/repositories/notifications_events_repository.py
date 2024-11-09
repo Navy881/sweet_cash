@@ -6,7 +6,9 @@ from kafka.errors import KafkaTimeoutError
 
 from sweet_cash.types.notifications_events import Event, KafkaTopic
 
+
 logger = logging.getLogger(name="kafka")
+
 
 class NotificationsEventsRepository():
     def __init__(self, producer: AIOKafkaProducer) -> None:

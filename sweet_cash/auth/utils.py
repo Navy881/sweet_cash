@@ -1,8 +1,11 @@
 import jwt
 import time
+import bcrypt
 from datetime import datetime, timedelta, timezone
 
 from sweet_cash.settings import Settings
+
+from sweet_cash.errors import APIAuthError
 
 
 def decode_jwt(token: str) -> dict:
@@ -22,3 +25,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode.update({"exp": expire})
     encoded_jwt = jwt.encode(to_encode, Settings.SECRET_KEY, algorithm=Settings.ALGORITHM)
     return encoded_jwt
+
+
+def check_password(password: str, given_password: str):
+    result = bcrypt.checkpw(given_password.encode("utf-8"), password.encode("utf-8"))
+    if not result:
+        raise APIAuthError('Wrong password')

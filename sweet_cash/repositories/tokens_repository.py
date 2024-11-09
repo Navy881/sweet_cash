@@ -1,21 +1,23 @@
-
 import uuid
 from datetime import datetime, timedelta
 from typing import Union, List
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.token_table import token_table
+
 from sweet_cash.types.users_types import TokenModel, RefreshTokenModel
-from sweet_cash.errors import APIValueNotFound
+
 from sweet_cash.settings import Settings
+
 from sweet_cash.auth.utils import create_access_token
 
 
 class TokenRepository(BaseRepository):
     table: Table = token_table
 
-    async def get_access_token(self, refresh_token: str) -> TokenModel:
+    async def get_access_token(self, refresh_token: str) -> Union[TokenModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -26,10 +28,10 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound('Token not found')
+            return None
         return TokenModel(**row)
 
-    async def get_token_by_user(self, user_id: int) -> TokenModel:
+    async def get_token_by_user(self, user_id: int) -> Union[TokenModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -40,7 +42,7 @@ class TokenRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound(f'User {user_id} is not authorized')
+            return None
         return TokenModel(**row)
 
     async def get_user_by_token(self, token: str) -> Union[TokenModel, None]:

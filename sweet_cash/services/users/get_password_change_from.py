@@ -1,32 +1,44 @@
-
 import logging
+from idlelib.iomenu import errors
+from typing import Union
+
 from fastapi import Request
-from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from starlette.responses import HTMLResponse
+from starlette.templating import _TemplateResponse
 
 from sweet_cash.services.base_service import BaseService
+
 from sweet_cash.repositories.users_repository import UsersRepository
-from sweet_cash.types.users_types import UserModel
-from sweet_cash.auth.utils import decode_jwt
+
+from sweet_cash.errors import APIValueNotFound
+
 from sweet_cash.settings import Settings
+
+from sweet_cash.auth.utils import decode_jwt
 
 
 logger = logging.getLogger(name="auth")
 
 
 class GetPasswordChangeForm(BaseService):
-    def __init__(self, users_repository: UsersRepository) -> None:
+    def __init__(self,
+                 users_repository: UsersRepository) -> None:
         self.users_repository = users_repository
 
-    async def __call__(self, request: Request, email: str, confirmation_code: str) -> HTMLResponse:
+    async def __call__(
+            self, request: Request, email: str, confirmation_code: str
+        ) -> Union[HTMLResponse, _TemplateResponse]:
         async with self.users_repository.transaction():
-            user: UserModel = await self.users_repository.get_by_email(email=email)
+            user = await self.users_repository.get_by_email(email=email)
+            if user is None:
+                raise APIValueNotFound(f'User with email "{email}" not found')
             if not user.confirmed:
                 return HTMLResponse(open('sweet_cash/templates/fail_confirmation.html', 'r').read())
 
             try:
                 payload = decode_jwt(token=confirmation_code)
-            except:
+            except errors:
                 payload = None
 
             if not payload:

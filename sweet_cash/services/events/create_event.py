@@ -1,13 +1,12 @@
-
 import logging
 
 from sweet_cash.services.base_service import BaseService
+from sweet_cash.services.events.create_event_participant_for_owner import CreateEventParticipantForOwner
+
 from sweet_cash.repositories.events_repository import EventsRepository
-from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
-from sweet_cash.repositories.users_repository import UsersRepository
+
 from sweet_cash.types.events_types import EventModel, CreateEventModel
-from sweet_cash.types.events_participants_types import CreateEventsParticipantsModel, EventParticipantRole
-from sweet_cash.types.users_types import UserResponseModel
+from sweet_cash.types.events_participants_types import EventsParticipantsModel
 
 
 logger = logging.getLogger(name="events")
@@ -16,42 +15,18 @@ logger = logging.getLogger(name="events")
 class CreateEvent(BaseService):
     def __init__(self,
                  user_id: int,
-                 events_repository: EventsRepository,
-                 events_participants_repository: EventsParticipantsRepository,
-                 user_repository: UsersRepository) -> None:
+                 create_event_participant_for_owner: CreateEventParticipantForOwner,
+                 events_repository: EventsRepository) -> None:
         self.user_id = user_id
+        self.create_event_participant_for_owner = create_event_participant_for_owner
         self.events_repository = events_repository
-        self.events_participants_repository = events_participants_repository
-        self.user_repository = user_repository
 
     async def __call__(self, event: CreateEventModel) -> EventModel:
+        # Create event
         async with self.events_repository.transaction():
-            # Create event
             event_model = await self.events_repository.create_event(event)
 
-        async with self.events_participants_repository.transaction():
-            # Create events participant
-            event_participant: CreateEventsParticipantsModel = CreateEventsParticipantsModel(
-                user_id=self.user_id,
-                role=EventParticipantRole.MANAGER
-            )
-
-            events_participant = await self.events_participants_repository.\
-                create_events_participant(event_id=event_model.id, event_participant=event_participant)
-
-            # Accept events participant
-            await self.events_participants_repository.accept_events_participant(
-                events_participant_id=events_participant.id)
-
-            # Addition events_participants for event
-            participants = await self.events_participants_repository.\
-                get_events_participants_by_event_id(event_ids=[event_model.id])
-            
-            async with self.user_repository.transaction():
-                for participant in participants:
-                    user = await self.user_repository.get_by_id(participant.user_id)
-                    participant.user = UserResponseModel(**user.dict())
-
-            event_model.participants = participants
+        participant: EventsParticipantsModel = await self.create_event_participant_for_owner(event_model.id)
+        event_model.participants = [participant]
         
         return event_model

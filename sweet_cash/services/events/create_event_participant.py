@@ -1,16 +1,17 @@
-
 import logging
 
 from sweet_cash.services.base_service import BaseService
-from sweet_cash.repositories.users_repository import UsersRepository
+from sweet_cash.services.users.get_user_by_id import GetUserById
+from sweet_cash.services.events.send_participant_added_event import SendParticipantAddedEvent
+
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
+
 from sweet_cash.types.events_participants_types import (
     EventsParticipantsModel,
     CreateEventsParticipantsModel,
     EventParticipantRole
 )
-from sweet_cash.types.users_types import UserResponseModel
-from sweet_cash.services.notifications_events.send_partisipant_added_event import SendPartisipantAddedEvent
+
 from sweet_cash.errors import APIValueNotFound, APIParamError
 
 
@@ -19,11 +20,11 @@ logger = logging.getLogger(name="events")
 
 class CreateEventParticipant(BaseService):
     def __init__(self, user_id: int,
-                 users_repository: UsersRepository,
+                 get_user_by_id: GetUserById,
                  events_participants_repository: EventsParticipantsRepository,
-                 events_sender: SendPartisipantAddedEvent) -> None:
+                 events_sender: SendParticipantAddedEvent) -> None:
         self.user_id = user_id
-        self.users_repository = users_repository
+        self.get_user_by_id = get_user_by_id
         self.events_participants_repository = events_participants_repository
         self.events_sender = events_sender
 
@@ -32,9 +33,9 @@ class CreateEventParticipant(BaseService):
         user_id: int = event_participants.user_id
         role: EventParticipantRole = event_participants.role
 
-        async with self.users_repository.transaction():
-            # Checking user from requests exist
-            user = await self.users_repository.get_by_id(user_id)
+        user = await self.get_user_by_id(user_id)
+        if user is None:
+            raise APIValueNotFound(f'User {user_id} not found')
 
         async with self.events_participants_repository.transaction():
             # Checking that requests user is the event manager
@@ -54,9 +55,9 @@ class CreateEventParticipant(BaseService):
             event_participant: EventsParticipantsModel = await self.events_participants_repository. \
                 create_events_participant(event_id=event_id, event_participant=event_participants)
             
-            event_participant.user = UserResponseModel(**user.dict())
+            event_participant.user = user
 
             # Send notification event to kafka
             # await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
 
-            return event_participant
+        return event_participant

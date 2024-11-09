@@ -1,13 +1,12 @@
-
 from datetime import datetime
 import bcrypt
+from typing import List, Union
 
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.user_table import user_table
 from sweet_cash.types.users_types import UserModel, RegisterUserResponseModel, RegisterUserModel
-from sweet_cash.errors import APIValueNotFound, APIAuthError
 
 
 class UsersRepository(BaseRepository):
@@ -42,7 +41,7 @@ class UsersRepository(BaseRepository):
     #         raise APIValueNotFound(f'User with login "{email}" not found')
     #     return UserModel(**row)
     
-    async def get_by_email(self, email: str) -> UserModel:
+    async def get_by_email(self, email: str) -> Union[UserModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -53,10 +52,10 @@ class UsersRepository(BaseRepository):
         r = await self.conn.execute(query)
         row = await r.fetchone()
         if row is None:
-            raise APIValueNotFound(f'User with email "{email}" not found')
+            return None
         return UserModel(**row)
 
-    async def get_by_id(self, user_id: int) -> UserModel:
+    async def get_by_id(self, user_id: int) -> Union[UserModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -67,10 +66,19 @@ class UsersRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound(f'User {user_id} not found')
+            return None
         return UserModel(**row)
 
-    #
+    async def get_by_ids(self, user_ids: List[int]) -> List[UserModel]:
+        query = (
+            self.table.select()
+                .where(self.table.c.id.in_(user_ids))
+                .order_by(self.table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [UserModel(**row) for row in rows]
+
     # async def find_bindings(self, wave_id: int, end_date: datetime, start_date: datetime) -> list[BindingModel]:
     #     query = self.table.select().where(
     #         (self.table.c.wave_id == wave_id)
@@ -145,9 +153,3 @@ class UsersRepository(BaseRepository):
     #     r_ = await self._execute(delete_query)
     #     rows = await r_.fetchall()
     #     return [BindingModel(**row) for row in rows]
-
-    @staticmethod
-    def check_password(password: str, given_password: str):
-        result = bcrypt.checkpw(given_password.encode("utf-8"), password.encode("utf-8"))
-        if not result:
-            raise APIAuthError('Wrong password')

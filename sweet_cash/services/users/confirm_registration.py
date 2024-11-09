@@ -1,11 +1,14 @@
-
 import logging
+from idlelib.iomenu import errors
 
 from fastapi.responses import HTMLResponse
 
 from sweet_cash.services.base_service import BaseService
+
 from sweet_cash.repositories.users_repository import UsersRepository
-from sweet_cash.types.users_types import UserModel
+
+from sweet_cash.errors import APIValueNotFound
+
 from sweet_cash.auth.utils import decode_jwt
 
 
@@ -13,18 +16,21 @@ logger = logging.getLogger(name="auth")
 
 
 class ConfirmRegistration(BaseService):
-    def __init__(self, users_repository: UsersRepository) -> None:
+    def __init__(self,
+                 users_repository: UsersRepository) -> None:
         self.users_repository = users_repository
 
     async def __call__(self, email: str, confirmation_code: str) -> HTMLResponse:
         async with self.users_repository.transaction():
-            user: UserModel = await self.users_repository.get_by_email(email=email)
+            user = await self.users_repository.get_by_email(email=email)
+            if user is None:
+                raise APIValueNotFound(f'User with email "{email}" not found')
             if user.confirmed:
                 return HTMLResponse(open('sweet_cash/templates/success_confirmation.html', 'r').read())
 
             try:
                 payload = decode_jwt(token=confirmation_code)
-            except:
+            except errors:
                 payload = None
 
             if not payload:

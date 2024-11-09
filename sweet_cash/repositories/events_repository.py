@@ -1,11 +1,12 @@
-
 from datetime import datetime
-from typing import List
+from typing import List, Union
 
-from sqlalchemy import Table
+from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.event_table import event_table
+
 from sweet_cash.types.events_types import EventModel, CreateEventModel
 
 
@@ -60,6 +61,20 @@ class EventsRepository(BaseRepository):
         r = await self.conn.execute(create_query)
         # r = await self._execute(create_query)
         row = await r.fetchone()
+        return EventModel(**row)
+
+    async def get_by_id(self, event_id: int) -> Union[EventModel, None]:
+        query = (
+            self.table.select()
+                .where(
+                    (self.table.c.id == event_id)
+                )
+                .order_by(desc(self.table.c.created_at))
+        )
+        r_ = await self.conn.execute(query)
+        row = await r_.fetchone()
+        if row is None:
+            return None
         return EventModel(**row)
 
     async def get_events(self, event_ids: List[int]) -> List[EventModel]:

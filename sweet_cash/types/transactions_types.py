@@ -7,8 +7,8 @@ from typing import Any, Optional
 
 from pydantic import BaseModel, validator
 
-from sweet_cash.types.users_types import UserResponseModel
-from sweet_cash.types.accounts_types import AccountResponseModel
+from sweet_cash.types.users_types import UserModel ,UserResponseModel
+from sweet_cash.types.accounts_types import AccountModel, AccountResponseModel, AccountResponseTinyModel
 
 
 class TransactionType(enum.Enum):
@@ -35,9 +35,9 @@ class TransactionModel(BaseModel):
     receipt_id: Optional[int]
     user: Optional[UserResponseModel]
     source_account_id: Optional[int]
-    source_account: Optional[AccountResponseModel]
+    source_account: Optional[AccountModel]
     target_account_id: Optional[int]
-    target_account: Optional[AccountResponseModel]
+    target_account: Optional[AccountModel]
 
 
 class TransactionResponseModel(BaseModel):
@@ -53,8 +53,8 @@ class TransactionResponseModel(BaseModel):
     description: Optional[str]
     receipt_id: Optional[int]
     user: Optional[UserResponseModel]
-    source_account: Optional[AccountResponseModel]
-    target_account: Optional[AccountResponseModel]
+    source_account: Optional[AccountResponseTinyModel]
+    target_account: Optional[AccountResponseTinyModel]
 
 
 class CreateTransactionModel(BaseModel):

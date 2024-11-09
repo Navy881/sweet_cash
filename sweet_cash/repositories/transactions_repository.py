@@ -1,13 +1,12 @@
-
 from datetime import datetime, timezone
-from typing import List
-
+from typing import List, Union
 from sqlalchemy import Table
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.transaction_table import transaction_table
-from sweet_cash.types.transactions_types import CreateTransactionModel, TransactionModel
-from sweet_cash.errors import APIValueNotFound
+
+from sweet_cash.types.transactions_types import CreateTransactionModel, TransactionModel, UpdateTransactionModel
 
 
 class TransactionsRepository(BaseRepository):
@@ -22,7 +21,7 @@ class TransactionsRepository(BaseRepository):
         row = await r.fetchone()
         return TransactionModel(**row)
 
-    async def get_transaction_by_id(self, transaction_id: int) -> TransactionModel:
+    async def get_transaction_by_id(self, transaction_id: int) -> Union[TransactionModel, None]:
         query = (
             self.table.select()
                 .where(self.table.c.id == transaction_id)
@@ -31,10 +30,10 @@ class TransactionsRepository(BaseRepository):
         r = await self.conn.execute(query)
         row = await r.fetchone()
         if row is None:
-            raise APIValueNotFound(f'Transaction {transaction_id} not found')
+            return None
         return TransactionModel(**row)
 
-    async def update_transaction(self, transaction_id: int, transaction: CreateTransactionModel) -> TransactionModel:
+    async def update_transaction(self, transaction_id: int, transaction: UpdateTransactionModel) -> TransactionModel:
         update_value = {
             "updated_at": datetime.now(timezone.utc),
             "type": transaction.type,

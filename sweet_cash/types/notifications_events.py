@@ -1,4 +1,3 @@
-
 from datetime import datetime
 from dataclasses import dataclass
 from enum import Enum
@@ -7,12 +6,12 @@ from typing import Union
 from sweet_cash.types.events_participants_types import EventParticipantRole
 
 class EventType(Enum):
-    PARTISIPANT_ADDED = "partisipant_added"
-    PARTISIPANT_GOT_ROLE = "partisipant_got_role"
+    PARTICIPANT_ADDED = "participant_added"
+    PARTICIPANT_GOT_ROLE = "participant_got_role"
 
 
 @dataclass(frozen=True)
-class PartisipantsAddedData:
+class ParticipantsAddedData:
     user_id: int
     event_id: int
     event_name: str
@@ -20,7 +19,7 @@ class PartisipantsAddedData:
 
 
 @dataclass(frozen=True)
-class PartisipantsGotRoleData:
+class ParticipantsGotRoleData:
     user_id: int
     event_id: int
     event_name: str
@@ -32,7 +31,7 @@ class Event:
     timestamp: datetime
     event_type: EventType
     for_user_id: int
-    data: Union[PartisipantsAddedData, PartisipantsGotRoleData, None]
+    data: Union[ParticipantsAddedData, ParticipantsGotRoleData, None]
 
 
 class KafkaTopic(str, Enum):

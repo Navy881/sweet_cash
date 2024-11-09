@@ -1,12 +1,12 @@
-
 from datetime import datetime
-
+from typing import Union
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
+
 from sweet_cash.repositories.tables.nalog_ru_sessions_table import nalog_ru_sessions_table
+
 from sweet_cash.types.nalog_ru_types import NalogRuSessionModel
-from sweet_cash.errors import APIValueNotFound
 
 
 class NalogRuSessionsRepository(BaseRepository):
@@ -48,7 +48,7 @@ class NalogRuSessionsRepository(BaseRepository):
         row = await r.fetchone()
         return NalogRuSessionModel(**row)
 
-    async def get_session_by_user(self, user_id: int) -> NalogRuSessionModel:
+    async def get_session_by_user(self, user_id: int) -> Union[NalogRuSessionModel, None]:
         query = (
             self.table.select()
                 .where(
@@ -59,5 +59,5 @@ class NalogRuSessionsRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         row = await r_.fetchone()
         if row is None:
-            raise APIValueNotFound(f'User {user_id} is not registered in NalogRU')
+            return None
         return NalogRuSessionModel(**row)

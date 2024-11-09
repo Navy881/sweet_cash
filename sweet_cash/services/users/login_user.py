@@ -1,28 +1,37 @@
-
 import logging
 
 from sweet_cash.services.base_service import BaseService
+
 from sweet_cash.repositories.tokens_repository import TokenRepository
 from sweet_cash.repositories.users_repository import UsersRepository
-from sweet_cash.types.users_types import LoginModel, LoginResponseModel, UserModel
+
+from sweet_cash.types.users_types import LoginModel, LoginResponseModel
+
+from sweet_cash.errors import APIConflict, APIValueNotFound
+
 from sweet_cash.settings import Settings
-from sweet_cash.errors import APIConflict
+
+from sweet_cash.auth.utils import check_password
 
 logger = logging.getLogger(name="auth")
 
 
 class LoginUser(BaseService):
-    def __init__(self, tokens_repository: TokenRepository, users_repository: UsersRepository) -> None:
+    def __init__(self,
+                 tokens_repository: TokenRepository,
+                 users_repository: UsersRepository) -> None:
         self.tokens_repository = tokens_repository
         self.users_repository = users_repository
 
     async def __call__(self, credits: LoginModel) -> LoginResponseModel:
         async with self.users_repository.transaction():
-            user: UserModel = await self.users_repository.get_by_email(email=credits.email)
+            user = await self.users_repository.get_by_email(email=credits.email)
+            if user is None:
+                raise APIValueNotFound(f'User with email "{credits.email}" not found')
             if not user.confirmed:
                 raise APIConflict(f'Registration for {credits.email} not confirmed')
                 
-            self.users_repository.check_password(password=user.password, given_password=credits.password)
+            check_password(password=user.password, given_password=credits.password)
 
         async with self.tokens_repository.transaction():
             data = {"user_id": user.id, "login_method": "email"}
@@ -37,6 +46,8 @@ class LoginUser(BaseService):
 
             # if await self.tokens_repository.check_exist_token_by_user(user_id=user.id):
             #     token = await self.tokens_repository.get_token_by_user(user_id=user.id)
+            #     if token is None:
+            #         raise APIValueNotFound(f'User {user.id} is not authorized')
             #     refresh_token = await self.tokens_repository.update_access_token(refresh_token=token.refresh_token, item=data)
             # else:  # not exist
             #     refresh_token = await self.tokens_repository.create_access_token(item=data)

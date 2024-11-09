@@ -1,16 +1,17 @@
-
 import logging
 
 from sweet_cash.services.base_service import BaseService
+from sweet_cash.services.users.get_user_by_id import GetUserById
+from sweet_cash.services.events.send_participant_got_role_event import SendParticipantGotRoleEvent
+
 from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
-from sweet_cash.repositories.users_repository import UsersRepository
+
 from sweet_cash.types.events_participants_types import (
     EventsParticipantsModel,
     UpdateEventsParticipantsModel,
     EventParticipantRole
 )
-from sweet_cash.types.users_types import UserResponseModel
-from sweet_cash.services.notifications_events.send_partisipant_got_role_event import SendPartisipantGotRoleEvent
+
 from sweet_cash.errors import APIConflict, APIValueNotFound
 
 
@@ -19,21 +20,24 @@ logger = logging.getLogger(name="events")
 
 class UpdateEventParticipant(BaseService):
     def __init__(self, user_id: int,
+                 get_user_by_id: GetUserById,
                  events_participants_repository: EventsParticipantsRepository,
-                 events_sender: SendPartisipantGotRoleEvent,
-                 user_repository: UsersRepository) -> None:
+                 events_sender: SendParticipantGotRoleEvent) -> None:
         self.user_id = user_id
+        self.get_user_by_id = get_user_by_id
         self.events_participants_repository = events_participants_repository
         self.events_sender = events_sender
-        self.user_repository = user_repository
 
     async def __call__(self, event_participant_id: int,
                        event_participants: UpdateEventsParticipantsModel) -> EventsParticipantsModel:
         
         async with self.events_participants_repository.transaction():
             # Checking participant exist
-            event_participant: EventsParticipantsModel = await self.events_participants_repository. \
+            event_participant = await self.events_participants_repository. \
                 get_events_participant_by_id(event_participant_id)
+
+            if event_participant is None:
+                raise APIValueNotFound(f'Event participant {event_participant_id} not found')
 
             event_id: int = event_participant.event_id
 
@@ -51,11 +55,9 @@ class UpdateEventParticipant(BaseService):
             event_participant: EventsParticipantsModel = await self.events_participants_repository. \
                 update_events_participant(event_participant_id=event_participant_id,
                                           event_participant=event_participants)
-        
 
-        async with self.user_repository.transaction():
-            user = await self.user_repository.get_by_id(event_participant.user_id)
-            event_participant.user = UserResponseModel(**user.dict())
+            # Update user model for event_participant
+            event_participant.user = await self.get_user_by_id(event_participant.user_id)
 
         # Send notification event to kafka
         # await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)

@@ -1,16 +1,20 @@
-
 from fastapi import Request
 
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
-from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
-from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
-from sweet_cash.repositories.users_repository import UsersRepository
-from sweet_cash.repositories.accounts_repository import AccountsRepository
+
 from sweet_cash.services.transactions.create_transaction import CreateTransaction, CreateTransactionV2
-from sweet_cash.services.transactions.get_transactions import GetAllTransactions
-from sweet_cash.services.transactions.get_transaction import GetTransactions
+from sweet_cash.services.transactions.get_all_transactions import GetAllTransactions
+from sweet_cash.services.transactions.get_transactions_by_ids import GetTransactionsByIds
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction, UpdateTransactionV2
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
+
+from sweet_cash.dependencies.users_dependecies import get_user_by_id_dependency
+from sweet_cash.dependencies.accounts_dependencies import (
+    get_account_by_id_dependency,
+    get_available_accounts_by_id_dependency
+)
+from sweet_cash.dependencies.transaction_categories_dependencies import get_transaction_category_by_id_dependency
+from sweet_cash.dependencies.events_dependencies import get_event_participants_roles_for_user_dependency
 
 
 async def transactions_repository_dependency(request: Request) -> TransactionsRepository:
@@ -18,93 +22,78 @@ async def transactions_repository_dependency(request: Request) -> TransactionsRe
     return TransactionsRepository(engine)
 
 
-async def transaction_categories_repository_dependency(request: Request) -> TransactionCategoriesRepository:
-    engine = request.app.state.db
-    return TransactionCategoriesRepository(engine)
-
-
-async def events_participants_repository_dependency(request: Request) -> EventsParticipantsRepository:
-    engine = request.app.state.db
-    return EventsParticipantsRepository(engine)
-
-
-async def users_repository_dependency(request: Request) -> UsersRepository:
-    engine = request.app.state.db
-    return UsersRepository(engine)
-
-
-async def accounts_repository_dependency(request: Request) -> AccountsRepository:
-    engine = request.app.state.db
-    return AccountsRepository(engine)
-
-
 async def create_transaction_dependency(request: Request) -> CreateTransaction:
     return CreateTransaction(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository = await transaction_categories_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_account_by_id = await get_account_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
 async def get_all_transactions_dependency(request: Request) -> GetAllTransactions:
     return GetAllTransactions(
         user_id=getattr(request, "user_id"),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request),
-        accounts_repository = await accounts_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
-async def get_transactions_dependency(request: Request) -> GetTransactions:
-    return GetTransactions(
+async def get_transactions_dependency(request: Request) -> GetTransactionsByIds:
+    return GetTransactionsByIds(
         user_id=getattr(request, "user_id"),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request),
-        accounts_repository = await accounts_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
 async def update_transaction_dependency(request: Request) -> UpdateTransaction:
     return UpdateTransaction(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository = await transaction_categories_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
 async def delete_transaction_dependency(request: Request) -> DeleteTransaction:
     return DeleteTransaction(
         user_id=getattr(request, "user_id"),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request),
-        accounts_repository = await accounts_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
 async def create_transaction_dependency_v2(request: Request) -> CreateTransactionV2:
     return CreateTransactionV2(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository = await transaction_categories_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request),
-        accounts_repository = await accounts_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_account_by_id = await get_account_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )
 
 
 async def update_transaction_dependency_v2(request: Request) -> UpdateTransactionV2:
     return UpdateTransactionV2(
         user_id=getattr(request, "user_id"),
-        transaction_categories_repository = await transaction_categories_repository_dependency(request),
-        events_participants_repository = await events_participants_repository_dependency(request),
-        transactions_repository = await transactions_repository_dependency(request),
-        user_repository = await users_repository_dependency(request),
-        accounts_repository = await accounts_repository_dependency(request)
+        get_user_by_id = await get_user_by_id_dependency(request),
+        get_account_by_id = await get_account_by_id_dependency(request),
+        get_available_account_by_id = await get_available_accounts_by_id_dependency(request),
+        get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
+        get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
     )

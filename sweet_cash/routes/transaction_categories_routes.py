@@ -6,13 +6,13 @@ from typing import List, Optional
 from sweet_cash.dependencies.transaction_categories_dependencies import (
     create_transaction_categories_dependency,
     get_transaction_categories_dependency,
-    get_transaction_category_dependency,
+    get_transaction_category_by_id_dependency,
     update_transaction_categories_dependency,
     delete_transaction_categories_dependency
 )
 from sweet_cash.services.transaction_categories.create_transaction_category import CreateTransactionCategory
 from sweet_cash.services.transaction_categories.get_transaction_categories import GetTransactionCategories
-from sweet_cash.services.transaction_categories.get_transaction_category import GetTransactionCategory
+from sweet_cash.services.transaction_categories.get_transaction_category_by_id import GetTransactionCategoryBiId
 from sweet_cash.services.transaction_categories.update_transaction_category import UpdateTransactionCategory
 from sweet_cash.services.transaction_categories.delete_transaction_category import DeleteTransactionCategory
 from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
@@ -54,8 +54,8 @@ async def get_transaction_categories(
                                      tags=["Transactions categories"])
 async def get_transaction_category(
         transaction_category_id: int,
-        get_transaction_category_: GetTransactionCategory = Depends(
-            dependency=get_transaction_category_dependency)
+        get_transaction_category_: GetTransactionCategoryBiId = Depends(
+            dependency=get_transaction_category_by_id_dependency)
 ) -> TransactionCategoryModel:
     return await get_transaction_category_(transaction_category_id)
 

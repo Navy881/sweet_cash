@@ -18,7 +18,8 @@ from sweet_cash.repositories.tables import (
     transaction_category_table,
     receipt_table,
     nalog_ru_sessions_table,
-    account_table
+    account_table,
+    accounts_admitted_users
 )
 # from sweet_cash.api.components import (
 #     FastAPIStateManager,
@@ -55,6 +56,7 @@ def create_all_tables(engine):
     receipt_table.metadata.create_all(bind=engine)
     nalog_ru_sessions_table.metadata.create_all(bind=engine)
     account_table.metadata.create_all(bind=engine)
+    accounts_admitted_users.metadata.create_all(bind=engine)
 
 
 def create_app(settings: Settings) -> FastAPI:
@@ -108,7 +110,7 @@ def create_app(settings: Settings) -> FastAPI:
     from sweet_cash.routes.events_routes import events_api_router
     from sweet_cash.routes.transactions_routes import transactions_api_router, transactions_api_router_v2
     from sweet_cash.routes.transaction_categories_routes import transaction_category_api_router
-    from sweet_cash.routes.receipts_routes import receipts_api_router
+    from sweet_cash.routes.receipts_routes import receipts_api_router, receipts_api_router_v2
     from sweet_cash.routes.nalog_ru_routes import nalog_ru_api_router
     from sweet_cash.routes.account_routes import accounts_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
@@ -120,6 +122,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(nalog_ru_api_router, prefix="/api/v1")
     app.include_router(accounts_api_router, prefix="/api/v1")
     app.include_router(transactions_api_router_v2, prefix="/api/v2")
+    app.include_router(receipts_api_router_v2, prefix="/api/v2")
 
     # Run notification processing
     processors_names = settings.EVENT_PROCESSORS

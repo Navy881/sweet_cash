@@ -1,15 +1,16 @@
-
 import asyncio
 import logging
-
 from aiosmtplib import SMTP
 from datetime import timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
 from sweet_cash.settings import Settings
+
 from sweet_cash.auth.utils import create_access_token
+
 from sweet_cash.errors import APIError
+
 
 logger = logging.getLogger(name="email sending")
 

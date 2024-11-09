@@ -1,15 +1,15 @@
-
 import logging
 from fastapi import APIRouter, Depends
 from typing import List
 
 from sweet_cash.dependencies.receipts_dependencies import (
     create_receipt_dependency,
-    get_receipts_dependency
+    get_receipts_dependency,
+    create_receipt_dependency_v2
 )
-from sweet_cash.services.receipts.create_receipt_by_qr import CreateReceiptByQr
+from sweet_cash.services.receipts.create_receipt_by_qr import CreateReceiptByQr, CreateReceiptByQrV2
 from sweet_cash.services.receipts.get_receipt import GetReceipts
-from sweet_cash.types.receipts_types import ReceiptModel, CreateReceiptModel
+from sweet_cash.types.receipts_types import ReceiptModel, CreateReceiptModel, CreateReceiptModelV2
 from sweet_cash.auth.auth_bearer import JWTBearer
 
 
@@ -38,3 +38,17 @@ async def get_receipts(
         get_receipts_: GetReceipts = Depends(dependency=get_receipts_dependency)
 ) -> List[ReceiptModel]:
     return await get_receipts_(receipts_ids)
+
+
+receipts_api_router_v2 = APIRouter()
+
+
+@receipts_api_router_v2.post("/receipts/qr",
+                          response_model=ReceiptModel,
+                          dependencies=[Depends(JWTBearer())],
+                          tags=["Receipts"])
+async def create_receipt_by_qr_v2(
+        body: CreateReceiptModelV2,
+        create_receipt_by_qr_: CreateReceiptByQrV2 = Depends(dependency=create_receipt_dependency_v2)
+) -> ReceiptModel:
+    return await create_receipt_by_qr_(body)
