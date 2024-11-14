@@ -8,7 +8,7 @@ from sweet_cash.services.account.get_accounts_admitted_user_by_account_id_and_us
 
 from sweet_cash.repositories.accounts_repository import AccountsRepository
 
-from sweet_cash.types.accounts_types import AccountModel
+from sweet_cash.types.accounts_types import AccountModel, AccountResponseModel
 
 
 logger = logging.getLogger(name="accounts")
@@ -27,18 +27,18 @@ class GetAvailableAccountById(BaseService):
         self.get_admitted_user_by_account_id_and_user_id = get_admitted_user_by_account_id_and_user_id
         self.accounts_repository = accounts_repository
 
-    async def __call__(self, account_id: int) -> Union[AccountModel, None]:
+    async def __call__(self, account_id: int) -> Union[AccountModel, AccountResponseModel]:
         async with self.accounts_repository.transaction():
             account = await self.accounts_repository.get_by_id(account_id=account_id)
 
         if account is None:
-            return None
+            return AccountResponseModel(id=account_id)
 
         # Проверка, что user связан с account
         admitted_user = await self.get_admitted_user_by_account_id_and_user_id(account_id=account.id,
                                                                                user_id=self.user_id)
         if account.user_id != self.user_id and admitted_user is None:
-            return None
+            return AccountResponseModel(id=account_id)
 
         # Обогащение модели account
         account.user  = await self.get_user_by_id(account.user_id)

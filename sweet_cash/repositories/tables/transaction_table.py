@@ -17,6 +17,7 @@ transaction_table = Table(
     Column("type", Enum(TransactionType), nullable=False),
     Column("category_id", Integer, nullable=False),
     Column("amount", Float, nullable=False),
+    Column("transfer_fee", Float, nullable=True),
     Column("transaction_date", types.DateTime(timezone=False), nullable=False),
     Column("description", Text, nullable=True),
     Column("receipt_id", Integer, nullable=True),

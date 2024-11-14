@@ -1,19 +1,18 @@
-
 from __future__ import annotations
 
 import enum
 from datetime import datetime
 from typing import Any, Optional
+from pydantic import BaseModel, validator, root_validator
 
-from pydantic import BaseModel, validator
-
-from sweet_cash.types.users_types import UserModel ,UserResponseModel
-from sweet_cash.types.accounts_types import AccountModel, AccountResponseModel, AccountResponseTinyModel
+from sweet_cash.types.users_types import UserResponseModel
+from sweet_cash.types.accounts_types import AccountModel, AccountResponseTinyModel
 
 
 class TransactionType(enum.Enum):
     INCOME = "Income"
     EXPENSE = "Expense"
+    TRANSFER = "Transfer"
 
     @classmethod
     def has_value(cls, value):
@@ -30,6 +29,7 @@ class TransactionModel(BaseModel):
     type: TransactionType
     category_id: int
     amount: float
+    transfer_fee: Optional[float]
     transaction_date: datetime
     description: Optional[str]
     receipt_id: Optional[int]
@@ -49,6 +49,7 @@ class TransactionResponseModel(BaseModel):
     type: TransactionType
     category_id: int
     amount: float
+    transfer_fee: Optional[float]
     transaction_date: datetime
     description: Optional[str]
     receipt_id: Optional[int]
@@ -62,6 +63,7 @@ class CreateTransactionModel(BaseModel):
     type: TransactionType
     category_id: int
     amount: float
+    transfer_fee: Optional[float]
     transaction_date: datetime
     description: Optional[str]
     receipt_id: Optional[int]
@@ -69,16 +71,39 @@ class CreateTransactionModel(BaseModel):
     target_account_id: Optional[int]
 
     @validator("amount")
-    def validate_email(cls, v: float,  **kwargs: Any) -> float:
+    def validate_amount(cls, v: float,  **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
+
+    @validator("transfer_fee")
+    def validate_transfer_fee(cls, v: float,  **kwargs: Any) -> float:
+        if v < 0:
+            raise ValueError("'transfer_fee' must be positive")
+        return v
+
+    @root_validator(pre=True)
+    def validate_debtor_or_creditor(cls, values):
+        transaction_type = values.get("type")
+        source_account_id = values.get("source_account_id")
+        target_account_id = values.get("target_account_id")
+
+        if transaction_type == TransactionType.EXPENSE.value and not source_account_id:
+            raise ValueError("Field 'source_account_id' should not be empty for expense transaction")
+        elif transaction_type == TransactionType.INCOME.value and not target_account_id:
+            raise ValueError("Field 'target_account_id' should not be empty for income transaction")
+        elif transaction_type == TransactionType.TRANSFER.value and (not source_account_id or not target_account_id):
+            raise ValueError("Fields 'source_account_id' and 'target_account_id' "
+                             "should not be empty for transfer transaction")
+
+        return values
 
 
 class UpdateTransactionModel(BaseModel):
     type: TransactionType
     category_id: int
     amount: float
+    transfer_fee: Optional[float]
     transaction_date: datetime
     description: Optional[str]
     receipt_id: Optional[int]
@@ -86,7 +111,29 @@ class UpdateTransactionModel(BaseModel):
     target_account_id: Optional[int]
 
     @validator("amount")
-    def validate_email(cls, v: float,  **kwargs: Any) -> float:
+    def validate_amount(cls, v: float,  **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
+
+    @validator("transfer_fee")
+    def validate_transfer_fee(cls, v: float,  **kwargs: Any) -> float:
+        if v < 0:
+            raise ValueError("'transfer_fee' must be positive")
+        return v
+
+    @root_validator(pre=True)
+    def validate_debtor_or_creditor(cls, values):
+        transaction_type = values.get("type")
+        source_account_id = values.get("source_account_id")
+        target_account_id = values.get("target_account_id")
+
+        if transaction_type == TransactionType.EXPENSE.value and not source_account_id:
+            raise ValueError("Field 'source_account_id' should not be empty for expense transaction")
+        elif transaction_type == TransactionType.INCOME.value and not target_account_id:
+            raise ValueError("Field 'target_account_id' should not be empty for income transaction")
+        elif transaction_type == TransactionType.TRANSFER.value and (not source_account_id or not target_account_id):
+            raise ValueError("Fields 'source_account_id' and 'target_account_id' "
+                             "should not be empty for transfer transaction")
+
+        return values

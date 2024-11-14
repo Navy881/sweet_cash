@@ -11,6 +11,7 @@ from pydantic import BaseModel
 class TransactionCategoryType(enum.Enum):
     INCOME = "Income"
     EXPENSE = "Expense"
+    TRANSFER = "Transfer"
 
     @classmethod
     def has_value(cls, value):

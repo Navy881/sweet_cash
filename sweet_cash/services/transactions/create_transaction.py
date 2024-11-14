@@ -10,11 +10,11 @@ from sweet_cash.services.events.get_event_participants_roles_for_user import Get
 
 from sweet_cash.repositories.transactions_repository import TransactionsRepository
 
-from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel, TransactionType
+from sweet_cash.types.transactions_types import TransactionModel, CreateTransactionModel
 from sweet_cash.types.events_participants_types import EventParticipantRole
 
 
-from sweet_cash.errors import APIValueNotFound, APIParamError
+from sweet_cash.errors import APIValueNotFound
 
 
 logger = logging.getLogger(name="transactions")
@@ -82,13 +82,6 @@ class CreateTransactionV2(BaseService):
     async def __call__(self, transaction: CreateTransactionModel) -> TransactionModel:
         event_id: int = transaction.event_id
         transaction_category_id: int = transaction.category_id
-
-        # Checking account value
-        if transaction.type == TransactionType.EXPENSE and transaction.source_account_id is None:
-            raise APIParamError("Field source_account_id should not be empty for expense transaction")
-    
-        if transaction.type == TransactionType.INCOME and transaction.target_account_id is None:
-            raise APIParamError("Field target_account_id should not be empty for income transaction")
 
         # Проверка только по id, т.к. пользователь можно создавать 
         # транзкации со счётом, к которому у него нет доступа

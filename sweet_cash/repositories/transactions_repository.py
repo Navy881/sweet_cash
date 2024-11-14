@@ -39,6 +39,7 @@ class TransactionsRepository(BaseRepository):
             "type": transaction.type,
             "category_id": transaction.category_id,
             "amount": transaction.amount,
+            "transfer_fee": transaction.transfer_fee,
             "transaction_date": transaction.transaction_date,
             "description": transaction.description,
             "source_account_id": transaction.source_account_id,

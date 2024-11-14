@@ -7,6 +7,7 @@ from sweet_cash.integrations.nalog_ru_api import NalogRuApi
 from sweet_cash.services.nalog_ru.send_otp import SendOtp
 from sweet_cash.services.nalog_ru.verify_otp import VerifyOtp
 from sweet_cash.services.nalog_ru.get_receipt_by_qr import GetReceiptByQr
+from sweet_cash.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
 
 from sweet_cash.dependencies.users_dependecies import get_user_by_id_dependency
 
@@ -45,4 +46,10 @@ async def get_receipt_by_qr_dependency(request: Request) -> GetReceiptByQr:
         user_id=getattr(request, "user_id"),
         nalog_ru_sessions_repository = await nalog_ru_sessions_repository_dependency(request),
         nalog_ru_api = await nalog_ru_api_dependency(request)
+    )
+
+async def get_nalog_ru_session_dependency(request: Request) -> GetNalogRuSession:
+    return GetNalogRuSession(
+        user_id=getattr(request, "user_id"),
+        nalog_ru_sessions_repository = await nalog_ru_sessions_repository_dependency(request)
     )

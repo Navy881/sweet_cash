@@ -73,10 +73,10 @@ async def get_user_accounts(
                          dependencies=[Depends(JWTBearer())],
                          tags=["Accounts"])
 async def get_accounts(
-    account_ids: str,
+    ids: str,
     get_accounts_: GetAvailableAccountsByIds = Depends(dependency=get_available_accounts_by_ids_dependency)
 ) -> List[AccountModel]:
-    return await get_accounts_(account_ids=account_ids, with_blocked=True)
+    return await get_accounts_(account_ids=ids, with_blocked=True)
 
 
 @accounts_api_router.post("/accounts/{account_id}/addUser",

@@ -10,6 +10,7 @@ class TransactionCategoriesCacheRepository(object):
     KEYS = {
         TransactionCategoryType.INCOME: 'transaction:categories:income',
         TransactionCategoryType.EXPENSE: 'transaction:categories:expense',
+        TransactionCategoryType.TRANSFER: 'transaction:categories:transfer',
         None: 'transaction:categories'
     }
 

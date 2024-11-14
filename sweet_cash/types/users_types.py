@@ -121,3 +121,9 @@ class ChangePasswordRequestModel(BaseModel):
         if not check_password_format(v):
             raise ValueError("Invalid password format")
         return v
+
+
+class UserProfile(BaseModel):
+    id: int
+    name: str
+    registered_in_nalog_ru: bool = False
