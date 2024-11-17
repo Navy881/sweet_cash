@@ -4,6 +4,7 @@ from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.accounts_admitted_users import account_admitted_users_table
+
 from sweet_cash.types.accounts_admitted_users_types import AccountsAdmittedUsersModel
 
 
@@ -20,20 +21,6 @@ class AccountsAdmittedUsersRepository(BaseRepository):
         row = await r_.fetchone()
         return AccountsAdmittedUsersModel(**row)
 
-    async def get_by_id(self, item_id: int) -> Union[AccountsAdmittedUsersModel, None]:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.id == item_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return None
-        return AccountsAdmittedUsersModel(**row)
-    
     async def get_by_account_id_and_user_id(self, account_id: int, user_id: int) -> Union[AccountsAdmittedUsersModel, None]:
         query = (
             self.table.select()

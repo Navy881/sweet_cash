@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import enum
 from datetime import datetime
 from typing import Any, Optional
@@ -71,13 +70,13 @@ class CreateTransactionModel(BaseModel):
     target_account_id: Optional[int]
 
     @validator("amount")
-    def validate_amount(cls, v: float,  **kwargs: Any) -> float:
+    def validate_amount(cls, v: float, **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
 
     @validator("transfer_fee")
-    def validate_transfer_fee(cls, v: float,  **kwargs: Any) -> float:
+    def validate_transfer_fee(cls, v: float, **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'transfer_fee' must be positive")
         return v
@@ -98,6 +97,16 @@ class CreateTransactionModel(BaseModel):
 
         return values
 
+    @root_validator(pre=True)
+    def validate_amount_and_transfer_fee(cls, values):
+        amount = values.get("amount")
+        transfer_fee = values.get("transfer_fee")
+
+        if transfer_fee > amount:
+            raise ValueError("'transfer_fee' must be less than or equal to 'amount'")
+
+        return values
+
 
 class UpdateTransactionModel(BaseModel):
     type: TransactionType
@@ -111,13 +120,13 @@ class UpdateTransactionModel(BaseModel):
     target_account_id: Optional[int]
 
     @validator("amount")
-    def validate_amount(cls, v: float,  **kwargs: Any) -> float:
+    def validate_amount(cls, v: float, **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
 
     @validator("transfer_fee")
-    def validate_transfer_fee(cls, v: float,  **kwargs: Any) -> float:
+    def validate_transfer_fee(cls, v: float, **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'transfer_fee' must be positive")
         return v
@@ -135,5 +144,15 @@ class UpdateTransactionModel(BaseModel):
         elif transaction_type == TransactionType.TRANSFER.value and (not source_account_id or not target_account_id):
             raise ValueError("Fields 'source_account_id' and 'target_account_id' "
                              "should not be empty for transfer transaction")
+
+        return values
+
+    @root_validator(pre=True)
+    def validate_amount_and_transfer_fee(cls, values):
+        amount = values.get("amount")
+        transfer_fee = values.get("transfer_fee")
+
+        if transfer_fee > amount:
+            raise ValueError("'transfer_fee' must be less than or equal to 'amount'")
 
         return values

@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Union, List
 from sqlalchemy import Table, desc
 
@@ -86,11 +86,11 @@ class TokenRepository(BaseRepository):
     async def create_access_token(self, item: dict) -> RefreshTokenModel:
         expires_delta = timedelta(minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         insert_body = item
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["refresh_token"] = self._create_refresh_token()
         insert_body["token"] = create_access_token(data={"sub": insert_body["user_id"]},
                                                    expires_delta=expires_delta)
-        insert_body["expire_at"] = datetime.utcnow() + expires_delta
+        insert_body["expire_at"] = datetime.now(timezone.utc) + expires_delta
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r_ = await self.conn.execute(create_query)
         row = await r_.fetchone()
@@ -99,11 +99,11 @@ class TokenRepository(BaseRepository):
     async def update_access_token(self, refresh_token: str, item: dict) -> RefreshTokenModel:
         expires_delta = timedelta(minutes=Settings.ACCESS_TOKEN_EXPIRE_MINUTES)
         update_body = item
-        update_body["updated_at"] = datetime.utcnow()
+        update_body["updated_at"] = datetime.now(timezone.utc)
         update_body["refresh_token"] = self._create_refresh_token()
         update_body["token"] = create_access_token(data={"sub": update_body["user_id"]}, 
                                                    expires_delta=expires_delta)
-        update_body["expire_at"] = datetime.utcnow() + expires_delta
+        update_body["expire_at"] = datetime.now(timezone.utc) + expires_delta
         update_query = (
             self.table.update()
                 .where(self.table.c.refresh_token == refresh_token)

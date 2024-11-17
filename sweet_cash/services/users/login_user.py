@@ -23,15 +23,15 @@ class LoginUser(BaseService):
         self.tokens_repository = tokens_repository
         self.users_repository = users_repository
 
-    async def __call__(self, credits: LoginModel) -> LoginResponseModel:
+    async def __call__(self, credential: LoginModel) -> LoginResponseModel:
         async with self.users_repository.transaction():
-            user = await self.users_repository.get_by_email(email=credits.email)
+            user = await self.users_repository.get_by_email(email=credential.email)
             if user is None:
-                raise APIValueNotFound(f'User with email "{credits.email}" not found')
+                raise APIValueNotFound(f'User with email "{credential.email}" not found')
             if not user.confirmed:
-                raise APIConflict(f'Registration for {credits.email} not confirmed')
+                raise APIConflict(f'Registration for {credential.email} not confirmed')
                 
-            check_password(password=user.password, given_password=credits.password)
+            check_password(password=user.password, given_password=credential.password)
 
         async with self.tokens_repository.transaction():
             data = {"user_id": user.id, "login_method": "email"}

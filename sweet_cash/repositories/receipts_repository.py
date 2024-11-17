@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from sqlalchemy import Table
 
@@ -17,7 +17,7 @@ class ReceiptsRepository(BaseRepository):
     async def create_receipt_from_nalog_ru_data(self, user_id: int,
                                                 nalog_ru_receipt_data: NalogRuReceiptModel) -> ReceiptModel:
         insert_body = dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["user_id"] = user_id
         insert_body["external_id"] = nalog_ru_receipt_data.data['id']
         insert_body["data"] = json.dumps(nalog_ru_receipt_data.data)

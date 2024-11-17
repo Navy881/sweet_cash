@@ -44,7 +44,7 @@ class RegisterUserModel(BaseModel):
     password: str
 
     @validator("email")
-    def validate_email(cls, v: str,  **kwargs: Any) -> str:
+    def validate_email(cls, v: str, **kwargs: Any) -> str:
         if not check_email_format(v):
             raise ValueError("Invalid email format")
         return v
@@ -85,7 +85,7 @@ class LoginModel(BaseModel):
     password: str
 
     @validator("email")
-    def validate_email(cls, v: str,  **kwargs: Any) -> str:
+    def validate_email(cls, v: str, **kwargs: Any) -> str:
         if not check_email_format(v):
             raise ValueError("Invalid email format")
         return v

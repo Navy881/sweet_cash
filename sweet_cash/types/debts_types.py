@@ -1,9 +1,7 @@
 from __future__ import annotations
-
 import enum
 from datetime import datetime
 from typing import Any, Optional
-
 from pydantic import BaseModel, validator, root_validator
 
 from sweet_cash.types.users_types import UserResponseModel
@@ -65,13 +63,13 @@ class CreateDebtModel(BaseModel):
     closed_at: Optional[datetime]
 
     @validator("amount")
-    def validate_amount(cls, v: float,  **kwargs: Any) -> float:
+    def validate_amount(cls, v: float, **kwargs: Any) -> float:
         if v < 0:
             raise ValueError("'amount' must be positive")
         return v
 
     @validator("percentage_rate")
-    def validate_percentage_rate(cls, v: float,  **kwargs: Any) -> float:
+    def validate_percentage_rate(cls, v: float, **kwargs: Any) -> float:
         if v < 0 or v > 100:
             raise ValueError("'percentage_rate' must be between 0 and 100")
         return v
@@ -90,7 +88,7 @@ class CreateDebtModel(BaseModel):
         return values
 
     @validator("currency")
-    def validate_currency(cls, v: str,  **kwargs: Any) -> str:
+    def validate_currency(cls, v: str, **kwargs: Any) -> str:
         if v not in Settings.CURRENCIES.keys():
             raise ValueError("Unknown 'currency'")
         return v

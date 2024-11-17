@@ -5,7 +5,7 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel
 
-from sweet_cash.types.users_types import UserModel, UserResponseModel
+from sweet_cash.types.users_types import UserResponseModel
 
 
 class AccountModel(BaseModel):

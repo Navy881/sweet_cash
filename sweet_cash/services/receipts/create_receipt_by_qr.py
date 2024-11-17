@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from sweet_cash.services.base_service import BaseService
@@ -57,7 +57,7 @@ class CreateReceiptByQr(BaseService):
                                    type=TransactionType.EXPENSE,
                                    category_id=1,  # TODO Выбрать какую категорию брать для чеков
                                    amount=amount / 100,
-                                   transaction_date=datetime.utcfromtimestamp(transaction_date).isoformat(),
+                                   transaction_date=datetime.fromtimestamp(transaction_date, timezone.utc).isoformat(),
                                    receipt_id=receipt.id)
 
         await self.create_transaction(transaction)
@@ -102,7 +102,7 @@ class CreateReceiptByQrV2(BaseService):
                                    type=TransactionType.EXPENSE,
                                    category_id=1,  # TODO Выбрать какую категорию брать для чеков
                                    amount=amount / 100,
-                                   transaction_date=datetime.utcfromtimestamp(transaction_date).isoformat(),
+                                   transaction_date=datetime.fromtimestamp(transaction_date, timezone.utc).isoformat(),
                                    source_account_id=receipt_qr.account_id,
                                    receipt_id=receipt.id)
 

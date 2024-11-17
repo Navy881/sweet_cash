@@ -1,13 +1,10 @@
 
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator
 
 import pytest
 from aiopg.sa import Engine, SAConnection, create_engine
 from async_asgi_testclient import TestClient
 from fastapi import FastAPI
-from sqlalchemy import Table
-from sqlalchemy.dialects import postgresql
-from sqlalchemy.sql.ddl import CreateTable
 
 from sweet_cash.app import create_app
 from sweet_cash.settings import Settings
@@ -82,8 +79,8 @@ async def connection(db_engine: Engine) -> AsyncGenerator[SAConnection, None]:
 @pytest.fixture(autouse=True)
 async def db_engine(test_settings: Settings) -> AsyncGenerator[Engine, None]:
     async with create_engine(test_settings.POSTGRESQL_DATABASE_URI) as db_engine:
-        async with db_engine.acquire() as connection:
-            await drop_tables(connection)
+        async with db_engine.acquire() as connection_:
+            await drop_tables(connection_)
             # await create_tables(connection, TABLES)
             sql_alchemy_engine = engine(test_settings.POSTGRESQL_DATABASE_URI)
             create_all_tables(sql_alchemy_engine)

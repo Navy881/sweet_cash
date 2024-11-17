@@ -1,12 +1,16 @@
 from sqlalchemy import Table
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
 
 from sweet_cash.repositories.base_repository import BaseRepository
 
 from sweet_cash.repositories.tables.transaction_category_table import transaction_category_table
 
-from sweet_cash.types.transaction_categories_types import TransactionCategoryModel, CreateTransactionCategoryModel
+from sweet_cash.types.transaction_categories_types import (
+    TransactionCategoryModel,
+    CreateTransactionCategoryModel,
+    TransactionCategoryType
+)
 
 
 class TransactionCategoriesRepository(BaseRepository):
@@ -32,7 +36,7 @@ class TransactionCategoriesRepository(BaseRepository):
     async def create_transaction_category(self, transaction_category: CreateTransactionCategoryModel) -> \
             TransactionCategoryModel:
         insert_body = transaction_category.dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r = await self.conn.execute(create_query)
         row = await r.fetchone()
@@ -42,7 +46,7 @@ class TransactionCategoriesRepository(BaseRepository):
                                           transaction_category: CreateTransactionCategoryModel) -> \
             TransactionCategoryModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "name": transaction_category.name,
             "parent_category_id": transaction_category.parent_category_id,
             "type": transaction_category.type,
@@ -57,7 +61,7 @@ class TransactionCategoriesRepository(BaseRepository):
 
     async def delete_transaction_category(self, transaction_category_id: int) -> TransactionCategoryModel:
         update_value = {
-            "deleted": datetime.utcnow()
+            "deleted": datetime.now(timezone.utc)
         }
         update_query = (
             self.table.update().where(self.table.c.id == transaction_category_id).values(**update_value).returning(*self.table.c)
@@ -76,12 +80,15 @@ class TransactionCategoriesRepository(BaseRepository):
         rows = await r_.fetchall()
         return [TransactionCategoryModel(**row) for row in rows]
     
-    async def get_transaction_categories_by_type(self, type: str) -> List[TransactionCategoryModel]:
+    async def get_transaction_categories_by_type(
+            self,
+            transaction_categories_type: TransactionCategoryType
+    ) -> List[TransactionCategoryModel]:
         query = (
             self.table.select()
                 .where(
                     (self.table.c.deleted.is_(None))
-                    & (self.table.c.type == type)
+                    & (self.table.c.type == transaction_categories_type)
                 )
                 .order_by(self.table.c.id.desc())
         )

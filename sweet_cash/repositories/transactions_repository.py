@@ -81,7 +81,7 @@ class TransactionsRepository(BaseRepository):
         if user_id is not None:
             query = query.where(self.table.c.user_id == user_id)
 
-        query = query.order_by(self.table.c.transaction_date)
+        query = query.order_by(self.table.c.transaction_date.desc())
         query = query.limit(limit)
         query = query.offset(offset)
 

@@ -1,7 +1,7 @@
 
 import logging
 from fastapi import APIRouter, Depends
-from typing import List, Optional
+from typing import List
 
 from sweet_cash.dependencies.transaction_categories_dependencies import (
     create_transaction_categories_dependency,
@@ -41,11 +41,11 @@ async def create_transaction_category(
                                      dependencies=[Depends(JWTBearer())],
                                      tags=["Transactions categories"])
 async def get_transaction_categories(
-        type: str = '',
+        transaction_categories_type: str = '',
         get_transaction_categories_: GetTransactionCategories = Depends(
             dependency=get_transaction_categories_dependency)
 ) -> List[TransactionCategoryModel]:
-    return await get_transaction_categories_(type)
+    return await get_transaction_categories_(transaction_categories_type)
 
 
 @transaction_category_api_router.get("/transactions/categories/{transaction_category_id}",

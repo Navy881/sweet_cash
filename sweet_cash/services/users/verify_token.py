@@ -18,11 +18,12 @@ class VerifyToken(BaseService):
                  tokens_repository: TokenRepository) -> None:
         self.tokens_repository = tokens_repository
 
-    async def __call__(self, input: VerifyTokenModel) -> TokenInfoModel:
+    async def __call__(self, input_data: VerifyTokenModel) -> TokenInfoModel:
         async with self.tokens_repository.transaction():
-            token_data: TokenModel = await self.tokens_repository.get_user_by_token(input.token)
+            token_data: TokenModel = await self.tokens_repository.get_user_by_token(input_data.token)
             
             if token_data.expire_at < datetime.now():
                 raise APIValueNotFound("Valid token not found")
 
         return TokenInfoModel(**token_data.dict())
+

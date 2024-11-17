@@ -58,6 +58,6 @@ class CreateEventParticipant(BaseService):
             event_participant.user = user
 
             # Send notification event to kafka
-            # await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
+            await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
 
         return event_participant

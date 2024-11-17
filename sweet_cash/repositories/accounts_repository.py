@@ -83,19 +83,6 @@ class AccountsRepository(BaseRepository):
         r = await self.conn.execute(query)
         rows = await r.fetchall()
         return [AccountModel(**row) for row in rows]
-    
-    async def get_user_accounts_by_ids(self, account_ids: List[int], user_id: int) -> List[AccountModel]:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.id.in_(account_ids))
-                    & (self.table.c.user_id == user_id)
-                )
-                .order_by(self.table.c.id)
-        )
-        r = await self.conn.execute(query)
-        rows = await r.fetchall()
-        return [AccountModel(**row) for row in rows]
 
     async def get_by_user_id(self, user_id: int, with_blocked = False)-> List[AccountModel]:
         if with_blocked:

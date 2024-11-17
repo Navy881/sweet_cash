@@ -37,8 +37,8 @@ class CreateTransactionCategory(BaseService):
 
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
                                                                    ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
-                                                                   type=transaction_category.type)
-            
+                                                                   transaction_categories_type=transaction_category.type)
+
             # Запись в кэш по всем категорииям
             transaction_categories: List[TransactionCategoryModel] = await self.transaction_categories_repository. \
                 get_transaction_categories()
@@ -47,6 +47,6 @@ class CreateTransactionCategory(BaseService):
 
             await self.transaction_categories_cache_repository.set(transaction_categories=category_tree,
                                                                    ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
-                                                                   type=None)
+                                                                   transaction_categories_type=None)
 
             return transaction_category

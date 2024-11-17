@@ -8,7 +8,6 @@ from sweet_cash.repositories.events_participants_repository import EventsPartici
 
 from sweet_cash.types.events_participants_types import (
     EventsParticipantsModel,
-    CreateEventsParticipantsModel,
     EventParticipantRole
 )
 from sweet_cash.types.users_types import UserModel

@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
-
 from sqlalchemy import Table, desc
 
 from sweet_cash.repositories.base_repository import BaseRepository
@@ -56,7 +55,7 @@ class EventsRepository(BaseRepository):
 
     async def create_event(self, event: CreateEventModel) -> EventModel:
         insert_body = event.dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r = await self.conn.execute(create_query)
         # r = await self._execute(create_query)
@@ -89,7 +88,7 @@ class EventsRepository(BaseRepository):
 
     async def update_event(self, event_id: int, event: CreateEventModel) -> EventModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "name": event.name,
             "start": event.start,
             "end": event.end,

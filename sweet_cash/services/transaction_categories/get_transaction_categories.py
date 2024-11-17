@@ -46,6 +46,6 @@ class GetTransactionCategories(BaseService):
 
             await self.transaction_categories_cache_repository.set(transaction_categories=result,
                                                                    ttl_in_seconds=Settings.TRANSACTIONS_CATEGORIES_CACHE_TTL_SECOND,
-                                                                   type=category_type)
+                                                                   transaction_categories_type=category_type)
 
         return result

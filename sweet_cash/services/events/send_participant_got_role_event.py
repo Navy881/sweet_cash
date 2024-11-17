@@ -1,13 +1,12 @@
 import logging
 from typing import List
-from datetime import datetime, timezone
 
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.services.events.get_event_by_id import GetEventById
 from sweet_cash.services.events.get_event_participants_by_event import GetEventParticipantsByEvent
 from sweet_cash.services.notifications_events.send_event import SendEvent
 
-from sweet_cash.types.notifications_events import Event, EventType, ParticipantsGotRoleData
+from sweet_cash.types.notifications_events import EventType, ParticipantsGotRoleData
 from sweet_cash.types.events_participants_types import EventsParticipantsModel, EventParticipantRole
 
 

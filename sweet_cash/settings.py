@@ -7,7 +7,7 @@ load_dotenv(os.path.join('local.env'))
 
 
 class Settings(object):
-    port = 5000
+    port: int = int(os.getenv("APP_PORT"))
 
     POSTGRESQL_USER: str = os.getenv("POSTGRESQL_USER")
     POSTGRESQL_PASSWORD: str = os.getenv("POSTGRESQL_PASSWORD")

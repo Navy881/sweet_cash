@@ -1,14 +1,14 @@
 
 import abc
 import sqlalchemy
-import aiopg.sa
-from typing import Any, Dict, Optional, List
+#import aiopg.sa
+from typing import Any, Optional, List
 import contextlib
-from contextlib import asynccontextmanager
+#from contextlib import asynccontextmanager
 
-from aiopg.sa import Engine, SAConnection, create_engine
-from pydantic import BaseModel, PostgresDsn
-from pydantic.types import PositiveInt
+from aiopg.sa import Engine, create_engine
+#from pydantic import BaseModel, PostgresDsn
+#from pydantic.types import PositiveInt
 
 
 from sweet_cash.settings import Settings

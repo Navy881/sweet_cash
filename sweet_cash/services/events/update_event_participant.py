@@ -60,6 +60,6 @@ class UpdateEventParticipant(BaseService):
             event_participant.user = await self.get_user_by_id(event_participant.user_id)
 
         # Send notification event to kafka
-        # await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
+        await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
 
         return event_participant

@@ -69,19 +69,6 @@ class DebtsRepository(BaseRepository):
             return None
         return DebtModel(**row)
     
-    async def get_by_ids(self, debt_ids: List[int]) -> List[DebtModel]:
-        query = (
-            self.table.select()
-            .where(
-                self.table.c.id.in_(debt_ids)
-                & (self.table.c.is_blocked == False)
-            )
-            .order_by(self.table.c.id)
-        )
-        r = await self.conn.execute(query)
-        rows = await r.fetchall()
-        return [DebtModel(**row) for row in rows]
-    
     async def get_user_debts_by_ids(self, debt_ids: List[int], user_id: int) -> List[DebtModel]:
         query = (
             self.table.select()

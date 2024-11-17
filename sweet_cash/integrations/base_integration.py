@@ -2,7 +2,7 @@
 import asyncio
 import aiohttp
 from pydantic import AnyHttpUrl, ValidationError
-from typing import List, Any, Dict, Union, cast
+from typing import List, Any, Dict, Union, cast, AnyStr
 from urllib.parse import urljoin
 
 from sweet_cash.errors import APIError
@@ -15,12 +15,12 @@ class BaseIntegration(object):
         self.timeout = aiohttp.ClientTimeout(timeout)
         self.url = url
 
-    def _check_error(self, resp_json_body: Dict[str, Any], status_code: int) -> None:
-        if status_code < 400:
-            return
-        raise APIError(message=str(resp_json_body), status_code=status_code)
+    # def _check_error(resp_json_body: Dict[str, Any], status_code: int) -> None:
+    #     if status_code < 400:
+    #         return
+    #     raise APIError(message=str(resp_json_body), status_code=status_code)
 
-    async def _request(self, method: str, url: str, **kwargs: Any) -> Union[Dict[str, Any], List[Any]]:
+    async def _request(self, method: str, url: AnyStr, **kwargs: Any) -> Union[Dict[str, Any], List[Any]]:
         try:
             async with self.session.request(
                 method=method, url=urljoin(self.url, url), timeout=self.timeout, ssl=False, **kwargs

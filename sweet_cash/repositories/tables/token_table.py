@@ -1,5 +1,5 @@
 
-from sqlalchemy import Column, Integer, MetaData, Table, Text, types, Boolean
+from sqlalchemy import Column, Integer, MetaData, Table, Text, types
 
 
 metadata = MetaData()

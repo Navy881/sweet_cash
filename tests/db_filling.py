@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import psycopg2
-import bcrypt
-from datetime import datetime
+#import bcrypt
+from datetime import datetime, timezone
 
 conn = psycopg2.connect(
     database="postgres",
@@ -29,7 +29,7 @@ cursor = conn.cursor()
 for i in range(6):
     cursor.execute("INSERT INTO transactions_categories (created_at, name, parent_category_id) "
                    "VALUES (%s, %s, %s)", (
-                       datetime.utcnow(),
+                       datetime.now(timezone.utc),
                        f"Тестовая категория {i}",
                        i))
 

@@ -1,6 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timezone
 import bcrypt
-from typing import List, Union
+from typing import Union
 
 from sqlalchemy import Table, desc
 
@@ -69,16 +69,6 @@ class UsersRepository(BaseRepository):
             return None
         return UserModel(**row)
 
-    async def get_by_ids(self, user_ids: List[int]) -> List[UserModel]:
-        query = (
-            self.table.select()
-                .where(self.table.c.id.in_(user_ids))
-                .order_by(self.table.c.id)
-        )
-        r = await self.conn.execute(query)
-        rows = await r.fetchall()
-        return [UserModel(**row) for row in rows]
-
     # async def find_bindings(self, wave_id: int, end_date: datetime, start_date: datetime) -> list[BindingModel]:
     #     query = self.table.select().where(
     #         (self.table.c.wave_id == wave_id)
@@ -103,7 +93,7 @@ class UsersRepository(BaseRepository):
 
     async def create_user(self, item: RegisterUserModel) -> RegisterUserResponseModel:
         insert_body = item.dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["password"] = bcrypt.hashpw(item.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r_ = await self.conn.execute(create_query)
@@ -123,7 +113,7 @@ class UsersRepository(BaseRepository):
     
     async def update_user(self, user: RegisterUserModel) -> UserModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "name": user.name,
             "email": user.email,
             "phone": user.phone,

@@ -1,10 +1,7 @@
-
 from __future__ import annotations
-
 import enum
 from datetime import datetime
 from typing import Optional, List
-
 from pydantic import BaseModel
 
 

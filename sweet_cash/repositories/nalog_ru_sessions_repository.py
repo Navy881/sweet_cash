@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Union
 from sqlalchemy import Table, desc
 
@@ -14,7 +14,7 @@ class NalogRuSessionsRepository(BaseRepository):
 
     async def create_nalog_ru_session(self, user_id: int, nalog_ru_session: NalogRuSessionModel) -> NalogRuSessionModel:
         insert_body = nalog_ru_session.dict()
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["user_id"] = user_id
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r_ = await self.conn.execute(create_query)
@@ -37,7 +37,7 @@ class NalogRuSessionsRepository(BaseRepository):
 
     async def update_nalog_ru_session(self, user_id: int, nalog_ru_session: NalogRuSessionModel) -> NalogRuSessionModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "session_id": nalog_ru_session.session_id,
             "refresh_token": nalog_ru_session.refresh_token
         }

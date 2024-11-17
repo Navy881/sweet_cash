@@ -17,8 +17,8 @@ class TransactionCategoriesCacheRepository(object):
     def __init__(self, redis: Redis) -> None:
         self._redis = redis
 
-    async def get(self, type) -> Optional[List[TransactionCategoryModel]]:
-        key = self.KEYS[type]
+    async def get(self, transaction_categories_type) -> Optional[List[TransactionCategoryModel]]:
+        key = self.KEYS[transaction_categories_type]
         raw_item = await self._redis.get(key)
         if raw_item:
             return pickle.loads(raw_item)
@@ -26,8 +26,8 @@ class TransactionCategoriesCacheRepository(object):
 
     async def set(self, transaction_categories: List[TransactionCategoryModel],
                   ttl_in_seconds: int,
-                  type=None) -> List[TransactionCategoryModel]:
-        await self._redis.set(name=self.KEYS[type],
+                  transaction_categories_type=None) -> List[TransactionCategoryModel]:
+        await self._redis.set(name=self.KEYS[transaction_categories_type],
                               value=pickle.dumps(transaction_categories),
                               ex=datetime.timedelta(seconds=ttl_in_seconds))
         return transaction_categories

@@ -1,6 +1,5 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Union
-
 from sqlalchemy import Table
 
 from sweet_cash.repositories.base_repository import BaseRepository
@@ -22,7 +21,7 @@ class EventsParticipantsRepository(BaseRepository):
                                         event_participant: CreateEventsParticipantsModel) -> EventsParticipantsModel:
         insert_body = event_participant.dict()
         insert_body['event_id'] = event_id
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r = await self.conn.execute(create_query)
         # r_ = await self._execute(create_query)
@@ -35,7 +34,7 @@ class EventsParticipantsRepository(BaseRepository):
     ) -> EventsParticipantsModel:
         insert_body = event_participant.dict()
         insert_body['event_id'] = event_id
-        insert_body["created_at"] = datetime.utcnow()
+        insert_body["created_at"] = datetime.now(timezone.utc)
         insert_body["accepted"] = True
         create_query = self.table.insert().values(insert_body).returning(*self.table.c)
         r = await self.conn.execute(create_query)
@@ -51,16 +50,6 @@ class EventsParticipantsRepository(BaseRepository):
         r = await self.conn.execute(query)
         row = await r.fetchone()
         return EventsParticipantsModel(**row)
-
-    async def get_events_participants_by_event_ids(self, event_ids: List[int]) -> List[EventsParticipantsModel]:
-        query = (
-            self.table.select()
-                .where(self.table.c.event_id.in_(event_ids))
-                .order_by(self.table.c.id)
-        )
-        r = await self.conn.execute(query)
-        rows = await r.fetchall()
-        return [EventsParticipantsModel(**row) for row in rows]
 
     async def check_exist_events_participant_by_role(self, user_id: int,
                                                      event_id: int,
@@ -159,7 +148,7 @@ class EventsParticipantsRepository(BaseRepository):
     async def update_events_participant(self, event_participant_id: int,
                                         event_participant: UpdateEventsParticipantsModel) -> EventsParticipantsModel:
         update_value = {
-            "updated_at": datetime.utcnow(),
+            "updated_at": datetime.now(timezone.utc),
             "role": event_participant.role,
         }
         update_query = (
