@@ -62,7 +62,7 @@ class AccountsRepository(BaseRepository):
             return None
         return AccountModel(**row)
     
-    async def get_by_ids(self, account_ids: List[int], with_blocked = False) -> List[AccountModel]:
+    async def get_by_ids(self, account_ids: List[int], with_blocked: bool = False) -> List[AccountModel]:
         if with_blocked:
             query = (
                 self.table.select()
@@ -84,7 +84,7 @@ class AccountsRepository(BaseRepository):
         rows = await r.fetchall()
         return [AccountModel(**row) for row in rows]
 
-    async def get_by_user_id(self, user_id: int, with_blocked = False)-> List[AccountModel]:
+    async def get_by_user_id(self, user_id: int, with_blocked: bool = False)-> List[AccountModel]:
         if with_blocked:
             query = (
                 self.table.select()

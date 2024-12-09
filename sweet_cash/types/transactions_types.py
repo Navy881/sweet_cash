@@ -102,7 +102,7 @@ class CreateTransactionModel(BaseModel):
         amount = values.get("amount")
         transfer_fee = values.get("transfer_fee")
 
-        if transfer_fee > amount:
+        if transfer_fee and transfer_fee > amount:
             raise ValueError("'transfer_fee' must be less than or equal to 'amount'")
 
         return values

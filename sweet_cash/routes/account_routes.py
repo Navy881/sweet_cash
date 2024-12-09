@@ -62,7 +62,7 @@ async def update_account(
                          dependencies=[Depends(JWTBearer())],
                          tags=["Accounts"])
 async def get_user_accounts(
-    with_blocked = False,
+    with_blocked: bool = False,
     get_user_accounts_: GetAvailableAccountsByUser = Depends(dependency=get_available_accounts_by_user_dependency)
 ) -> List[AccountModel]:
     return await get_user_accounts_(with_blocked)
