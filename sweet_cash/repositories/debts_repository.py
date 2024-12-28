@@ -1,10 +1,13 @@
 from datetime import datetime, timezone
 from typing import List, Union
-from sqlalchemy import Table, desc
+from sqlalchemy import Table
 
 from sweet_cash.repositories.base_repository import BaseRepository
 from sweet_cash.repositories.tables.debt_table import debt_table
+
 from sweet_cash.types.debts_types import DebtModel, CreateDebtModel
+
+from sweet_cash.errors import APIValueNotFound
 
 
 class DebtsRepository(BaseRepository):
@@ -19,7 +22,7 @@ class DebtsRepository(BaseRepository):
         row = await r_.fetchone()
         return DebtModel(**row)
     
-    async def update_debt(self, debt_id: int, item: CreateDebtModel) -> DebtModel:
+    async def update_debt(self, user_id: int, debt_id: int, item: CreateDebtModel) -> Union[DebtModel, APIValueNotFound]:
         update_value = {
             "updated_at": datetime.now(timezone.utc),
             "type": item.type,
@@ -34,39 +37,17 @@ class DebtsRepository(BaseRepository):
         }
 
         update_query = (
-            self.table.update().where(self.table.c.id == debt_id).values(**update_value).returning(*self.table.c)
+            self.table.update().where(
+                (self.table.c.id == debt_id)
+                & (self.table.c.user_id == user_id)
+            )
+            .values(**update_value)
+            .returning(*self.table.c)
         )
         r = await self.conn.execute(update_query)
         row = await r.fetchone()
-        return DebtModel(**row)
-    
-    async def get_by_id(self, debt_id: int) -> Union[DebtModel, None]:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.id == debt_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return None
-        return DebtModel(**row)
-    
-    async def get_user_debt_by_id(self, debt_id: int, user_id: int) -> Union[DebtModel, None]:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.id == debt_id)
-                    & (self.table.c.user_id == user_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return None
+        if not row:
+            return APIValueNotFound()
         return DebtModel(**row)
     
     async def get_user_debts_by_ids(self, debt_ids: List[int], user_id: int) -> List[DebtModel]:
@@ -82,7 +63,7 @@ class DebtsRepository(BaseRepository):
         rows = await r.fetchall()
         return [DebtModel(**row) for row in rows]
 
-    async def get_by_user_id(self, user_id: int)-> List[DebtModel]:
+    async def get_debts_by_user_id(self, user_id: int)-> List[DebtModel]:
         query = (
             self.table.select()
                 .where(

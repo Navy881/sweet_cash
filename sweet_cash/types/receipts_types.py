@@ -16,10 +16,5 @@ class ReceiptModel(BaseModel):
 
 class CreateReceiptModel(BaseModel):
     event_id: int
-    qr: str
-
-
-class CreateReceiptModelV2(BaseModel):
-    event_id: int
     account_id: int
     qr: str

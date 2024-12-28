@@ -44,14 +44,6 @@ class LoginUser(BaseService):
                 refresh_token = await self.tokens_repository.update_access_token(refresh_token=tokens[0].refresh_token, 
                                                                                  item=data)
 
-            # if await self.tokens_repository.check_exist_token_by_user(user_id=user.id):
-            #     token = await self.tokens_repository.get_token_by_user(user_id=user.id)
-            #     if token is None:
-            #         raise APIValueNotFound(f'User {user.id} is not authorized')
-            #     refresh_token = await self.tokens_repository.update_access_token(refresh_token=token.refresh_token, item=data)
-            # else:  # not exist
-            #     refresh_token = await self.tokens_repository.create_access_token(item=data)
-
             return LoginResponseModel(**{
                 **refresh_token.dict(), 
                 'user': {**user.dict()}

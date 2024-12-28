@@ -12,14 +12,12 @@ from sweet_cash.message_queue import MessageQueue
 from sweet_cash.repositories.tables import (
     user_table,
     token_table,
-    event_table,
-    event_participants_table,
+    event_tables,
     transaction_table,
     transaction_category_table,
     receipt_table,
     nalog_ru_sessions_table,
-    account_table,
-    accounts_admitted_users,
+    account_tables,
     debt_table
 )
 # from sweet_cash.api.components import (
@@ -50,14 +48,12 @@ messages_queue = MessageQueue()
 def create_all_tables(engine):
     user_table.metadata.create_all(bind=engine)
     token_table.metadata.create_all(bind=engine)
-    event_table.metadata.create_all(bind=engine)
-    event_participants_table.metadata.create_all(bind=engine)
+    event_tables.metadata.create_all(bind=engine)
     transaction_table.metadata.create_all(bind=engine)
     transaction_category_table.metadata.create_all(bind=engine)
     receipt_table.metadata.create_all(bind=engine)
     nalog_ru_sessions_table.metadata.create_all(bind=engine)
-    account_table.metadata.create_all(bind=engine)
-    accounts_admitted_users.metadata.create_all(bind=engine)
+    account_tables.metadata.create_all(bind=engine)
     debt_table.metadata.create_all(bind=engine)
 
 
@@ -118,16 +114,16 @@ def create_app(settings: Settings) -> FastAPI:
     from sweet_cash.routes.users_routes import user_api_router
     from sweet_cash.routes.debts_routes import debt_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
-    app.include_router(auth_pages_router)
-    app.include_router(events_api_router, prefix="/api/v1")
-    app.include_router(transaction_category_api_router, prefix="/api/v1")
-    app.include_router(receipts_api_router, prefix="/api/v1")
-    app.include_router(nalog_ru_api_router, prefix="/api/v1")
-    app.include_router(accounts_api_router, prefix="/api/v1")
-    app.include_router(transactions_api_router_v2, prefix="/api/v2")
-    app.include_router(receipts_api_router_v2, prefix="/api/v2")
     app.include_router(user_api_router, prefix="/api/v1")
+    app.include_router(nalog_ru_api_router, prefix="/api/v1")
+    app.include_router(events_api_router, prefix="/api/v1")
+    app.include_router(accounts_api_router, prefix="/api/v1")
+    app.include_router(transaction_category_api_router, prefix="/api/v1")
+    app.include_router(transactions_api_router_v2, prefix="/api/v2")
+    app.include_router(receipts_api_router, prefix="/api/v1")
+    app.include_router(receipts_api_router_v2, prefix="/api/v2")
     app.include_router(debt_api_router, prefix="/api/v1")
+    app.include_router(auth_pages_router)
 
     # Run notification processing
     processors_names = settings.EVENT_PROCESSORS

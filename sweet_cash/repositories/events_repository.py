@@ -1,90 +1,207 @@
 from datetime import datetime, timezone
 from typing import List, Union
-from sqlalchemy import Table, desc
+from sqlalchemy import Table, select, func, and_, exists
 
 from sweet_cash.repositories.base_repository import BaseRepository
 
-from sweet_cash.repositories.tables.event_table import event_table
+from sweet_cash.repositories.tables.event_tables import event_table, event_participants_table
 
-from sweet_cash.types.events_types import EventModel, CreateEventModel
+from sweet_cash.types.events_types import (
+    EventModel,
+    CreateEventModel,
+    CreateEventsParticipantsModel,
+    UpdateEventsParticipantsModel,
+    EventsParticipantsModel,
+    EventParticipantRole
+)
 
 
 class EventsRepository(BaseRepository):
-    table: Table = event_table
-
-    # async def search_one(self, wave_id: int, search_datetime: datetime) -> BindingModel:
-    #     query = (
-    #         self.table.select()
-    #             .where(
-    #             (self.table.c.wave_id == wave_id)
-    #             & between(
-    #                 search_datetime,
-    #                 self.table.c.start_date,
-    #                 self.table.c.end_date,
-    #             )
-    #         )
-    #             .order_by(desc(self.table.c.created_at))
-    #     )
-    #     r = await self._execute(query)
-    #     row = await r.fetchone()
-    #     if row is None:
-    #         raise NotFoundError
-    #     return BindingModel(**row)
-    #
-    # async def find_bindings(self, wave_id: int, end_date: datetime, start_date: datetime) -> list[BindingModel]:
-    #     query = self.table.select().where(
-    #         (self.table.c.wave_id == wave_id)
-    #         & (self.table.c.end_date >= start_date)
-    #         & (self.table.c.start_date <= end_date)
-    #     )
-    #     r = await self._execute(query)
-    #     rows = await r.fetchall()
-    #     return [BindingModel(**row) for row in rows]
-    #
-    # async def get(self, wave_id: int, limit: int = 100, offset: int = 0) -> list[BindingModel]:
-    #     query = (
-    #         self.table.select()
-    #             .where(self.table.c.wave_id == wave_id)
-    #             .order_by(self.table.c.start_date)
-    #             .limit(limit)
-    #             .offset(offset)
-    #     )
-    #     r = await self._execute(query)
-    #     rows = await r.fetchall()
-    #     return [BindingModel(**row) for row in rows]
+    event_table: Table = event_table
+    event_participants_table: Table = event_participants_table
 
     async def create_event(self, event: CreateEventModel) -> EventModel:
         insert_body = event.dict()
         insert_body["created_at"] = datetime.now(timezone.utc)
-        create_query = self.table.insert().values(insert_body).returning(*self.table.c)
+        create_query = self.event_table.insert().values(insert_body).returning(*self.event_table.c)
         r = await self.conn.execute(create_query)
-        # r = await self._execute(create_query)
         row = await r.fetchone()
-        return EventModel(**row)
+        return EventModel(
+            **row,
+            participants=[]
+        )
 
-    async def get_by_id(self, event_id: int) -> Union[EventModel, None]:
+    async def get_available_events_by_ids(self, user_id: int, event_ids: List[int]) -> List[EventModel]:
+        # Подзапрос для participants
+        participants_subquery = (
+            select(
+                self.event_participants_table.c.event_id,
+                func.json_agg(
+                    func.row_to_json(self.event_participants_table.table_valued())
+                ).label("participants")
+            )
+            .group_by(self.event_participants_table.c.event_id)
+            .subquery()
+        )
+
+        # Основной запрос
         query = (
-            self.table.select()
-                .where(
-                    (self.table.c.id == event_id)
+            select(
+                self.event_table,
+                participants_subquery.c.participants
+            )
+            .outerjoin(
+                participants_subquery,
+                self.event_table.c.id == participants_subquery.c.event_id
+            )
+            .where(
+                and_(
+                    self.event_table.c.id.in_(event_ids),
+                    exists(
+                        select(1)
+                        .where(
+                            and_(
+                                self.event_table.c.id == self.event_participants_table.c.event_id,
+                                self.event_participants_table.c.user_id == user_id,
+                                self.event_participants_table.c.accepted == True
+                            )
+                        )
+                    )
                 )
-                .order_by(desc(self.table.c.created_at))
+            )
         )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return None
-        return EventModel(**row)
 
-    async def get_events(self, event_ids: List[int]) -> List[EventModel]:
-        query = (
-            self.table.select()
-                .where(self.table.c.id.in_(event_ids))
-                .order_by(self.table.c.id)
-        )
         r = await self.conn.execute(query)
         rows = await r.fetchall()
-        return [EventModel(**row) for row in rows]
+
+        result: List[EventModel] = []
+        for row in rows:
+            row_dict = dict(row.items())
+            participants_data = row_dict.pop("participants", [])
+            participants = [
+                EventsParticipantsModel(**{**participant, "role": EventParticipantRole[participant["role"]]})
+                for participant in participants_data
+            ]
+            result.append(
+                EventModel(
+                    **row_dict,
+                    participants=participants
+                )
+            )
+        return result
+
+    async def get_available_events_by_roles(self, user_id: int, roles: List[EventParticipantRole]) -> List[EventModel]:
+        # Подзапрос для participants
+        participants_subquery = (
+            select(
+                self.event_participants_table.c.event_id,
+                func.json_agg(
+                    func.row_to_json(self.event_participants_table.table_valued())
+                ).label("participants")
+            )
+            .group_by(self.event_participants_table.c.event_id)
+            .subquery()
+        )
+
+        # Основной запрос
+        query = (
+            select(
+                self.event_table,
+                participants_subquery.c.participants
+            )
+            .outerjoin(
+                participants_subquery,
+                self.event_table.c.id == participants_subquery.c.event_id
+            )
+            .where(
+                exists(
+                    select(1)
+                    .where(
+                        and_(
+                            self.event_table.c.id == self.event_participants_table.c.event_id,
+                            self.event_participants_table.c.user_id == user_id,
+                            self.event_participants_table.c.accepted == True,
+                            self.event_participants_table.c.role.in_(roles)
+                        )
+                    )
+                )
+            )
+        )
+
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+
+        result: List[EventModel] = []
+        for row in rows:
+            row_dict = dict(row.items())
+            participants_data = row_dict.pop("participants", [])
+            participants = [
+                EventsParticipantsModel(**{**participant, "role": EventParticipantRole[participant["role"]]})
+                for participant in participants_data
+            ]
+            result.append(
+                EventModel(
+                    **row_dict,
+                    participants=participants
+                )
+            )
+        return result
+
+    async def get_invitations_to_events(self, user_id: int) -> List[EventModel]:
+        # Подзапрос для participants
+        participants_subquery = (
+            select(
+                self.event_participants_table.c.event_id,
+                func.json_agg(
+                    func.row_to_json(self.event_participants_table.table_valued())
+                ).label("participants")
+            )
+            .group_by(self.event_participants_table.c.event_id)
+            .subquery()
+        )
+
+        # Основной запрос
+        query = (
+            select(
+                self.event_table,
+                participants_subquery.c.participants
+            )
+            .outerjoin(
+                participants_subquery,
+                self.event_table.c.id == participants_subquery.c.event_id
+            )
+            .where(
+                exists(
+                    select(1)
+                    .where(
+                        and_(
+                            self.event_table.c.id == self.event_participants_table.c.event_id,
+                            self.event_participants_table.c.user_id == user_id,
+                            self.event_participants_table.c.accepted == False
+                        )
+                    )
+                )
+            )
+        )
+
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+
+        result: List[EventModel] = []
+        for row in rows:
+            row_dict = dict(row.items())
+            participants_data = row_dict.pop("participants", [])
+            participants = [
+                EventsParticipantsModel(**{**participant, "role": EventParticipantRole[participant["role"]]})
+                for participant in participants_data
+            ]
+            result.append(
+                EventModel(
+                    **row_dict,
+                    participants=participants
+                )
+            )
+        return result
 
     async def update_event(self, event_id: int, event: CreateEventModel) -> EventModel:
         update_value = {
@@ -95,26 +212,125 @@ class EventsRepository(BaseRepository):
             "description": event.description
         }
         update_query = (
-            self.table.update().where(self.table.c.id == event_id).values(**update_value).returning(*self.table.c)
+            self.event_table.update()
+            .where(
+                self.event_table.c.id == event_id
+            )
+            .values(**update_value)
+            .returning(*self.event_table.c)
         )
         r = await self.conn.execute(update_query)
         row = await r.fetchone()
         return EventModel(**row)
 
-    # async def delete(self, wave_id: int, binding_id: int) -> BindingModel:
-    #     delete_query = (
-    #         self.table.delete()
-    #             .where((self.table.c.wave_id == wave_id) & (self.table.c.id == binding_id))
-    #             .returning(*self.table.c)
-    #     )
-    #     r = await self._execute(delete_query)
-    #     row = await r.fetchone()
-    #     if row is None:
-    #         raise NotFoundError
-    #     return BindingModel(**row)
-    #
-    # async def delete_bindings_by_wave_id(self, wave_id: int) -> list[BindingModel]:
-    #     delete_query = self.table.delete().where(self.table.c.wave_id == wave_id).returning(*self.table.c)
-    #     r = await self._execute(delete_query)
-    #     rows = await r.fetchall()
-    #     return [BindingModel(**row) for row in rows]
+    async def create_events_participant(self, event_id: int,
+                                        event_participant: CreateEventsParticipantsModel) -> EventsParticipantsModel:
+        insert_body = event_participant.dict()
+        insert_body['event_id'] = event_id
+        insert_body["created_at"] = datetime.now(timezone.utc)
+        create_query = (
+            self.event_participants_table.insert()
+            .values(insert_body)
+            .returning(*self.event_participants_table.c)
+        )
+        r = await self.conn.execute(create_query)
+        # r_ = await self._execute(create_query)
+        row = await r.fetchone()
+        return EventsParticipantsModel(**row)
+
+    async def create_events_owner_participant(
+            self, event_id: int,
+            event_participant: CreateEventsParticipantsModel
+    ) -> EventsParticipantsModel:
+        insert_body = event_participant.dict()
+        insert_body['event_id'] = event_id
+        insert_body["created_at"] = datetime.now(timezone.utc)
+        insert_body["accepted"] = True
+        create_query = (
+            self.event_participants_table.insert()
+            .values(insert_body)
+            .returning(*self.event_participants_table.c)
+        )
+        r = await self.conn.execute(create_query)
+        row = await r.fetchone()
+        return EventsParticipantsModel(**row)
+
+    async def accept_events_participants(self, events_participant_ids: List[int]) -> List[EventsParticipantsModel]:
+        query = (
+            self.event_participants_table.update()
+                .where(self.event_participants_table.c.id.in_(events_participant_ids))
+                .values(accepted=True)
+        ).returning(*self.event_participants_table.c)
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [EventsParticipantsModel(**row) for row in rows]
+
+    async def get_events_participant_by_id(self, event_participant_id: int) -> Union[EventsParticipantsModel, None]:
+        query = (
+            self.event_participants_table.select()
+                .where(self.event_participants_table.c.id == event_participant_id)
+                .order_by(self.event_participants_table.c.id)
+        )
+        r = await self.conn.execute(query)
+        row = await r.fetchone()
+        if row is None:
+            return None
+        return EventsParticipantsModel(**row)
+
+    async def get_events_participants_by_event(self, event_id: int) -> List[EventsParticipantsModel]:
+        query = (
+            self.event_participants_table.select()
+            .where(
+                self.event_participants_table.c.event_id == event_id
+            )
+            .order_by(self.event_participants_table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [EventsParticipantsModel(**row) for row in rows]
+
+    async def get_events_participants_by_user_and_event(self, user_id: int,
+                                                        event_id: int,
+                                                        accepted: bool = True) -> List[EventsParticipantsModel]:
+        query = (
+            self.event_participants_table.select()
+                .where(
+                (self.event_participants_table.c.user_id == user_id)
+                & (self.event_participants_table.c.event_id == event_id)
+                & (self.event_participants_table.c.accepted == accepted)
+            )
+            .order_by(self.event_participants_table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [EventsParticipantsModel(**row) for row in rows]
+
+    async def update_events_participant(self, event_participant_id: int,
+                                        event_participant: UpdateEventsParticipantsModel) -> EventsParticipantsModel:
+        update_value = {
+            "updated_at": datetime.now(timezone.utc),
+            "role": event_participant.role,
+        }
+        update_query = (
+            self.event_participants_table.update()
+            .where(
+                self.event_participants_table.c.id == event_participant_id
+            )
+            .values(**update_value)
+            .returning(*self.event_participants_table.c)
+        )
+        r = await self.conn.execute(update_query)
+        row = await r.fetchone()
+        return EventsParticipantsModel(**row)
+
+    async def delete_events_participants(self, events_participant_ids: List[int]) -> List[EventsParticipantsModel]:
+        delete_query = (
+            self.event_participants_table.delete()
+            .where(
+                self.event_participants_table.c.id.in_(events_participant_ids)
+            )
+            .returning(*self.event_participants_table.c)
+        )
+        r = await self.conn.execute(delete_query)
+        rows = await r.fetchall()
+        return [EventsParticipantsModel(**row) for row in rows]

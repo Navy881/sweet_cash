@@ -15,7 +15,7 @@ from sweet_cash.services.email.send_password_change_email import SendPasswordCha
 from sweet_cash.services.users.password_recovery import PasswordRecovery
 from sweet_cash.services.users.get_password_change_from import GetPasswordChangeForm
 from sweet_cash.services.users.change_password import ChangePassword
-from sweet_cash.services.users.get_user_by_id import GetUserById
+from sweet_cash.services.users.get_users_by_ids import GetUsersByIds
 
 
 async def users_repository_dependency(request: Request) -> UsersRepository:
@@ -99,8 +99,9 @@ async def change_password_dependency(request: Request) -> ChangePassword:
         users_repository = await users_repository_dependency(request)
     )
 
-async def get_user_by_id_dependency(request: Request) -> GetUserById:
-    return GetUserById(
+
+async def get_users_by_ids_dependency(request: Request) -> GetUsersByIds:
+    return GetUsersByIds(
         user_id=getattr(request, "user_id"),
         users_repository = await users_repository_dependency(request)
     )

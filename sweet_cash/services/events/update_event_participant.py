@@ -1,16 +1,18 @@
 import logging
+from typing import List
 
 from sweet_cash.services.base_service import BaseService
-from sweet_cash.services.users.get_user_by_id import GetUserById
-from sweet_cash.services.events.send_participant_got_role_event import SendParticipantGotRoleEvent
+from sweet_cash.services.events.enrich_events_participants import EnrichEventsParticipants
+from sweet_cash.services.events.send_events_notifications import SendEventsNotifications
 
-from sweet_cash.repositories.events_participants_repository import EventsParticipantsRepository
+from sweet_cash.repositories.events_repository import EventsRepository
 
-from sweet_cash.types.events_participants_types import (
+from sweet_cash.types.events_types import (
     EventsParticipantsModel,
     UpdateEventsParticipantsModel,
     EventParticipantRole
 )
+from sweet_cash.types.notifications_events import ParticipantsGotRoleData
 
 from sweet_cash.errors import APIConflict, APIValueNotFound
 
@@ -20,20 +22,21 @@ logger = logging.getLogger(name="events")
 
 class UpdateEventParticipant(BaseService):
     def __init__(self, user_id: int,
-                 get_user_by_id: GetUserById,
-                 events_participants_repository: EventsParticipantsRepository,
-                 events_sender: SendParticipantGotRoleEvent) -> None:
+                 enrich_events_participants: EnrichEventsParticipants,
+                 events_repository: EventsRepository,
+                 events_sender: SendEventsNotifications) -> None:
         self.user_id = user_id
-        self.get_user_by_id = get_user_by_id
-        self.events_participants_repository = events_participants_repository
+        self.enrich_events_participants = enrich_events_participants
+        self.events_repository = events_repository
         self.events_sender = events_sender
 
-    async def __call__(self, event_participant_id: int,
-                       event_participants: UpdateEventsParticipantsModel) -> EventsParticipantsModel:
-        
-        async with self.events_participants_repository.transaction():
+    async def __call__(self,
+                       event_participant_id: int,
+                       event_participants: UpdateEventsParticipantsModel
+                       ) -> EventsParticipantsModel:
+        async with self.events_repository.transaction():
             # Checking participant exist
-            event_participant = await self.events_participants_repository. \
+            event_participant = await self.events_repository. \
                 get_events_participant_by_id(event_participant_id)
 
             if event_participant is None:
@@ -46,20 +49,26 @@ class UpdateEventParticipant(BaseService):
                 raise APIConflict(f'User {self.user_id} is trying to update his participant {event_participant_id}')
 
             # Checking that requests user is the event manager
-            if not await self.events_participants_repository. \
-                    check_exist_events_participant_by_role(user_id=self.user_id,
-                                                           event_id=event_id,
-                                                           role=EventParticipantRole('Manager')):
+            user_events_participants: List[EventsParticipantsModel] = await self.events_repository. \
+                get_events_participants_by_user_and_event(event_id=event_participant.event_id,
+                                                          user_id=self.user_id,
+                                                          accepted=True)
+            if EventParticipantRole.MANAGER not in [participant.role for participant in user_events_participants]:
                 raise APIValueNotFound(f'User {self.user_id} not associated with the event {event_id}')
 
-            event_participant: EventsParticipantsModel = await self.events_participants_repository. \
+            event_participant: EventsParticipantsModel = await self.events_repository. \
                 update_events_participant(event_participant_id=event_participant_id,
                                           event_participant=event_participants)
 
-            # Update user model for event_participant
-            event_participant.user = await self.get_user_by_id(event_participant.user_id)
+        # Update user model for event_participant
+        await self.enrich_events_participants([event_participant])
 
         # Send notification event to kafka
-        await self.events_sender(event_id=event_id, user_id=event_participant.user_id, role=event_participant.role)
+        event_data = ParticipantsGotRoleData(
+            user_id=event_participant.user_id,
+            event_id=event_id,
+            role=event_participant.role
+        )
+        await self.events_sender(event_id=event_id, event_data=event_data)
 
         return event_participant

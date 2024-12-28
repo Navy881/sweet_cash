@@ -21,20 +21,6 @@ class NalogRuSessionsRepository(BaseRepository):
         row = await r_.fetchone()
         return NalogRuSessionModel(**row)
 
-    async def check_exist_by_user_id(self, user_id: int) -> bool:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.user_id == user_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return False
-        return True
-
     async def update_nalog_ru_session(self, user_id: int, nalog_ru_session: NalogRuSessionModel) -> NalogRuSessionModel:
         update_value = {
             "updated_at": datetime.now(timezone.utc),

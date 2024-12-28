@@ -31,20 +31,6 @@ class TokenRepository(BaseRepository):
             return None
         return TokenModel(**row)
 
-    async def get_token_by_user(self, user_id: int) -> Union[TokenModel, None]:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.user_id == user_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return None
-        return TokenModel(**row)
-
     async def get_user_by_token(self, token: str) -> Union[TokenModel, None]:
         query = (
             self.table.select()
@@ -59,20 +45,6 @@ class TokenRepository(BaseRepository):
             return None
         return TokenModel(**row)
 
-    async def check_exist_token_by_user(self, user_id: int) -> bool:
-        query = (
-            self.table.select()
-                .where(
-                    (self.table.c.user_id == user_id)
-                )
-                .order_by(desc(self.table.c.created_at))
-        )
-        r_ = await self.conn.execute(query)
-        row = await r_.fetchone()
-        if row is None:
-            return False
-        return True
-    
     async def get_tokens_by_user(self, user_id: int) -> List[TokenModel]:
         query = (
             self.table.select()

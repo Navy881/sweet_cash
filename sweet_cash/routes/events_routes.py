@@ -23,8 +23,9 @@ from sweet_cash.services.events.create_event_participant import CreateEventParti
 from sweet_cash.services.events.update_event_participant import UpdateEventParticipant
 from sweet_cash.services.events.confirm_event_participant import ConfirmEventParticipant
 from sweet_cash.services.events.reject_event_participant import RejectEventParticipant
-from sweet_cash.types.events_types import EventModel, CreateEventModel
-from sweet_cash.types.events_participants_types import (
+from sweet_cash.types.events_types import (
+    EventModel,
+    CreateEventModel,
     EventsParticipantsModel,
     CreateEventsParticipantsModel,
     UpdateEventsParticipantsModel

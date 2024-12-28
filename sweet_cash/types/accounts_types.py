@@ -48,3 +48,10 @@ class UpdateAccountModel(BaseModel):
     name: str
     description: Optional[str]
     is_blocked: bool
+
+
+class AccountsAdmittedUsersModel(BaseModel):
+    id: int
+    created_at: datetime
+    account_id: int
+    user_id: int

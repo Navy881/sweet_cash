@@ -9,7 +9,7 @@ from sweet_cash.services.nalog_ru.verify_otp import VerifyOtp
 from sweet_cash.services.nalog_ru.get_receipt_by_qr import GetReceiptByQr
 from sweet_cash.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
 
-from sweet_cash.dependencies.users_dependecies import get_user_by_id_dependency
+from sweet_cash.dependencies.users_dependecies import get_users_by_ids_dependency
 
 
 async def nalog_ru_sessions_repository_dependency(request: Request) -> NalogRuSessionsRepository:
@@ -28,7 +28,7 @@ async def nalog_ru_api_dependency(request: Request) -> NalogRuApi:
 async def send_otp_dependency(request: Request) -> SendOtp:
     return SendOtp(
         user_id=getattr(request, "user_id"),
-        get_user_by_id = await get_user_by_id_dependency(request),
+        get_users_by_ids = await get_users_by_ids_dependency(request),
         nalog_ru_api = await nalog_ru_api_dependency(request)
     )
 
@@ -36,7 +36,7 @@ async def send_otp_dependency(request: Request) -> SendOtp:
 async def verify_otp_dependency(request: Request) -> VerifyOtp:
     return VerifyOtp(
         user_id=getattr(request, "user_id"),
-        get_user_by_id=await get_user_by_id_dependency(request),
+        get_users_by_ids = await get_users_by_ids_dependency(request),
         nalog_ru_sessions_repository = await nalog_ru_sessions_repository_dependency(request),
         nalog_ru_api = await nalog_ru_api_dependency(request)
     )

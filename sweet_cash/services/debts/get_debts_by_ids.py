@@ -2,7 +2,7 @@ import logging
 from typing import List
 
 from sweet_cash.services.base_service import BaseService
-from sweet_cash.services.users.get_user_by_id import GetUserById
+from sweet_cash.services.debts.enrich_debts import EnrichDebts
 
 from sweet_cash.repositories.debts_repository import DebtsRepository
 
@@ -17,10 +17,10 @@ logger = logging.getLogger(name="accounts")
 class GetDebtsByIds(BaseService):
     def __init__(self,
                  user_id: int,
-                 get_user_by_id: GetUserById,
+                 enrich_debts: EnrichDebts,
                  debts_repository: DebtsRepository) -> None:
         self.user_id = user_id
-        self.get_user_by_id = get_user_by_id
+        self.enrich_debts = enrich_debts
         self.debts_repository = debts_repository
 
     async def __call__(self, debt_ids) -> List[DebtModel]:
@@ -28,11 +28,7 @@ class GetDebtsByIds(BaseService):
             debt_ids: List[id] = ids2list(debt_ids)
 
         async with self.debts_repository.transaction():
-            debts: List[DebtModel] = await self.debts_repository.get_user_debts_by_ids(debt_ids=debt_ids,
-                                                                                       user_id=self.user_id)
-        # Обогащение модели account
-        user = await self.get_user_by_id(self.user_id)
-        for i, debt in enumerate(debts):
-            debts[i].user = user
-
-        return debts
+            debts: List[DebtModel] = await self.debts_repository \
+                .get_user_debts_by_ids(debt_ids=debt_ids, user_id=self.user_id)
+            await self.enrich_debts(debts)
+            return debts

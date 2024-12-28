@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 import bcrypt
-from typing import Union
+from typing import Union, List
 
 from sqlalchemy import Table, desc
 
@@ -26,21 +26,6 @@ class UsersRepository(BaseRepository):
             return False
         return True
 
-    # async def get_by_email(self, email: str, confirmed: bool = True) -> UserModel:
-    #     query = (
-    #         self.table.select()
-    #             .where(
-    #                 (self.table.c.email == email)
-    #                 & (self.table.c.confirmed == confirmed)
-    #             )
-    #             .order_by(desc(self.table.c.created_at))
-    #     )
-    #     r = await self.conn.execute(query)
-    #     row = await r.fetchone()
-    #     if row is None:
-    #         raise APIValueNotFound(f'User with login "{email}" not found')
-    #     return UserModel(**row)
-    
     async def get_by_email(self, email: str) -> Union[UserModel, None]:
         query = (
             self.table.select()
@@ -68,28 +53,6 @@ class UsersRepository(BaseRepository):
         if row is None:
             return None
         return UserModel(**row)
-
-    # async def find_bindings(self, wave_id: int, end_date: datetime, start_date: datetime) -> list[BindingModel]:
-    #     query = self.table.select().where(
-    #         (self.table.c.wave_id == wave_id)
-    #         & (self.table.c.end_date >= start_date)
-    #         & (self.table.c.start_date <= end_date)
-    #     )
-    #     r_ = await self._execute(query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
-    #
-    # async def get(self, wave_id: int, limit: int = 100, offset: int = 0) -> list[BindingModel]:
-    #     query = (
-    #         self.table.select()
-    #             .where(self.table.c.wave_id == wave_id)
-    #             .order_by(self.table.c.start_date)
-    #             .limit(limit)
-    #             .offset(offset)
-    #     )
-    #     r_ = await self._execute(query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
 
     async def create_user(self, item: RegisterUserModel) -> RegisterUserResponseModel:
         insert_body = item.dict()
@@ -126,20 +89,12 @@ class UsersRepository(BaseRepository):
         row = await r.fetchone()
         return UserModel(**row)
 
-    # async def delete(self, wave_id: int, binding_id: int) -> BindingModel:
-    #     delete_query = (
-    #         self.table.delete()
-    #             .where((self.table.c.wave_id == wave_id) & (self.table.c.id == binding_id))
-    #             .returning(*self.table.c)
-    #     )
-    #     r_ = await self._execute(delete_query)
-    #     row = await r_.fetchone()
-    #     if row is None:
-    #         raise NotFoundError
-    #     return BindingModel(**row)
-    #
-    # async def delete_bindings_by_wave_id(self, wave_id: int) -> list[BindingModel]:
-    #     delete_query = self.table.delete().where(self.table.c.wave_id == wave_id).returning(*self.table.c)
-    #     r_ = await self._execute(delete_query)
-    #     rows = await r_.fetchall()
-    #     return [BindingModel(**row) for row in rows]
+    async def get_by_ids(self, user_ids: List[int]) -> List[UserModel]:
+        query = (
+            self.table.select()
+            .where(self.table.c.id.in_(user_ids))
+            .order_by(self.table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [UserModel(**row) for row in rows]

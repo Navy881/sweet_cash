@@ -7,10 +7,10 @@ from sweet_cash.dependencies.transactions_dependencies import (
     get_all_transactions_dependency,
     get_transactions_dependency,
     delete_transaction_dependency,
-    create_transaction_dependency_v2,
+    create_transaction_dependency,
     update_transaction_dependency
 )
-from sweet_cash.services.transactions.create_transaction import CreateTransactionV2
+from sweet_cash.services.transactions.create_transaction import CreateTransaction
 from sweet_cash.services.transactions.get_all_transactions import GetAllTransactions
 from sweet_cash.services.transactions.get_transactions_by_ids import GetTransactionsByIds
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction
@@ -36,7 +36,7 @@ transactions_api_router_v2 = APIRouter()
                                  tags=["Transactions"])
 async def create_transaction(
     body: CreateTransactionModel,
-    create_transaction_: CreateTransactionV2 = Depends(dependency=create_transaction_dependency_v2)
+    create_transaction_: CreateTransaction = Depends(dependency=create_transaction_dependency)
 ) -> TransactionModel:
     return await create_transaction_(body)
 

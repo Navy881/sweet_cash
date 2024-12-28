@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
-from sweet_cash.types.events_participants_types import EventParticipantRole
+from sweet_cash.types.events_types import EventParticipantRole
 
 class EventType(Enum):
     PARTICIPANT_ADDED = "participant_added"
@@ -14,7 +14,6 @@ class EventType(Enum):
 class ParticipantsAddedData:
     user_id: int
     event_id: int
-    event_name: str
     role: EventParticipantRole
 
 
@@ -22,7 +21,6 @@ class ParticipantsAddedData:
 class ParticipantsGotRoleData:
     user_id: int
     event_id: int
-    event_name: str
     role: EventParticipantRole
 
 

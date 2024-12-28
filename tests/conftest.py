@@ -13,8 +13,7 @@ from sweet_cash.db import engine
 from sweet_cash.repositories.tables import (
     user_table,
     token_table,
-    event_table,
-    event_participants_table,
+    event_tables,
     transaction_table,
     transaction_category_table,
     receipt_table,
@@ -55,8 +54,7 @@ async def drop_tables(connection: SAConnection):
 def create_all_tables(engine):
     user_table.metadata.create_all(bind=engine)
     token_table.metadata.create_all(bind=engine)
-    event_table.metadata.create_all(bind=engine)
-    event_participants_table.metadata.create_all(bind=engine)
+    event_tables.metadata.create_all(bind=engine)
     transaction_table.metadata.create_all(bind=engine)
     transaction_category_table.metadata.create_all(bind=engine)
     receipt_table.metadata.create_all(bind=engine)

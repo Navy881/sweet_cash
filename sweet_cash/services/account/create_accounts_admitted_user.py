@@ -1,13 +1,12 @@
 import logging
 
 from sweet_cash.services.base_service import BaseService
-from sweet_cash.services.account.get_account_by_id import GetAccountById
 
-from sweet_cash.repositories.accounts_admitted_users_repository import AccountsAdmittedUsersRepository
+from sweet_cash.repositories.accounts_repository import AccountsRepository
 
-from sweet_cash.types.accounts_admitted_users_types import AccountsAdmittedUsersModel
+from sweet_cash.types.accounts_types import AccountModel, AccountsAdmittedUsersModel
 
-from sweet_cash.errors import APIValueNotFound, APIAuthError, APIConflict
+from sweet_cash.errors import APIValueNotFound, APIConflict
 
 
 logger = logging.getLogger(name="accounts")
@@ -16,27 +15,20 @@ logger = logging.getLogger(name="accounts")
 class CreateAccountsAdmittedUser(BaseService):
     def __init__(self,
                  user_id: int,
-                 get_accounts_by_id: GetAccountById,
-                 accounts_admitted_users_repository: AccountsAdmittedUsersRepository) -> None:
+                 accounts_repository: AccountsRepository) -> None:
         self.user_id = user_id
-        self.get_accounts_by_id = get_accounts_by_id
-        self.accounts_admitted_users_repository = accounts_admitted_users_repository
+        self.accounts_repository = accounts_repository
 
     async def __call__(self, account_id: int, user_id: int) -> AccountsAdmittedUsersModel:
-        # Проверка, что пользователь является владельцем account
-        account = await self.get_accounts_by_id(account_id)
-        if account is None:
-            raise APIValueNotFound(f'Account {account_id} not found')
+        async with self.accounts_repository.transaction():
+            account_model = await self.accounts_repository \
+                .get_user_account_by_id(user_id=self.user_id, account_id=account_id)
+            if not isinstance(account_model, AccountModel):
+                raise APIValueNotFound(f'Account {account_id} not found')
 
-        if account.user_id != self.user_id:
-            raise APIAuthError(f'No access to account {account_id}')
-        
-        async with self.accounts_admitted_users_repository.transaction():
-            admitted_user = await self.accounts_admitted_users_repository. \
-                get_by_account_id_and_user_id(account_id=account_id, user_id=user_id)
-            if admitted_user:
+            result = await self.accounts_repository.create_admitted_user(user_id=user_id, account_id=account_id)
+            if isinstance(result, APIConflict):
                 raise APIConflict(f'User {user_id} already added to account {account_id}')
 
-            return await self.accounts_admitted_users_repository.create_admitted_user(account_id=account_id,
-                                                                                      user_id=user_id)
+            return result
  

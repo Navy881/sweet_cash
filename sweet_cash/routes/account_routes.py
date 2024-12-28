@@ -22,9 +22,9 @@ from sweet_cash.types.accounts_types import (
     AccountResponseModel,
     CreateAccountModel,
     UpdateAccountModel,
-    AccountModel
+    AccountModel,
+    AccountsAdmittedUsersModel
 )
-from sweet_cash.types.accounts_admitted_users_types import AccountsAdmittedUsersModel
 
 from sweet_cash.auth.auth_bearer import JWTBearer
 
