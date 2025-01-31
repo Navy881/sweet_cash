@@ -43,17 +43,21 @@ class UpdateTransaction(BaseService):
         # транзкации со счётом, к которому у него нет доступа
         accounts: Dict[int, AccountModel] = await self.get_accounts_by_ids([transaction.source_account_id,
                                                                             transaction.target_account_id])
-        try:
-            self.source_account = accounts[transaction.source_account_id]
-            self.target_account = accounts[transaction.target_account_id]
-        except KeyError as e:
-            logger.error(e)
+        if transaction.source_account_id is not None:
+            try:
+                self.source_account = accounts[transaction.source_account_id]
+            except KeyError as e:
+                logger.error(e)
+            if self.source_account is None:
+                raise APIValueNotFound(f'Account {transaction.source_account_id} not found')
 
-        if transaction.source_account_id is not None and self.source_account is None:
-            raise APIValueNotFound(f'Account {transaction.source_account_id} not found')
-
-        if transaction.target_account_id is not None and self.target_account is None:
-            raise APIValueNotFound(f'Account {transaction.target_account_id} not found')
+        if transaction.target_account_id is not None:
+            try:
+                self.target_account = accounts[transaction.target_account_id]
+            except KeyError as e:
+                logger.error(e)
+            if self.target_account is None:
+                raise APIValueNotFound(f'Account {transaction.target_account_id} not found')
 
         # Checking exist transaction category
         await self.get_transaction_category_by_id(transaction_category_id)
