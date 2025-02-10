@@ -113,6 +113,7 @@ def create_app(settings: Settings) -> FastAPI:
     from sweet_cash.routes.account_routes import accounts_api_router
     from sweet_cash.routes.users_routes import user_api_router
     from sweet_cash.routes.debts_routes import debt_api_router
+    from sweet_cash.routes.analytics_routes import analytics_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
     app.include_router(user_api_router, prefix="/api/v1")
     app.include_router(nalog_ru_api_router, prefix="/api/v1")
@@ -123,6 +124,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(receipts_api_router, prefix="/api/v1")
     app.include_router(receipts_api_router_v2, prefix="/api/v2")
     app.include_router(debt_api_router, prefix="/api/v1")
+    app.include_router(analytics_api_router, prefix="/api/v1")
     app.include_router(auth_pages_router)
 
     # Run notification processing

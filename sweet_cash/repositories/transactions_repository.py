@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from typing import List, Union
-from sqlalchemy import Table
+from sqlalchemy import Table, or_
 
 from sweet_cash.repositories.base_repository import BaseRepository
 
@@ -94,3 +94,18 @@ class TransactionsRepository(BaseRepository):
         r = await self.conn.execute(delete_query)
         row = await r.fetchone()
         return TransactionModel(**row)
+
+    async def get_transactions_by_account_id(self, account_id: int) -> List[TransactionModel]:
+        query = (
+            self.table.select()
+                .where(
+                    or_(
+                        self.table.c.source_account_id == account_id,
+                        self.table.c.target_account_id == account_id
+                    )
+                )
+                .order_by(self.table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TransactionModel(**row) for row in rows]

@@ -8,6 +8,7 @@ from sweet_cash.services.transactions.get_transactions_by_ids import GetTransact
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
 from sweet_cash.services.transactions.enrich_transactions import EnrichTransactions
+from sweet_cash.services.transactions.get_transactions_by_account_id import GetTransactionsByAccountId
 
 from sweet_cash.dependencies.users_dependecies import get_users_by_ids_dependency
 from sweet_cash.dependencies.accounts_dependencies import (
@@ -75,5 +76,12 @@ async def update_transaction_dependency(request: Request) -> UpdateTransaction:
         get_accounts_by_ids = await get_account_by_ids_dependency(request),
         get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
         get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
+    )
+
+async def get_transactions_by_account_id_dependency(request: Request) -> GetTransactionsByAccountId:
+    return GetTransactionsByAccountId(
+        user_id=getattr(request, "user_id"),
+        enrich_transactions = await enrich_transactions_dependency(request),
         transactions_repository = await transactions_repository_dependency(request)
     )

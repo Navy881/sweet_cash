@@ -12,7 +12,7 @@ async def on_startup(app: FastAPI) -> None:
                            use_tls=True,
                            start_tls=False)
     app.state.smtp = smtp
-    await app.state.smtp.connect()
+    # await app.state.smtp.connect()
 
 
 async def on_shutdown(app: FastAPI) -> None:
