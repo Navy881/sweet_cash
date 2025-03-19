@@ -16,7 +16,7 @@ from sweet_cash.dependencies.users_dependecies import (
 )
 from sweet_cash.services.users.register_user import RegisterUser
 from sweet_cash.services.users.login_user import LoginUser
-from sweet_cash.services.users.get_access_token import GerAccessToken
+from sweet_cash.services.users.get_access_token import GetAccessToken
 from sweet_cash.services.users.confirm_registration import ConfirmRegistration
 from sweet_cash.services.users.send_confirmation_code import SendConfirmationCode
 from sweet_cash.services.users.verify_token import VerifyToken
@@ -57,7 +57,7 @@ async def login_user(
 
 @auth_api_router.post("/auth/token", response_model=TokenModel, tags=["Auth"])
 async def get_token(
-    body: GetAccessTokenModel, get_token_: GerAccessToken = Depends(dependency=get_token_dependency)
+    body: GetAccessTokenModel, get_token_: GetAccessToken = Depends(dependency=get_token_dependency)
 ) -> TokenModel:
     return await get_token_(body)
 

@@ -112,5 +112,7 @@ class Settings(object):
         "KZT": "Казахстанский тенге",
     }
 
+    SC_USERS_GRPC_API_ADDRESS: str = os.getenv("SC_USERS_GRPC_API_ADDRESS")
+
     class Config:
         env_file = "local.env"

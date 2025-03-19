@@ -4,7 +4,7 @@ from sweet_cash.repositories.users_repository import UsersRepository
 from sweet_cash.repositories.tokens_repository import TokenRepository
 
 from sweet_cash.services.users.register_user import RegisterUser
-from sweet_cash.services.users.get_access_token import GerAccessToken
+from sweet_cash.services.users.get_access_token import GetAccessToken
 from sweet_cash.services.users.login_user import LoginUser
 from sweet_cash.services.users.get_current_user import GetCurrentUser
 from sweet_cash.services.users.confirm_registration import ConfirmRegistration
@@ -52,8 +52,8 @@ async def login_user_dependency(request: Request) -> LoginUser:
     )
 
 
-async def get_token_dependency(request: Request) -> GerAccessToken:
-    return GerAccessToken(
+async def get_token_dependency(request: Request) -> GetAccessToken:
+    return GetAccessToken(
         tokens_repository = await token_repository_dependency(request)
     )
 

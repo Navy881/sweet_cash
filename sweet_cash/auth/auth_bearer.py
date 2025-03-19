@@ -27,6 +27,7 @@ class JWTBearer(HTTPBearer):
 
             current_token: TokenModel = await get_current_user_(token=credentials.credentials)
             setattr(request, "user_id", current_token.user_id)
+            setattr(request, "jwtoken", credentials.credentials)
 
             return credentials.credentials
 

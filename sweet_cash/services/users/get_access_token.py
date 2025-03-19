@@ -12,7 +12,7 @@ from sweet_cash.errors import APIValueNotFound
 logger = logging.getLogger(name="auth")
 
 
-class GerAccessToken(BaseService):
+class GetAccessToken(BaseService):
     def __init__(self,
                  tokens_repository: TokenRepository) -> None:
         self.tokens_repository = tokens_repository
