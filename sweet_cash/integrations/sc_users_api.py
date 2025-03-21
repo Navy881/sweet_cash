@@ -1,7 +1,7 @@
 
 import grpc
 from datetime import datetime
-from typing import AsyncGenerator, List
+from typing import AsyncGenerator, List, Union
 from contextlib import asynccontextmanager
 
 from sweet_cash.integrations.proto import user_pb2
@@ -9,13 +9,24 @@ from sweet_cash.integrations.proto import user_pb2_grpc
 
 from sweet_cash.types.users_types import SCUserApiUserModel
 
-from sweet_cash.errors import APIError
+from sweet_cash.errors import APIError, APIValueNotFound, APIConflict, BaseError
 
 
 def parse_datetime(time_string: str) -> datetime:
     time_string = time_string.replace(" UTC", "")
     dt = datetime.strptime(time_string, "%Y-%m-%d %H:%M:%S.%f %z")
     return dt
+
+def handle_grpc_error(e: grpc.RpcError) -> BaseError:
+    error_code = e.code() if hasattr(e, "code") else None
+    error_details = e.details() if hasattr(e, "details") else None
+
+    if error_code == grpc.StatusCode.NOT_FOUND:
+        return APIValueNotFound(error_details)
+    elif error_code == grpc.StatusCode.ALREADY_EXISTS:
+        return APIConflict(error_details)
+    else:
+        return APIError(error_details)
 
 
 class SCUsersApi(object):
@@ -30,7 +41,7 @@ class SCUsersApi(object):
             self.stub = user_pb2_grpc.UserServiceStub(channel)
             yield
 
-    async def create_user(self, request: user_pb2.CreateUserRequest) -> SCUserApiUserModel:
+    async def create_user(self, request: user_pb2.CreateUserRequest) -> Union[SCUserApiUserModel, BaseError]:
         try:
             response = await self.stub.CreateUser(request, metadata=self.metadata)
             response_dict = {field.name: value for field, value in response.ListFields()}
@@ -44,9 +55,9 @@ class SCUsersApi(object):
                 confirmed=True if response_dict.get("confirmed") else False
             )
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def update_user(self, request: user_pb2.UpdateUserRequest) -> SCUserApiUserModel:
+    async def update_user(self, request: user_pb2.UpdateUserRequest) -> Union[SCUserApiUserModel, BaseError]:
         try:
             response = await self.stub.UpdateUser(request, metadata=self.metadata)
             response_dict = {field.name: value for field, value in response.ListFields()}
@@ -60,9 +71,9 @@ class SCUsersApi(object):
                 confirmed=True if response_dict.get("confirmed") else False
             )
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def confirm_user(self, user_id: int) -> SCUserApiUserModel:
+    async def confirm_user(self, user_id: int) -> Union[SCUserApiUserModel, BaseError]:
         request = user_pb2.ConfirmUserRequest(user_id=user_id)
 
         try:
@@ -78,7 +89,7 @@ class SCUsersApi(object):
                 confirmed=True if response_dict.get("confirmed") else False
             )
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
     async def delete_user(self, user_id: int) -> None:
         request = user_pb2.DeleteUserRequest(user_id=user_id)
@@ -86,9 +97,9 @@ class SCUsersApi(object):
         try:
             await self.stub.DeleteUser(request, metadata=self.metadata)
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def get_user_by_id(self, user_id: int) -> SCUserApiUserModel:
+    async def get_user_by_id(self, user_id: int) -> Union[SCUserApiUserModel, BaseError]:
         request = user_pb2.GetUserByIdRequest(user_id=user_id)
 
         try:
@@ -104,9 +115,9 @@ class SCUsersApi(object):
                 confirmed=True if response_dict.get("confirmed") else False
             )
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def get_user_by_ids(self, user_ids: List[int]) -> List[SCUserApiUserModel]:
+    async def get_user_by_ids(self, user_ids: List[int]) -> Union[List[SCUserApiUserModel], BaseError]:
         request = user_pb2.GetUsersByIdsRequest(user_ids=user_ids)
 
         try:
@@ -130,9 +141,9 @@ class SCUsersApi(object):
                 )
             return result
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def get_user_by_email(self, email: str) -> SCUserApiUserModel:
+    async def get_user_by_email(self, email: str) -> Union[SCUserApiUserModel, BaseError]:
         request = user_pb2.GetUserByEmailRequest(email=email)
 
         try:
@@ -148,12 +159,12 @@ class SCUsersApi(object):
                 confirmed=True if response_dict.get("confirmed") else False
             )
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)
 
-    async def verify_password(self,  request: user_pb2.VerifyPasswordRequest) -> bool:
+    async def verify_password(self,  request: user_pb2.VerifyPasswordRequest) -> Union[bool, BaseError]:
         try:
             response = await self.stub.VerifyPassword(request, metadata=self.metadata)
             response_dict = {field.name: value for field, value in response.ListFields()}
             return True if response_dict.get("success") == "Ok" else False
         except grpc.RpcError as e:
-            raise APIError(e)
+            return handle_grpc_error(e)

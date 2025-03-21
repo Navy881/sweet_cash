@@ -1,17 +1,20 @@
 import logging
+from typing import Union
 
 from sweet_cash.services.base_service import BaseService
 
 from sweet_cash.repositories.tokens_repository import TokenRepository
-from sweet_cash.repositories.users_repository import UsersRepository
 
-from sweet_cash.types.users_types import LoginModel, LoginResponseModel
+from sweet_cash.integrations.sc_users_api import SCUsersApi
 
-from sweet_cash.errors import APIConflict, APIValueNotFound
+from sweet_cash.types.users_types import LoginModel, LoginResponseModel, SCUserApiUserModel
+
+from sweet_cash.errors import APIConflict, BaseError, APIAuthError
 
 from sweet_cash.settings import Settings
 
-from sweet_cash.auth.utils import check_password
+from sweet_cash.integrations.proto import user_pb2
+
 
 logger = logging.getLogger(name="auth")
 
@@ -19,19 +22,32 @@ logger = logging.getLogger(name="auth")
 class LoginUser(BaseService):
     def __init__(self,
                  tokens_repository: TokenRepository,
-                 users_repository: UsersRepository) -> None:
+                 sc_users_api: SCUsersApi) -> None:
         self.tokens_repository = tokens_repository
-        self.users_repository = users_repository
+        self.sc_users_api = sc_users_api
 
     async def __call__(self, credential: LoginModel) -> LoginResponseModel:
-        async with self.users_repository.transaction():
-            user = await self.users_repository.get_by_email(email=credential.email)
-            if user is None:
-                raise APIValueNotFound(f'User with email "{credential.email}" not found')
+        async with self.sc_users_api.get_stub():
+            response: Union[SCUserApiUserModel, BaseError] = \
+                await self.sc_users_api.get_user_by_email(credential.email)
+            if isinstance(response, BaseError):
+                raise response
+
+            user: SCUserApiUserModel = response
+
             if not user.confirmed:
                 raise APIConflict(f'Registration for {credential.email} not confirmed')
-                
-            check_password(password=user.password, given_password=credential.password)
+
+            sc_user_api_request = user_pb2.VerifyPasswordRequest(
+                email=credential.email,
+                password=credential.password
+            )
+            response: Union[SCUserApiUserModel, BaseError] = \
+                await self.sc_users_api.verify_password(sc_user_api_request)
+            if isinstance(response, BaseError):
+                if response.detail == 'password was not verified':
+                    raise APIAuthError('Wrong password')
+                raise APIAuthError(response.detail)
 
         async with self.tokens_repository.transaction():
             data = {"user_id": user.id, "login_method": "email"}
