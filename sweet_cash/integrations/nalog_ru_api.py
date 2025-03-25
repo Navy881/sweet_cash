@@ -1,5 +1,5 @@
+
 from aiohttp import hdrs
-from numpy.distutils.conv_template import header
 
 from sweet_cash.integrations.base_integration import BaseIntegration
 from sweet_cash.types.nalog_ru_types import NalogRuSessionModel, NalogRuReceiptIdModel, NalogRuReceiptModel
