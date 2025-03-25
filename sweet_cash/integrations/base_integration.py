@@ -1,6 +1,7 @@
 
 import asyncio
 import aiohttp
+from aiohttp_retry import RetryClient, ExponentialRetry
 from pydantic import AnyHttpUrl, ValidationError
 from typing import List, Any, Dict, Union, cast, AnyStr
 from urllib.parse import urljoin
@@ -11,7 +12,8 @@ from sweet_cash.errors import APIError
 class BaseIntegration(object):
 
     def __init__(self, session: aiohttp.ClientSession, timeout: float, url: AnyHttpUrl):
-        self.session = session
+        retry_options = ExponentialRetry(attempts=3, start_timeout=1, max_timeout=10)
+        self.session = RetryClient(session, retry_options=retry_options)
         self.timeout = aiohttp.ClientTimeout(timeout)
         self.url = url
 
@@ -33,9 +35,8 @@ class BaseIntegration(object):
                 # self._check_error(resp_json_body=resp_json_body, status_code=resp.status)
                 return cast(Dict[str, Any], resp_json_body)
 
-        except (asyncio.TimeoutError, aiohttp.ClientError, ValidationError) as exc:
+        except (asyncio.TimeoutError, aiohttp.ClientError, ValidationError, ConnectionError) as exc:
             raise APIError(exc)
-
 
 
 # class BaseIntegration(object):
