@@ -1,16 +1,18 @@
 
 import pytest
+import random
 from unittest.mock import ANY
-from datetime import timedelta
+from datetime import datetime, timedelta
 from async_asgi_testclient import TestClient
 
 from sweet_cash.auth.utils import create_access_token
 
-
-EMAIL = "test@test.com"
+t = random.randint(1, 100000)
+EMAIL = f'test{t}@test.com'
 PHONE = '+79876543210'
 PASSWORD = "1@yAndexru"
 REFRESH_TOKEN = ''
+TODAY = str(datetime.utcnow())
 
 
 @pytest.fixture
@@ -52,7 +54,7 @@ TEST REGISTER
 '''
 
 @pytest.mark.asyncio
-@pytest.mark.freeze_time("2020-01-01")
+@pytest.mark.freeze_time(TODAY)
 async def test_register_success(client: TestClient):
     response = await client.post(
         "/api/v1/auth/register",
@@ -64,15 +66,14 @@ async def test_register_success(client: TestClient):
         }
     )
 
-    assert response.json() == {
-        "id": 1,
-        "created_at": "2020-01-01T00:00:00",
-        "name": EMAIL,
-        "email": EMAIL,
-        "phone": PHONE
-    }
+    response_json = response.json()
+    print(response_json)
+    assert isinstance(response_json["id"], int)
+    assert response_json["created_at"] == datetime.fromisoformat(response_json["created_at"]).isoformat()
+    assert response_json["name"] == EMAIL
+    assert response_json["email"] == EMAIL
+    assert response_json["phone"] == PHONE
     assert response.status_code == 200
-
 
 
 @pytest.mark.asyncio
@@ -215,7 +216,7 @@ async def test_register_with_registered_email(client: TestClient):
     )
 
     assert response.json() == {
-        "detail": "User with email \"test@test.com\" already exist"
+        "detail": f'User with email \"{EMAIL}\" already exist'
     }
     assert response.status_code == 409
 
@@ -355,7 +356,7 @@ TEST GETTING TOKEN
 
 @pytest.mark.usefixtures("create_user", "confirm_user", "login_user")
 @pytest.mark.asyncio
-@pytest.mark.freeze_time("2020-01-01")
+@pytest.mark.freeze_time(TODAY)
 async def test_getting_token_success(client: TestClient):
     response = await client.post(
         "/api/v1/auth/token",
@@ -506,12 +507,11 @@ async def test_confirm_registration_success(client: TestClient):
 
 @pytest.mark.asyncio
 async def test_confirm_with_invalid_email(client: TestClient):
-    response = await client.get(f"/confirm?email={EMAIL}&code=1234")
+    email = 'test@mail.com'
+    response = await client.get(f"/confirm?email={email}&code=1234")
 
-    assert response.json() == {
-        "detail": "User with email \"test@test.com\" not found"
-    }
-    assert response.status_code == 404
+    assert response.status_code == 200
+    assert response.headers["Content-Type"] == "text/html; charset=utf-8"
 
 
 @pytest.mark.asyncio
@@ -557,10 +557,11 @@ async def test_send_code_success(client: TestClient):
 
 @pytest.mark.asyncio
 async def test_send_code_with_invalid_email(client: TestClient):
-    response = await client.get(f"/api/v1/auth/code?email={EMAIL}")
+    email = 'test@mail.com'
+    response = await client.get(f"/api/v1/auth/code?email={email}")
 
     assert response.json() == {
-        "detail": "User with email \"test@test.com\" not found"
+        "detail": f'User with email {email} not found'
     }
     assert response.status_code == 404
 

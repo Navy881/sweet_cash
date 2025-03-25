@@ -3,12 +3,11 @@ from typing import Union
 
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.services.nalog_ru.get_nalog_ru_session import GetNalogRuSession
+from sweet_cash.integrations.sc_users_api import SCUsersApi
 
-from sweet_cash.repositories.users_repository import UsersRepository
+from sweet_cash.types.users_types import UserProfile, SCUserApiUserModel
 
-from sweet_cash.types.users_types import UserProfile
-
-from sweet_cash.errors import APIValueNotFound
+from sweet_cash.errors import BaseError
 
 
 logger = logging.getLogger(name="users")
@@ -18,16 +17,19 @@ class GetUserProfile(BaseService):
     def __init__(self,
                  user_id: int,
                  get_nalog_ru_session: GetNalogRuSession,
-                 users_repository: UsersRepository) -> None:
+                 sc_users_api: SCUsersApi) -> None:
         self.user_id = user_id
         self.get_nalog_ru_session = get_nalog_ru_session
-        self.users_repository = users_repository
+        self.sc_users_api = sc_users_api
 
     async def __call__(self) -> Union[UserProfile, None]:
-        async with self.users_repository.transaction():
-            user = await self.users_repository.get_by_id(self.user_id)
-            if user is None:
-                raise APIValueNotFound('User not found')
+        async with self.sc_users_api.get_stub():
+            response: Union[SCUserApiUserModel, BaseError] = \
+                await self.sc_users_api.get_user_by_id(self.user_id)
+            if isinstance(response, BaseError):
+                raise response
+
+            user: SCUserApiUserModel = response
 
         profile: UserProfile = UserProfile(**user.dict())
 
@@ -35,4 +37,45 @@ class GetUserProfile(BaseService):
         if nalog_ru_session:
             profile.registered_in_nalog_ru = True
 
+        # async with self.sc_user_api.get_stub():
+        #     sc_user_api_request = user_pb2.CreateUserRequest(
+        #         email="315342tgerge@email.com",
+        #         name="name",
+        #         phone="+79876543210",
+        #         password="12345Qq@"
+        #     )
+        #     result: Union[SCUserApiUserModel, BaseError] = await self.sc_user_api.create_user(sc_user_api_request)
+        #     if not isinstance(result, SCUserApiUserModel):
+        #         raise result
+        #
+        #     sc_user_api_request = user_pb2.UpdateUserRequest(
+        #         user_id=1,
+        #         email="315342tgerge@email.com",
+        #         name="name",
+        #         phone="+79876543210",
+        #         password="12345Qq@"
+        #     )
+        #     user_model: SCUserApiUserModel = await self.sc_user_api.update_user(sc_user_api_request)
+        #     print(user_model)
+        #
+        #     user_model: SCUserApiUserModel = await self.sc_user_api.confirm_user(user_id=user_model.id)
+        #     print(user_model)
+        #
+        #     sc_user_api_request = user_pb2.VerifyPasswordRequest(
+        #         email="315342tgerge@email.com",
+        #         password="12345Qq@"
+        #     )
+        #     result: bool = await self.sc_user_api.verify_password(sc_user_api_request)
+        #     print(result)
+        #
+        #     user_model: SCUserApiUserModel = await self.sc_user_api.get_user_by_id(user_id=user_model.id)
+        #     print(user_model)
+        #
+        #     user_models: [SCUserApiUserModel] = await self.sc_user_api.get_user_by_ids(user_ids=[20, user_model.id])
+        #     print(user_models)
+        #
+        #     user_model: SCUserApiUserModel = await self.sc_user_api.get_user_by_email(email=user_model.email)
+        #     print(user_model)
+        #
+        #     await self.sc_user_api.delete_user(user_id=user_model.id)
         return profile

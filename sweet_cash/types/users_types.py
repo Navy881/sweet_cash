@@ -127,3 +127,13 @@ class UserProfile(BaseModel):
     id: int
     name: str
     registered_in_nalog_ru: bool = False
+
+
+class SCUserApiUserModel(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    name: str
+    email: str
+    phone: str
+    confirmed: bool

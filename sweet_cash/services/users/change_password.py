@@ -1,15 +1,18 @@
 import logging
 from idlelib.iomenu import errors
+from typing import Union
 
 from sweet_cash.services.base_service import BaseService
 
-from sweet_cash.repositories.users_repository import UsersRepository
+from sweet_cash.integrations.sc_users_api import SCUsersApi
 
-from sweet_cash.types.users_types import ChangePasswordRequestModel, RegisterUserModel
+from sweet_cash.types.users_types import ChangePasswordRequestModel, SCUserApiUserModel
 
-from sweet_cash.errors import APIConflict, APIAuthError, APIValueNotFound
+from sweet_cash.errors import APIConflict, APIAuthError, BaseError
 
 from sweet_cash.auth.utils import decode_jwt
+
+from sweet_cash.integrations.proto import user_pb2
 
 
 logger = logging.getLogger(name="auth")
@@ -17,34 +20,39 @@ logger = logging.getLogger(name="auth")
 
 class ChangePassword(BaseService):
     def __init__(self,
-                 users_repository: UsersRepository) -> None:
-        self.users_repository = users_repository
+                 sc_users_api: SCUsersApi) -> None:
+        self.sc_users_api = sc_users_api
 
     async def __call__(self, request: ChangePasswordRequestModel) -> None:
-        user_email: str = request.email
+        try:
+            payload = decode_jwt(token=request.code)
+        except errors:
+            payload = None
 
-        async with self.users_repository.transaction():
-            try:
-                payload = decode_jwt(token=request.code)
-            except errors:
-                payload = None
+        if payload is None:
+            raise APIAuthError(f'Invalid token')
 
-            if payload is None:
-                raise APIAuthError(f'Invalid token')
+        async with self.sc_users_api.get_stub():
+            response: Union[SCUserApiUserModel, BaseError] = \
+                await self.sc_users_api.get_user_by_email(request.email)
+            if isinstance(response, BaseError):
+                raise response
+            user: SCUserApiUserModel = response
 
-            user = await self.users_repository.get_by_email(email=user_email)
-            if user is None:
-                raise APIValueNotFound(f'User with email "{user_email}" not found')
-            if not user.confirmed:
+            if not response.confirmed:
                 raise APIConflict(f'Registration for {user.email} not confirmed')
 
-            new_user_data = RegisterUserModel(
+            new_user_data = user_pb2.UpdateUserRequest(
+                user_id=user.id,
                 name=user.name,
                 email=user.email,
                 phone=user.phone,
                 password=request.new_password
             )
 
-            await self.users_repository.update_user(new_user_data)
+            response: Union[SCUserApiUserModel, BaseError] = \
+                await self.sc_users_api.update_user(new_user_data)
+            if isinstance(response, BaseError):
+                raise response
 
         return None

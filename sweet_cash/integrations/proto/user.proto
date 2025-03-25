@@ -1,0 +1,128 @@
+
+// python3 -m grpc_tools.protoc -I. --python_out=. --pyi_out=. --grpc_python_out=. sweet_cash/integrations/proto/user.proto
+
+syntax = "proto3";
+
+package grpc;
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  string phone = 3;
+  string password = 4;
+}
+
+message CreateUserResponse {
+  uint64 id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string name = 4;
+  string email = 5;
+  string phone = 6;
+  bool confirmed = 7;
+}
+
+message UpdateUserRequest {
+  uint64 user_id = 1;
+  string name = 2;
+  string email = 3;
+  string phone = 4;
+  string password = 5;
+}
+
+message UpdateUserResponse {
+  uint64 id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string name = 4;
+  string email = 5;
+  string phone = 6;
+  bool confirmed = 7;
+}
+
+message ConfirmUserRequest {
+  uint64 user_id = 1;
+}
+
+message ConfirmUserResponse {
+  uint64 id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string name = 4;
+  string email = 5;
+  string phone = 6;
+  bool confirmed = 7;
+}
+
+message DeleteUserRequest {
+  uint64 user_id = 1;
+}
+
+message DeleteUserResponse {
+  string success = 1;
+}
+
+message GetUserByIdRequest {
+  uint64 user_id = 1;
+}
+
+message GetUserByIdResponse {
+  uint64 id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string name = 4;
+  string email = 5;
+  string phone = 6;
+  bool confirmed = 7;
+}
+
+message GetUsersByIdsRequest {
+  repeated uint64 user_ids = 1;
+}
+
+message GetUsersByIdsResponse {
+  message User {
+    uint64 id = 1;
+    string created_at = 2;
+    string updated_at = 3;
+    string name = 4;
+    string email = 5;
+    string phone = 6;
+    bool confirmed = 7;
+  }
+  repeated User users = 1;
+}
+
+message GetUserByEmailRequest {
+  string email = 1;
+}
+
+message GetUserByEmailResponse {
+  uint64 id = 1;
+  string created_at = 2;
+  string updated_at = 3;
+  string name = 4;
+  string email = 5;
+  string phone = 6;
+  bool confirmed = 7;
+}
+
+message VerifyPasswordRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message VerifyPasswordResponse {
+  string success = 1;
+}
+
+service UserService {
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+  rpc ConfirmUser(ConfirmUserRequest) returns (ConfirmUserResponse);
+  rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+  rpc GetUserById(GetUserByIdRequest) returns (GetUserByIdResponse);
+  rpc GetUsersByIds(GetUsersByIdsRequest) returns (GetUsersByIdsResponse);
+  rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
+  rpc VerifyPassword(VerifyPasswordRequest) returns (VerifyPasswordResponse);
+}
