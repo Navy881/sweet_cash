@@ -21,6 +21,11 @@ class GetUsersByIds(BaseService):
         self.sc_users_api = sc_users_api
 
     async def __call__(self, user_ids: List[int]) -> Dict[int, UserModel]:
+        users_map: Dict = {}
+
+        if not user_ids:
+            return users_map
+
         async with self.sc_users_api.get_stub():
             response: Union[List[SCUserApiUserModel], BaseError] = \
                 await self.sc_users_api.get_user_by_ids(user_ids)
@@ -29,7 +34,6 @@ class GetUsersByIds(BaseService):
 
             users: List[SCUserApiUserModel] = response
 
-        users_map: Dict = {}
         for user in users:
             users_map[user.id] = user
 
