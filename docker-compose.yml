@@ -25,7 +25,7 @@ services:
             - sweet_cash
 
     app_pg:
-        image: postgres:latest
+        image: postgres:16
         container_name: sweet_cash-db
         ports:
             - ${POSTGRESQL_PORT}:${POSTGRESQL_PORT}
