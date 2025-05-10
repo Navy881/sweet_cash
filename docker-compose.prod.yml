@@ -1,0 +1,51 @@
+services:
+    app:
+        # Путь до Dockerfile
+        build: .
+        # Имя для создаваемого контейнера
+        container_name: sweet_cash-app
+        # Файл с переменными окружения
+        env_file:
+            - local.env
+        # Создание переменных окружения в контейнере
+        environment:
+          # для отладки (при запуске в релиз убрать!)
+            - FLASK_ENV=${FLASK_ENV}
+          ## Позволяет отслеживать процесс работы приложения в командной строке
+            - PYTHONUNBUFFERED=True
+        # Перезапускаем сервис в случае падения
+        restart: on-failure
+        # Порт, который будет смотреть наружу : порт который используется внутри контейнера
+        ports:
+            - ${APP_PORT}:${APP_PORT}
+        depends_on:
+            - app_pg
+            - app_redis
+        networks:
+            - sweet_cash
+
+    app_pg:
+        image: postgres:latest
+        container_name: sweet_cash-db
+        environment:
+            - POSTGRES_DB=${POSTGRESQL_DATABASE}
+            - POSTGRES_USER=${POSTGRESQL_USER}
+            - POSTGRES_PASSWORD=${POSTGRESQL_PASSWORD}
+        volumes:
+            - postgres_data:/var/lib/postgresql/data/
+        networks:
+            - sweet_cash
+
+    app_redis:
+        image: redis
+        container_name: sweet_cash-redis
+        command: redis-server --requirepass ${REDIS_PASSWORD}
+        networks:
+            - sweet_cash
+
+networks:
+  sweet_cash:
+    name: sweet_cash
+
+volumes:
+  postgres_data:
