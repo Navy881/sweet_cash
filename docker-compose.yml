@@ -14,7 +14,7 @@ services:
           ## Позволяет отслеживать процесс работы приложения в командной строке
             - PYTHONUNBUFFERED=True
         # Перезапускаем сервис в случае падения
-        restart: on-failure
+        restart: always
         # Порт, который будет смотреть наружу : порт который используется внутри контейнера
         ports:
             - 127.0.0.1:${APP_PORT}:${APP_PORT}
@@ -27,6 +27,7 @@ services:
     app_pg:
         image: postgres:16
         container_name: sweet_cash-db
+        restart: always
         ports:
             - ${POSTGRESQL_PORT}:${POSTGRESQL_PORT}
         environment:
@@ -42,6 +43,7 @@ services:
         image: redis
         container_name: sweet_cash-redis
         command: redis-server --requirepass ${REDIS_PASSWORD}
+        restart: always
         ports:
             - ${REDIS_PORT}:${REDIS_PORT}
         networks:
