@@ -36,4 +36,5 @@ class CategoriesReportModel(BaseModel):
     event_id: int
     transaction_type: TransactionType
     period: PeriodModel
+    total_amount: float = 0
     categories: List[CategoryAmountModel]

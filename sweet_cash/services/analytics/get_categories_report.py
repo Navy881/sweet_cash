@@ -64,7 +64,9 @@ class GetCategoriesReport(BaseService):
             if transaction.category_id in categories_amounts.keys():
                 categories_amounts[transaction.category_id] += transaction.amount
             else:
-                categories_amounts[transaction.category_id] = 0
+                categories_amounts[transaction.category_id] = transaction.amount
+
+            result.total_amount += transaction.amount
 
         # Get categories into
         category_models: Dict[int, TransactionCategoryModel] = await self.get_transaction_categories_by_ids(list(categories_amounts.keys()))
