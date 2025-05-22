@@ -4,7 +4,7 @@ from sqlalchemy import Table, desc, select
 from psycopg2.errors import UniqueViolation
 
 from sweet_cash.repositories.base_repository import BaseRepository
-from sweet_cash.repositories.tables.account_tables import account_table,account_admitted_users_table
+from sweet_cash.repositories.tables.account_tables import account_table, account_admitted_users_table
 from sweet_cash.types.accounts_types import (
     AccountModel,
     CreateAccountModel,

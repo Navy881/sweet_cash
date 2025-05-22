@@ -95,3 +95,16 @@ class TransactionCategoriesRepository(BaseRepository):
         r_ = await self.conn.execute(query)
         rows = await r_.fetchall()
         return [TransactionCategoryModel(**row) for row in rows]
+
+    async def get_transaction_categories_by_ids(
+            self,
+            transaction_category_ids: List[int]
+    ) -> List[TransactionCategoryModel]:
+        query = (
+            self.table.select()
+                .where(self.table.c.id.in_(transaction_category_ids))
+                .order_by(self.table.c.id)
+        )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TransactionCategoryModel(**row) for row in rows]

@@ -18,7 +18,8 @@ from sweet_cash.repositories.tables import (
     receipt_table,
     nalog_ru_sessions_table,
     account_tables,
-    debt_table
+    debt_table,
+    limit_table
 )
 # from sweet_cash.api.components import (
 #     FastAPIStateManager,
@@ -55,6 +56,7 @@ def create_all_tables(engine):
     nalog_ru_sessions_table.metadata.create_all(bind=engine)
     account_tables.metadata.create_all(bind=engine)
     debt_table.metadata.create_all(bind=engine)
+    limit_table.metadata.create_all(bind=engine)
 
 
 def create_app(settings: Settings) -> FastAPI:
@@ -114,6 +116,7 @@ def create_app(settings: Settings) -> FastAPI:
     from sweet_cash.routes.users_routes import user_api_router
     from sweet_cash.routes.debts_routes import debt_api_router
     from sweet_cash.routes.analytics_routes import analytics_api_router
+    from sweet_cash.routes.limits_routes import limits_api_router
     app.include_router(auth_api_router, prefix="/api/v1")
     app.include_router(user_api_router, prefix="/api/v1")
     app.include_router(nalog_ru_api_router, prefix="/api/v1")
@@ -125,6 +128,7 @@ def create_app(settings: Settings) -> FastAPI:
     app.include_router(receipts_api_router_v2, prefix="/api/v2")
     app.include_router(debt_api_router, prefix="/api/v1")
     app.include_router(analytics_api_router, prefix="/api/v1")
+    app.include_router(limits_api_router, prefix="/api/v1")
     app.include_router(auth_pages_router)
 
     # Run notification processing

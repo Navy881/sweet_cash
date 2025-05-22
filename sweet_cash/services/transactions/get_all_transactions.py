@@ -9,6 +9,7 @@ from sweet_cash.repositories.transactions_repository import TransactionsReposito
 
 from sweet_cash.types.transactions_types import TransactionModel
 from sweet_cash.types.events_types import EventParticipantRole
+from sweet_cash.errors import APIParamError
 
 
 logger = logging.getLogger(name="transactions")
@@ -26,6 +27,9 @@ class GetAllTransactions(BaseService):
         self.transactions_repository = transactions_repository
 
     async def __call__(self, event_id: int, start: str, end: str, limit: int, offset: int) -> List[TransactionModel]:
+        if limit > 100:
+            raise APIParamError(f'Limit value must be less than or equal to 100')
+
         transactions: List[TransactionModel]
 
         users_roles: List[EventParticipantRole] = \

@@ -41,7 +41,7 @@ class DeleteTransaction(BaseService):
                     await self.get_event_participants_roles_for_user(event_id=event_id, user_id=self.user_id)
 
                 if EventParticipantRole.MANAGER not in users_roles:
-                    raise APIConflict(f'Updating a transaction {transaction_id} unavailable for user {self.user_id}')
+                    raise APIConflict(f'Deleting a transaction {transaction_id} unavailable for user {self.user_id}')
 
             transaction = await self.transactions_repository.delete_transaction(transaction_id)
 

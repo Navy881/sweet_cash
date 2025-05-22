@@ -82,7 +82,7 @@ class CreateTransactionModel(BaseModel):
         return v
 
     @root_validator(pre=True)
-    def validate_debtor_or_creditor(cls, values):
+    def validate_accounts(cls, values):
         transaction_type = values.get("type")
         source_account_id = values.get("source_account_id")
         target_account_id = values.get("target_account_id")

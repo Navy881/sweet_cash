@@ -41,11 +41,11 @@ async def create_transaction_category(
                                      dependencies=[Depends(JWTBearer())],
                                      tags=["Transactions categories"])
 async def get_transaction_categories(
-        transaction_categories_type: str = '',
+        type: str = '',
         get_transaction_categories_: GetTransactionCategories = Depends(
             dependency=get_transaction_categories_dependency)
 ) -> List[TransactionCategoryModel]:
-    return await get_transaction_categories_(transaction_categories_type)
+    return await get_transaction_categories_(type)
 
 
 @transaction_category_api_router.get("/transactions/categories/{transaction_category_id}",

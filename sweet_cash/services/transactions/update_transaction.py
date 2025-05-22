@@ -13,7 +13,7 @@ from sweet_cash.types.transactions_types import TransactionModel, UpdateTransact
 from sweet_cash.types.accounts_types import AccountModel
 from sweet_cash.types.events_types import EventParticipantRole
 
-from sweet_cash.errors import APIValueNotFound
+from sweet_cash.errors import APIConflict, APIValueNotFound
 
 
 logger = logging.getLogger(name="transactions")
@@ -76,7 +76,7 @@ class UpdateTransaction(BaseService):
                     await self.get_event_participants_roles_for_user(event_id=event_id, user_id=self.user_id)
 
                 if EventParticipantRole.MANAGER not in users_roles:
-                    raise APIValueNotFound(f'User {self.user_id} cannot change the transaction {transaction_id}')
+                    raise APIConflict(f'User {self.user_id} cannot change the transaction {transaction_id}')
                     
             transaction_model = await self.transactions_repository.update_transaction(transaction_id=transaction_id,
                                                                                       transaction=transaction)

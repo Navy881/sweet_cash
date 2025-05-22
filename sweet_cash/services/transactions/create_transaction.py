@@ -14,7 +14,7 @@ from sweet_cash.types.accounts_types import AccountModel
 from sweet_cash.types.events_types import EventParticipantRole
 
 
-from sweet_cash.errors import APIValueNotFound
+from sweet_cash.errors import APIConflict, APIValueNotFound
 
 
 logger = logging.getLogger(name="transactions")
@@ -70,7 +70,7 @@ class CreateTransaction(BaseService):
             await self.get_event_participants_roles_for_user(event_id=event_id, user_id=self.user_id)
 
         if len(users_roles) == 0:
-            raise APIValueNotFound(f'User {self.user_id} not associated with the event {event_id}')
+            raise APIConflict(f'User {self.user_id} not associated with the event {event_id}')
 
         async with self.transactions_repository.transaction():
             transaction_model =  await self.transactions_repository.create_transaction(user_id=self.user_id,

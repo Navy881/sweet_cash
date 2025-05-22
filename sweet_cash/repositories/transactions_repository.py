@@ -6,7 +6,12 @@ from sweet_cash.repositories.base_repository import BaseRepository
 
 from sweet_cash.repositories.tables.transaction_table import transaction_table
 
-from sweet_cash.types.transactions_types import CreateTransactionModel, TransactionModel, UpdateTransactionModel
+from sweet_cash.types.transactions_types import (
+    CreateTransactionModel,
+    TransactionModel,
+    UpdateTransactionModel,
+    TransactionType
+)
 
 
 class TransactionsRepository(BaseRepository):
@@ -106,6 +111,32 @@ class TransactionsRepository(BaseRepository):
                 )
                 .order_by(self.table.c.id)
         )
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TransactionModel(**row) for row in rows]
+
+    async def get_transactions_by_event_and_type(
+            self,
+            event_id: int,
+            start: str,
+            end: str,
+            transaction_type: TransactionType,
+            category_id: int = None
+    ) -> List[TransactionModel]:
+        query = (
+            self.table.select()
+                .where(
+                    (self.table.c.event_id == event_id)
+                    & (self.table.c.transaction_date >= start)
+                    & (self.table.c.transaction_date <= end)
+                    & (self.table.c.type == TransactionType(transaction_type))
+                )
+                .order_by(self.table.c.id)
+        )
+
+        if category_id is not None:
+            query = query.where(self.table.c.category_id == category_id)
+
         r = await self.conn.execute(query)
         rows = await r.fetchall()
         return [TransactionModel(**row) for row in rows]

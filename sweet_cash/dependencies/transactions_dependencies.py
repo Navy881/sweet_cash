@@ -9,6 +9,7 @@ from sweet_cash.services.transactions.update_transaction import UpdateTransactio
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
 from sweet_cash.services.transactions.enrich_transactions import EnrichTransactions
 from sweet_cash.services.transactions.get_transactions_by_account_id import GetTransactionsByAccountId
+from sweet_cash.services.transactions.get_transactions_by_event_and_type import GetTransactionsByEventAndType
 
 from sweet_cash.dependencies.users_dependecies import get_users_by_ids_dependency
 from sweet_cash.dependencies.accounts_dependencies import (
@@ -83,5 +84,11 @@ async def get_transactions_by_account_id_dependency(request: Request) -> GetTran
     return GetTransactionsByAccountId(
         user_id=getattr(request, "user_id"),
         enrich_transactions = await enrich_transactions_dependency(request),
+        transactions_repository = await transactions_repository_dependency(request)
+    )
+
+async def get_transactions_by_event_and_type_dependency(request: Request) -> GetTransactionsByEventAndType:
+    return GetTransactionsByEventAndType(
+        user_id=getattr(request, "user_id"),
         transactions_repository = await transactions_repository_dependency(request)
     )

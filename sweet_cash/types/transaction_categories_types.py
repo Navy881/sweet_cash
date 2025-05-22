@@ -26,6 +26,13 @@ class TransactionCategoryModel(BaseModel):
     sub_categories: Optional[List[TransactionCategoryModel]]
 
 
+class TransactionCategoryResponseModel(BaseModel):
+    id: int
+    name: Optional[str]
+    type: Optional[TransactionCategoryType]
+    description: Optional[str]
+
+
 class CreateTransactionCategoryModel(BaseModel):
     name: str
     type: TransactionCategoryType

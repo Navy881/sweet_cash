@@ -14,7 +14,7 @@ from sweet_cash.types.nalog_ru_types import NalogRuReceiptModel
 from sweet_cash.types.transactions_types import CreateTransactionModel, TransactionType
 from sweet_cash.types.events_types import EventParticipantRole
 
-from sweet_cash.errors import APIValueNotFound
+from sweet_cash.errors import APIConflict
 
 
 logger = logging.getLogger(name="receipts")
@@ -39,7 +39,7 @@ class CreateReceiptByQr(BaseService):
             await self.get_event_participants_roles_for_user(event_id=receipt_qr.event_id, user_id=self.user_id)
 
         if len(user_roles) == 0:
-            raise APIValueNotFound(f'User {self.user_id} not associated with the event {receipt_qr.event_id}')
+            raise APIConflict(f'User {self.user_id} not associated with the event {receipt_qr.event_id}')
 
         # Get receipt data by qr
         receipt_data: NalogRuReceiptModel = await self.get_receipt_by_qr(receipt_qr.qr)
