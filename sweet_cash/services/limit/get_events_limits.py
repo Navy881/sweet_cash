@@ -56,11 +56,11 @@ class GetEventsLimits(BaseService):
         for limit_model in limit_models:
 
             # Получение всех подкатегорий для категории лимита
-            category_ids = []
+            category_ids = None
             if limit_model.category_id:
+                category_ids = [limit_model.category_id]
                 sub_categories : List[TransactionCategoryModel] = \
                     await self.get_sub_transaction_categories(limit_model.category_id)
-                category_ids.append(limit_model.category_id)
                 category_ids += [c.id for c in sub_categories]
 
             transactions = await self.get_transactions_by_event_and_type(
