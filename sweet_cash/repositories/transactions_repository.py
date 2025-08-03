@@ -121,7 +121,7 @@ class TransactionsRepository(BaseRepository):
             start: str,
             end: str,
             transaction_type: TransactionType,
-            category_id: int = None
+            category_ids: List[int] = None
     ) -> List[TransactionModel]:
         query = (
             self.table.select()
@@ -134,8 +134,8 @@ class TransactionsRepository(BaseRepository):
                 .order_by(self.table.c.id)
         )
 
-        if category_id is not None:
-            query = query.where(self.table.c.category_id == category_id)
+        if category_ids is not None:
+            query = query.where(self.table.c.category_id.in_(category_ids))
 
         r = await self.conn.execute(query)
         rows = await r.fetchall()

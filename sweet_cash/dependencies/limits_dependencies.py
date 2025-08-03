@@ -15,6 +15,7 @@ from sweet_cash.dependencies.transaction_categories_dependencies import (
 )
 from sweet_cash.dependencies.events_dependencies import get_event_participants_roles_for_user_dependency
 from sweet_cash.dependencies.transactions_dependencies import get_transactions_by_event_and_type_dependency
+from sweet_cash.dependencies.transaction_categories_dependencies import get_sub_transaction_categories_dependency
 
 
 async def limits_repository_dependency(request: Request) -> LimitsRepository:
@@ -63,6 +64,6 @@ async def get_events_limits_dependency(request: Request) -> GetEventsLimits:
         limits_repository = await limits_repository_dependency(request),
         enrich_limits = await enrich_limits_dependency(request),
         get_event_participants_roles_for_user = await get_event_participants_roles_for_user_dependency(request),
-        get_transaction_category_by_id = await get_transaction_category_by_id_dependency(request),
-        get_transactions_by_event_and_type = await get_transactions_by_event_and_type_dependency(request)
+        get_transactions_by_event_and_type = await get_transactions_by_event_and_type_dependency(request),
+        get_sub_transaction_categories = await get_sub_transaction_categories_dependency(request)
     )

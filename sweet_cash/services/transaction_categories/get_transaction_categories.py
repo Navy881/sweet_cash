@@ -4,7 +4,6 @@ from typing import List
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.services.transaction_categories.create_category_tree import create_category_tree
 
-
 from sweet_cash.repositories.transaction_categories_repository import TransactionCategoriesRepository
 from sweet_cash.repositories.transaction_categories_cache_repository import TransactionCategoriesCacheRepository
 

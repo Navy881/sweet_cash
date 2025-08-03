@@ -25,7 +25,7 @@ class GetTransactionsByEventAndType(BaseService):
             start: datetime,
             end: datetime,
             transaction_type: TransactionType,
-            category_id: int = None
+            category_ids: List[int] = None
     ) -> List[TransactionModel]:
         async with self.transactions_repository.transaction():
             transactions: List[TransactionModel] = await self.transactions_repository. \
@@ -34,7 +34,7 @@ class GetTransactionsByEventAndType(BaseService):
                     start=start.isoformat(),
                     end=end.isoformat(),
                     transaction_type=transaction_type,
-                    category_id=category_id
+                    category_ids=category_ids
                 )
 
         return transactions
