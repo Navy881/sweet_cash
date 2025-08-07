@@ -10,6 +10,7 @@ from sweet_cash.services.transactions.delete_transaction import DeleteTransactio
 from sweet_cash.services.transactions.enrich_transactions import EnrichTransactions
 from sweet_cash.services.transactions.get_transactions_by_account_id import GetTransactionsByAccountId
 from sweet_cash.services.transactions.get_transactions_by_event_and_type import GetTransactionsByEventAndType
+from sweet_cash.services.transactions.get_transactions_by_account import GetTransactionsByAccount
 
 from sweet_cash.dependencies.users_dependecies import get_users_by_ids_dependency
 from sweet_cash.dependencies.accounts_dependencies import (
@@ -17,8 +18,10 @@ from sweet_cash.dependencies.accounts_dependencies import (
     get_available_accounts_by_ids_internal_dependency
 )
 from sweet_cash.dependencies.transaction_categories_dependencies import get_transaction_category_by_id_dependency
-from sweet_cash.dependencies.events_dependencies import get_event_participants_roles_for_user_dependency
-
+from sweet_cash.dependencies.events_dependencies import (
+    get_event_participants_roles_for_user_dependency,
+    get_events_by_ids_internal_dependency,
+)
 
 async def transactions_repository_dependency(request: Request) -> TransactionsRepository:
     engine = request.app.state.db
@@ -28,7 +31,8 @@ async def enrich_transactions_dependency(request: Request) -> EnrichTransactions
     return EnrichTransactions(
         user_id=getattr(request, "user_id"),
         get_users_by_ids = await get_users_by_ids_dependency(request),
-        get_available_accounts_by_ids = await get_available_accounts_by_ids_internal_dependency(request)
+        get_available_accounts_by_ids = await get_available_accounts_by_ids_internal_dependency(request),
+        get_events_by_ids = await get_events_by_ids_internal_dependency(request)
     )
 
 
@@ -90,5 +94,13 @@ async def get_transactions_by_account_id_dependency(request: Request) -> GetTran
 async def get_transactions_by_event_and_type_dependency(request: Request) -> GetTransactionsByEventAndType:
     return GetTransactionsByEventAndType(
         user_id=getattr(request, "user_id"),
+        transactions_repository = await transactions_repository_dependency(request)
+    )
+
+async def get_transactions_by_account_dependency(request: Request) -> GetTransactionsByAccount:
+    return GetTransactionsByAccount(
+        user_id=getattr(request, "user_id"),
+        enrich_transactions = await enrich_transactions_dependency(request),
+        get_available_accounts_by_ids = await get_available_accounts_by_ids_internal_dependency(request),
         transactions_repository = await transactions_repository_dependency(request)
     )

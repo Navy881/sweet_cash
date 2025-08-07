@@ -15,6 +15,7 @@ from sweet_cash.services.events.get_event_participants_roles_for_user import Get
 from sweet_cash.services.events.send_events_notifications import SendEventsNotifications
 from sweet_cash.services.events.enrich_events import EnrichEvents
 from sweet_cash.services.events.enrich_events_participants import EnrichEventsParticipants
+from sweet_cash.services.events.get_events_by_ids import GetEventsByIdsInternal
 
 from sweet_cash.dependencies.users_dependecies import get_users_by_ids_dependency
 from sweet_cash.dependencies.notifications_events_dependencies import send_event_dependency
@@ -126,5 +127,11 @@ async def send_events_notifications_dependency(request: Request) -> SendEventsNo
     return SendEventsNotifications(
         user_id=getattr(request, "user_id"),
         send_event = await send_event_dependency(request),
+        events_repository = await events_repository_dependency(request)
+    )
+
+async def get_events_by_ids_internal_dependency(request: Request) -> GetEventsByIdsInternal:
+    return GetEventsByIdsInternal(
+        user_id=getattr(request, "user_id"),
         events_repository = await events_repository_dependency(request)
     )

@@ -48,3 +48,4 @@ class EnrichAccounts(BaseService):
                         account.admitted_users.append(users[admitted_user.user_id])
                     except KeyError as e:
                         logger.error(e)
+

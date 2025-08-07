@@ -5,6 +5,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, validator, root_validator
 
 from sweet_cash.types.users_types import UserResponseModel
+from sweet_cash.types.events_types import EventModel, EventModelTiny
 from sweet_cash.types.accounts_types import AccountModel, AccountResponseTinyModel
 
 
@@ -25,6 +26,7 @@ class TransactionModel(BaseModel):
     number: int
     user_id: int
     event_id: int
+    event: Optional[EventModel]
     type: TransactionType
     category_id: int
     amount: float
@@ -45,6 +47,7 @@ class TransactionResponseModel(BaseModel):
     updated_at: Optional[datetime]
     number: int
     event_id: int
+    event: Optional[EventModelTiny]
     type: TransactionType
     category_id: int
     amount: float
@@ -55,6 +58,7 @@ class TransactionResponseModel(BaseModel):
     user: Optional[UserResponseModel]
     source_account: Optional[AccountResponseTinyModel]
     target_account: Optional[AccountResponseTinyModel]
+
 
 
 class CreateTransactionModel(BaseModel):

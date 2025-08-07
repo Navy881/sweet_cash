@@ -8,13 +8,15 @@ from sweet_cash.dependencies.transactions_dependencies import (
     get_transactions_dependency,
     delete_transaction_dependency,
     create_transaction_dependency,
-    update_transaction_dependency
+    update_transaction_dependency,
+    get_transactions_by_account_dependency
 )
 from sweet_cash.services.transactions.create_transaction import CreateTransaction
 from sweet_cash.services.transactions.get_all_transactions import GetAllTransactions
 from sweet_cash.services.transactions.get_transactions_by_ids import GetTransactionsByIds
 from sweet_cash.services.transactions.update_transaction import UpdateTransaction
 from sweet_cash.services.transactions.delete_transaction import DeleteTransaction
+from sweet_cash.services.transactions.get_transactions_by_account import GetTransactionsByAccount
 from sweet_cash.types.transactions_types import (
     TransactionModel,
     CreateTransactionModel,
@@ -88,3 +90,19 @@ async def update_transaction(
     update_transaction_: UpdateTransaction = Depends(dependency=update_transaction_dependency)
 ) -> TransactionModel:
     return await update_transaction_(transaction_id, body)
+
+@transactions_api_router_v2.get("/transactions/byAccount",
+                                response_model=List[TransactionResponseModel],
+                                dependencies=[Depends(JWTBearer())],
+                                tags=["Transactions"])
+async def get_transactions_by_account(
+        account_id: int,
+        start: str,
+        end: str,
+        limit: int,
+        offset: int,
+        get_transactions_by_account_: GetTransactionsByAccount = Depends(
+            dependency=get_transactions_by_account_dependency
+        )
+) -> List[TransactionModel]:
+    return await get_transactions_by_account_(account_id, start, end, limit, offset)

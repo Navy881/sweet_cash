@@ -94,6 +94,33 @@ class TransactionsRepository(BaseRepository):
         rows = await r.fetchall()
         return [TransactionModel(**row) for row in rows]
 
+    async def get_transactions_page(self, event_id: int,
+                                    start: str,
+                                    end: str,
+                                    user_id: int = None,
+                                    limit: int = 100,
+                                    offset: int = 0) -> List[TransactionModel]:
+
+        query = (
+            self.table.select()
+                .where(
+                (self.table.c.event_id == event_id)
+                & (self.table.c.transaction_date >= start)
+                & (self.table.c.transaction_date <= end)
+            )
+        )
+
+        if user_id is not None:
+            query = query.where(self.table.c.user_id == user_id)
+
+        query = query.order_by(self.table.c.transaction_date.desc())
+        query = query.limit(limit)
+        query = query.offset(offset)
+
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TransactionModel(**row) for row in rows]
+
     async def delete_transaction(self, transaction_id: int) -> TransactionModel:
         delete_query = self.table.delete().where(self.table.c.id == transaction_id).returning(*self.table.c)
         r = await self.conn.execute(delete_query)
@@ -136,6 +163,32 @@ class TransactionsRepository(BaseRepository):
 
         if category_ids is not None:
             query = query.where(self.table.c.category_id.in_(category_ids))
+
+        r = await self.conn.execute(query)
+        rows = await r.fetchall()
+        return [TransactionModel(**row) for row in rows]
+
+    async def get_transactions_by_account_id_page(self, account_id: int,
+                                                  start: str,
+                                                  end: str,
+                                                  limit: int = 100,
+                                                  offset: int = 0) -> List[TransactionModel]:
+
+        query = (
+            self.table.select()
+                .where(
+                or_(
+                    self.table.c.source_account_id == account_id,
+                    self.table.c.target_account_id == account_id
+                )
+                & (self.table.c.transaction_date >= start)
+                & (self.table.c.transaction_date <= end)
+            )
+        )
+
+        query = query.order_by(self.table.c.transaction_date.desc())
+        query = query.limit(limit)
+        query = query.offset(offset)
 
         r = await self.conn.execute(query)
         rows = await r.fetchall()

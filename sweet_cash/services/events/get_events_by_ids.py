@@ -1,5 +1,5 @@
 import logging
-from typing import List
+from typing import List, Dict
 
 from sweet_cash.services.base_service import BaseService
 from sweet_cash.services.events.enrich_events import EnrichEvents
@@ -32,3 +32,17 @@ class GetEventsByIds(BaseService):
 
             await self.enrich_events(events)
             return events
+
+class GetEventsByIdsInternal(BaseService):
+    def __init__(self,
+                 user_id: int,
+                 events_repository: EventsRepository) -> None:
+        self.user_id = user_id
+        self.events_repository = events_repository
+
+    async def __call__(self, events_ids: List[int]) -> Dict[int, EventModel]:
+        async with self.events_repository.transaction():
+            events: List[EventModel] = await self.events_repository \
+                .get_available_events_by_ids(user_id=self.user_id, event_ids=events_ids)
+
+            return {event.id: event for event in events}

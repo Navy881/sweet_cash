@@ -41,6 +41,16 @@ class EventModel(BaseModel):
     participants: Optional[List[EventsParticipantsModel]]
 
 
+class EventModelTiny(BaseModel):
+    id: int
+    created_at: datetime
+    updated_at: Optional[datetime]
+    name: str
+    start: Optional[datetime]
+    end: Optional[datetime]
+    description: Optional[str]
+
+
 class CreateEventModel(BaseModel):
     name: str
     start: Optional[datetime]
